@@ -1,4 +1,4 @@
-# run: make all RUBY_BUILD_ENV=openipc/radxa/[empty](pi)
+# run: make all RUBY_BUILD_ENV=openipc/radxa/rk3528/rk3588/[empty](pi)
 
 _CFLAGS := $(CFLAGS) -Wall -Wno-stringop-truncation -Wno-format-truncation -O2 -fdata-sections -ffunction-sections
 _CPPFLAGS := $(CPPLAGS) -Wall -Wno-stringop-truncation -Wno-format-truncation -O2 -fdata-sections -ffunction-sections
@@ -27,6 +27,34 @@ CFLAGS_RENDERER += `pkg-config cairo --cflags`
 _LDFLAGS := $(LDFLAGS) -lrt -lpcap -lpthread -li2c -lgpiod -Wl,--gc-sections 
 _CFLAGS := $(_CFLAGS) -DRUBY_BUILD_HW_PLATFORM_RADXA
 _CPPFLAGS := $(_CPPFLAGS) -DRUBY_BUILD_HW_PLATFORM_RADXA
+CENTRAL_RENDER_CODE := $(FOLDER_CENTRAL_RENDERER)/render_engine.o $(FOLDER_CENTRAL_RENDERER)/render_engine_cairo.o $(FOLDER_CENTRAL_RENDERER)/render_engine_ui.o $(FOLDER_CENTRAL_RENDERER)/drm_core.o
+MODULE_LOC := $(FOLDER_COMMON)/strings_loc.o $(FOLDER_COMMON)/strings_table.o 
+else
+ifeq ($(RUBY_BUILD_ENV),rk3528)
+
+LDFLAGS_CENTRAL := -L/lib/aarch64-linux-gnu -lpthread -lrt -lm
+LDFLAGS_CENTRAL2 := -lpthread -lrt -lm
+
+LDFLAGS_RENDERER := -ldrm -lcairo
+CFLAGS_RENDERER := -I/usr/include/drm -I/usr/include/libdrm
+CFLAGS_RENDERER += `pkg-config cairo --cflags`
+_LDFLAGS := $(LDFLAGS) -lrt -lpcap -lpthread -li2c -lgpiod -Wl,--gc-sections 
+_CFLAGS := $(_CFLAGS) -DRUBY_BUILD_HW_PLATFORM_RK3528
+_CPPFLAGS := $(_CPPFLAGS) -DRUBY_BUILD_HW_PLATFORM_RK3528
+CENTRAL_RENDER_CODE := $(FOLDER_CENTRAL_RENDERER)/render_engine.o $(FOLDER_CENTRAL_RENDERER)/render_engine_cairo.o $(FOLDER_CENTRAL_RENDERER)/render_engine_ui.o $(FOLDER_CENTRAL_RENDERER)/drm_core.o
+MODULE_LOC := $(FOLDER_COMMON)/strings_loc.o $(FOLDER_COMMON)/strings_table.o 
+else
+ifeq ($(RUBY_BUILD_ENV),rk3588)
+
+LDFLAGS_CENTRAL := -L/lib/aarch64-linux-gnu -lpthread -lrt -lm
+LDFLAGS_CENTRAL2 := -lpthread -lrt -lm
+
+LDFLAGS_RENDERER := -ldrm -lcairo
+CFLAGS_RENDERER := -I/usr/include/drm -I/usr/include/libdrm
+CFLAGS_RENDERER += `pkg-config cairo --cflags`
+_LDFLAGS := $(LDFLAGS) -lrt -lpcap -lpthread -li2c -lgpiod -Wl,--gc-sections 
+_CFLAGS := $(_CFLAGS) -DRUBY_BUILD_HW_PLATFORM_R3588
+_CPPFLAGS := $(_CPPFLAGS) -DRUBY_BUILD_HW_PLATFORM_RK3588
 CENTRAL_RENDER_CODE := $(FOLDER_CENTRAL_RENDERER)/render_engine.o $(FOLDER_CENTRAL_RENDERER)/render_engine_cairo.o $(FOLDER_CENTRAL_RENDERER)/render_engine_ui.o $(FOLDER_CENTRAL_RENDERER)/drm_core.o
 MODULE_LOC := $(FOLDER_COMMON)/strings_loc.o $(FOLDER_COMMON)/strings_table.o 
 else
@@ -205,6 +233,12 @@ vehicle: ruby_start ruby_utils ruby_tx_telemetry ruby_rt_vehicle
 ifeq ($(RUBY_BUILD_ENV),radxa)
 station: ruby_start ruby_utils ruby_controller ruby_rt_station ruby_tx_rc ruby_rx_telemetry ruby_player_radxa
 else
+ifeq ($(RUBY_BUILD_ENV),rk3528)
+station: ruby_start ruby_utils ruby_controller ruby_rt_station ruby_tx_rc ruby_rx_telemetry ruby_player_radxa
+else
+ifeq ($(RUBY_BUILD_ENV),rk3588)
+station: ruby_start ruby_utils ruby_controller ruby_rt_station ruby_tx_rc ruby_rx_telemetry ruby_player_radxa
+else
 station: ruby_start ruby_utils ruby_controller ruby_rt_station ruby_tx_rc ruby_rx_telemetry
 endif
 
@@ -285,6 +319,12 @@ ruby_player_radxa:code/r_player/ruby_player_radxa.o code/r_player/mpp_core.o $(F
 	$(CXX) $(_CFLAGS) $(CFLAGS_RENDERER) -o $@ $^ $(_LDFLAGS) $(LDFLAGS_RENDERER) $(LDFLAGS_CENTRAL) $(LDFLAGS_CENTRAL2) -ldl -lc -lrockchip_mpp
 
 ifeq ($(RUBY_BUILD_ENV),radxa)
+tests: test_log test_port_rx test_port_tx test_link
+else
+ifeq ($(RUBY_BUILD_ENV),rk3528)
+tests: test_log test_port_rx test_port_tx test_link
+else
+ifeq ($(RUBY_BUILD_ENV),rk3588)
 tests: test_log test_port_rx test_port_tx test_link
 else
 tests: test_gpio test_log test_port_rx test_port_tx test_link
