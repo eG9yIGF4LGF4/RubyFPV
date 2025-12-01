@@ -33,22 +33,10 @@ jobs:
       with: 
         image_additional_mb: 4096
         base_image: raspios_lite_arm64:latest
-        bind_mount_repository: true
+        #bind_mount_repository: true
         #optimize_image: yes
         #copy_repository_path: /opt/pynab
         commands: |    
-            echo RUN=${MATRIX} >> ${GITHUB_ENV}
-            printenv
-            
-            DST_IMG=$(echo "${{matrix.platform}}")
-            echo "Preparing $DST_IMG image build.."
             sudo apt-get -y update
             sudo apt-get -y install libdrm-dev libcairo-dev build-essential cmake libpcap-dev dkms net-tools wireless-tools libgpiod-dev libi2c-dev i2c-tools
-            export DST_IMG=$DST_IMG
-
-            FN=$(echo "make_${{matrix.platform}}.sh")
-            echo "Running $FN"
-
-            cd /RubyFPV
-
             bash $FN
