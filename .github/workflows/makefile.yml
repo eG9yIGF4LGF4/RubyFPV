@@ -28,7 +28,7 @@ jobs:
         DST_IMG=$(echo "${{matrix.platform}}")
         echo "Preparing $DST_IMG image build.."
         sudo apt-get -y update
-        sudo apt-get -y install libdrm-dev libcairo-dev build-essential cmake libpcap-dev dkms net-tools wireless-tools libgpiod-dev
+        sudo apt-get -y install libdrm-dev libcairo-dev build-essential cmake libpcap-dev dkms net-tools wireless-tools libgpiod-dev libi2c-dev i2c-tools
         export DST_IMG=$DST_IMG
 
     - name: Make ${{matrix.platform}}
