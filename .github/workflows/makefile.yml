@@ -28,7 +28,8 @@ jobs:
         sudo apt-get update -y
         sudo apt-get install -y autoconf cmake make git curl wget gcc qemu-user-static binfmt-support qemu-system-arm
 
-    - name: Build ${{matrix.platform}} Image 
+    - name: Build ${{matrix.platform}} Image
+      id: build_image
       uses: pguyot/arm-runner-action@v2
       with: 
         image_additional_mb: 4096
@@ -40,3 +41,16 @@ jobs:
             sudo apt-get -y update
             sudo apt-get -y install libdrm-dev libcairo-dev build-essential cmake libpcap-dev dkms net-tools wireless-tools libgpiod-dev libi2c-dev i2c-tools
             bash $FN
+
+    - name: Upload Image
+      run: |
+        mv ${{ steps.build_image.outputs.image }} rubyfpv_${{matrix.platform}}.img
+        sudo xz -T 0 -v rubyfpv_${{matrix.platform}}.img
+
+    - name: Upload Image Artifact
+      uses: actions/upload-artifact@v3
+      with:
+        name: rubyfpv_${{matrix.platform}}.img.xz
+        path: rubyfpv_${{matrix.platform}}.img.xz
+        if-no-files-found: error
+        retention-days: 3
