@@ -72,6 +72,8 @@ CENTRAL_RENDER_CODE := $(FOLDER_CENTRAL_RENDERER)/lodepng.o $(FOLDER_CENTRAL_REN
 
 endif
 endif
+endif
+endif
 
 INCLUDE_CENTRAL := -Imenu -Iosd -I../menu -I../osd -Icode/r_central/menu -Icode/r_central/osd -I../openvg -I/opt/vc/include/ -I/opt/vc/include/interface/vcos/pthreads -I/opt/vc/include/interface/vmcs_host/linux -I/usr/include/freetype2
 
