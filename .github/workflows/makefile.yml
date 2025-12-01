@@ -25,8 +25,8 @@ jobs:
 
     - name: Prepare Runner Device
       run: |
-        apt-get update -y
-        apt-get install -y autoconf cmake make git curl wget gcc qemu-user-static binfmt-support qemu-system-arm
+        sudo apt-get update -y
+        sudo apt-get install -y autoconf cmake make git curl wget gcc qemu-user-static binfmt-support qemu-system-arm
 
     - name: Build ${{matrix.platform}} Image 
       uses: pguyot/arm-runner-action@v2
