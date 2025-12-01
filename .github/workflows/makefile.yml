@@ -1,0 +1,38 @@
+name: Makefile CI
+
+on:
+  push:
+    branches: [ "main", "stable" ]
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+  build:
+
+    strategy:
+      fail-fast: false
+      matrix:
+        platform:
+          - pi
+          - radxa
+          - rk3528
+          - rk3588
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Prepare ${{matrix.platform}}
+      run: |
+        DST_IMG=$(echo "${{matrix.platform}}")
+        echo "Preparing $DST_IMG image build.."
+        
+        export DST_IMG=$DST_IMG
+
+    - name: Make ${{matrix.platform}}
+      run: |
+        FN=$(echo "make_${{matrix.platform}}.sh")
+        echo "Running $FN"
+
+        bash $FN
