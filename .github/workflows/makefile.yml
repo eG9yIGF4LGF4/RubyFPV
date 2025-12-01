@@ -31,7 +31,10 @@ jobs:
     - name: Build ${{matrix.platform}} Image 
       uses: pguyot/arm-runner-action@v2
       with: 
+        image_additional_mb: 4096
         base_image: raspios_lite_arm64:latest
+        #optimize_image: yes
+        #copy_repository_path: /opt/pynab
         commands: |    
             echo RUN=${MATRIX} >> ${GITHUB_ENV}
             printenv
@@ -44,5 +47,7 @@ jobs:
 
             FN=$(echo "make_${{matrix.platform}}.sh")
             echo "Running $FN"
+
+            cd /RubyFPV
 
             bash $FN
