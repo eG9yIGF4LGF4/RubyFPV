@@ -33,6 +33,7 @@ jobs:
       with: 
         image_additional_mb: 4096
         base_image: raspios_lite_arm64:latest
+        bind_mount_repository: true
         #optimize_image: yes
         #copy_repository_path: /opt/pynab
         commands: |    
