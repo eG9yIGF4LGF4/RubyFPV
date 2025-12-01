@@ -23,17 +23,23 @@ jobs:
     steps:
     - uses: actions/checkout@v4
 
-    - name: Prepare ${{matrix.platform}}
-      run: |
-        DST_IMG=$(echo "${{matrix.platform}}")
-        echo "Preparing $DST_IMG image build.."
-        sudo apt-get -y update
-        sudo apt-get -y install libdrm-dev libcairo-dev build-essential cmake libpcap-dev dkms net-tools wireless-tools libgpiod-dev libi2c-dev i2c-tools
-        export DST_IMG=$DST_IMG
+    - name: Prepare Runner Device
+      uses: pguyot/arm-runner-action@v2
+      with:
+        base_image: raspios_lite_arm64:latest
+        commands: |
+            apt-get update -y
+            apt-get install -y autoconf cmake make git curl wget gcc qemu-user-static binfmt-support qemu-system-arm
+            echo RUN=${MATRIX} >> ${GITHUB_ENV}
+            printenv
+            
+            DST_IMG=$(echo "${{matrix.platform}}")
+            echo "Preparing $DST_IMG image build.."
+            sudo apt-get -y update
+            sudo apt-get -y install libdrm-dev libcairo-dev build-essential cmake libpcap-dev dkms net-tools wireless-tools libgpiod-dev libi2c-dev i2c-tools
+            export DST_IMG=$DST_IMG
 
-    - name: Make ${{matrix.platform}}
-      run: |
-        FN=$(echo "make_${{matrix.platform}}.sh")
-        echo "Running $FN"
+            FN=$(echo "make_${{matrix.platform}}.sh")
+            echo "Running $FN"
 
-        bash $FN
+            bash $FN
