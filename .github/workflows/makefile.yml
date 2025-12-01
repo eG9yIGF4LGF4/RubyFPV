@@ -40,6 +40,21 @@ jobs:
         commands: |    
             sudo apt-get -y update
             sudo apt-get -y install libdrm-dev libcairo-dev build-essential cmake libpcap-dev dkms net-tools wireless-tools libgpiod-dev libi2c-dev i2c-tools
+
+            git clone https://github.com/rockchip-linux/mpp.git
+            cd mpp
+            cmake –B build
+            sudo cmake –build build –target install
+            cd ..
+
+            git clone https://github.com/svpcom/rtl8812au.git
+            cd rtl8812au
+            sudo apt-get install dkms
+            sudo ./dkms-install.sh
+            cd ..
+
+            sudo systemctl disable lightdm
+            
             bash $FN
 
     - name: Upload Image
