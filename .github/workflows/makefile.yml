@@ -24,12 +24,15 @@ jobs:
     - uses: actions/checkout@v4
 
     - name: Prepare Runner Device
+      run: |
+        apt-get update -y
+        apt-get install -y autoconf cmake make git curl wget gcc qemu-user-static binfmt-support qemu-system-arm
+
+    - name: Build ${{matrix.platform}} Image 
       uses: pguyot/arm-runner-action@v2
-      with:
+      with: 
         base_image: raspios_lite_arm64:latest
-        commands: |
-            apt-get update -y
-            apt-get install -y autoconf cmake make git curl wget gcc qemu-user-static binfmt-support qemu-system-arm
+        commands: |    
             echo RUN=${MATRIX} >> ${GITHUB_ENV}
             printenv
             
