@@ -114,20 +114,20 @@ void MenuController::addItems()
    //m_IndexShowVoltage = addMenuItem(m_pItemsSelect[2]);
    
    m_IndexNetwork = addMenuItem(new MenuItem(L("Local Network Settings"), L("Change the local network settings on the controller (DHCP/Fixed IP)")));
-   //m_pMenuItems[m_IndexNetwork]->showArrow();
+   m_pMenuItems[m_IndexNetwork]->showArrow();
 
    m_IndexEncryption = -1;
-   //m_IndexEncryption = addMenuItem(new MenuItem("Encryption", "Change the encryption global settings"));
-   //m_pMenuItems[m_IndexEncryption]->showArrow();
-   //m_pMenuItems[m_IndexEncryption]->setEnabled(false);
+   m_IndexEncryption = addMenuItem(new MenuItem("Encryption", "Change the encryption global settings"));
+   m_pMenuItems[m_IndexEncryption]->showArrow();
+   m_pMenuItems[m_IndexEncryption]->setEnabled(false);
 
    m_IndexButtons = addMenuItem(new MenuItem(L("Buttons"), L("Change buttons actions.")));
    m_IndexPreferences = -1;
-   //m_IndexPreferences = addMenuItem(new MenuItem("Preferences", "Change preferences about messages."));
+   m_IndexPreferences = addMenuItem(new MenuItem("Preferences", "Change preferences about messages."));
    m_IndexPreferencesUI = addMenuItem(new MenuItem(L("User Interface"), L("Change user interface preferences: language, fonts, colors, sizes, display units.")));
 
    m_IndexRecording = addMenuItem(new MenuItem(L("Recording Settings"), L("Change the recording settings")));
-   //m_pMenuItems[m_IndexRecording]->showArrow();
+   m_pMenuItems[m_IndexRecording]->showArrow();
 
    ControllerSettings* pCS = get_ControllerSettings();
    m_IndexDeveloper = -1;
