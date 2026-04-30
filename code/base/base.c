@@ -713,8 +713,12 @@ void log_line(const char* format, ...)
 
    if ( NULL != fd )
       vfprintf(fd, format, args);
-   if ( ! s_logDisabledStdout )
-      vprintf(format, args);
+   // if ( ! s_logDisabledStdout )
+   //    vprintf(format, args);
+   #ifdef HW_PLATFORM_LINUX_GENERIC
+   //fprintf(stdout, format, args);
+   #endif
+   
 
    if ( 0 != s_szAdditionalLogFile[0] )
    {
@@ -1308,9 +1312,13 @@ void log_error_and_alarm(const char* format, ...)
    if ( ! s_logDisabledStdout )
       vprintf(format, args);
    if ( NULL != fd )
+      #ifdef HW_PLATFORM_LINUX_GENERIC
+      // printf(format, args);
+      #else
       vfprintf(fd, format, args);
+      #endif
    if ( NULL != fd2 ) {
-       #ifdef HW_PLATFORM_LINUX_GENERIC
+      #ifdef HW_PLATFORM_LINUX_GENERIC
       // printf(format, args);
       #else
       vfprintf(fd2, format, args);

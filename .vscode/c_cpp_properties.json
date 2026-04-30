@@ -5,7 +5,10 @@
             "includePath": [
                 "${workspaceFolder}/**",
                 "/usr/include/libdrm",
-                "/usr/include/cairo"
+                "/usr/include/cairo",
+                "/usr/include/gtk-3.0",
+                "/usr/include/gstreamer-1.0",
+                "/usr/include/glib-2.0"
             ],
             "defines": [],
             "compilerPath": "/usr/lib/ccache/clang-15",

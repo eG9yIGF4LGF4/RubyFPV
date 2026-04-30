@@ -1482,7 +1482,7 @@ void RenderEngineCairo::_updateCurrentFontToUse(RenderEngineRawFont* pFont, bool
    {
       log_line("[RenderEngineCairo] Test access to new fonts...");
       m_bMustTestFontAccess = false;
-      #if defined (HW_PLATFORM_RASPBERRY) || defined (HW_PLATFORM_RADXA)
+      #if defined (HW_PLATFORM_RASPBERRY) || defined (HW_PLATFORM_RADXA) || defined (HW_PLATFORM_LINUX_GENERIC)
       m_bHasNewFont = false;
       if ( access("/usr/share/fonts/truetype/noto/noto.ttf", R_OK) != -1 )
           m_bHasNewFont = true;
@@ -1538,7 +1538,7 @@ float RenderEngineCairo::textRawWidthScaled(u32 fontId, float fScale, const char
    if ( NULL == pCairoCtx )
        pCairoCtx = _createTempDrawContext();
    
-   _updateCurrentFontToUse(pFont, false);
+   _updateCurrentFontToUse(pFont, true);
    int iPixels = pFont->lineHeight*0.8*fScale;
    if ( iPixels < 6 )
       iPixels = 6;
@@ -1744,7 +1744,7 @@ void RenderEngineCairo::_drawSimpleTextScaled(RenderEngineRawFont* pFont, const 
 
    cairo_set_source_rgba(m_pCairoCtx, fColor[0], fColor[1], fColor[2], fColor[3]);
    cairo_move_to(m_pCairoCtx, xPos * m_iRenderWidth, yPos * m_iRenderHeight + pFont->baseLine);
-   _updateCurrentFontToUse(pFont, false);
+   _updateCurrentFontToUse(pFont, true);
    int iPixels = pFont->lineHeight*0.8;
    if ( iPixels < 6 )
       iPixels = 6;

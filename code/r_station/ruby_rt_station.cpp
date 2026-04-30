@@ -1966,6 +1966,11 @@ void video_processors_init()
       //rx_video_output_enable_local_player_udp_output();
       rx_video_output_enable_streamer_output();
       #endif
+      #ifdef HW_PLATFORM_LINUX_GENERIC
+      rx_video_output_enable_local_player_udp_output();
+      rx_video_output_enable_streamer_output();
+      #endif
+
 
       log_line("Do one time init of processors rx video...");
       ProcessorRxVideo::oneTimeInit();

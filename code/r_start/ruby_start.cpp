@@ -1599,13 +1599,13 @@ int main(int argc, char *argv[])
          sprintf(szComm, "touch %s", szFile);
          hw_execute_bash_command(szComm, NULL);
          
-         #if defined(HW_PLATFORM_LINUX_GENERIC)
-         sprintf(szComm, "%s res/intro.h264 &", VIDEO_PLAYER_OFFLINE);
-         hw_execute_bash_command_nonblock(szComm, NULL);         
-         #else
+         // #if defined(HW_PLATFORM_LINUX_GENERIC)
+         // sprintf(szComm, "%s res/intro.h264 &", VIDEO_PLAYER_OFFLINE);
+         // hw_execute_bash_command_nonblock(szComm, NULL);         
+         // #else
          sprintf(szComm, "./%s -b -f res/intro.h264 15 -endexit&", VIDEO_PLAYER_OFFLINE);
          hw_execute_bash_command_nonblock(szComm, NULL);
-         #endif
+         // #endif
       }
    }
    #endif

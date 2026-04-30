@@ -207,10 +207,16 @@
 #define FILE_FORCE_RESET "/home/radxa/ruby_config/forcereset"
 #define FILE_BOOT_LOG_STEPS "/home/radxa/ruby_config/bootstepslog.txt"
 
-#define VIDEO_PLAYER_PIPE "gst-play-1.0"
-#define VIDEO_PLAYER_SM "ruby_player_radxa"
-#define VIDEO_PLAYER_UDP "gst-play-1.0"
-#define VIDEO_PLAYER_OFFLINE "gst-play-1.0"
+#define VIDEO_PLAYER_PIPE "ruby_player_gst"
+#define VIDEO_PLAYER_SM "ruby_player_gst"
+#define VIDEO_PLAYER_UDP "ruby_player_gst"
+#define VIDEO_PLAYER_OFFLINE "ruby_player_gst"
+
+// #define VIDEO_PLAYER_PIPE "ruby_player_radxa"
+// #define VIDEO_PLAYER_SM "ruby_player_radxa"
+// #define VIDEO_PLAYER_UDP "ruby_player_radxa"
+// #define VIDEO_PLAYER_OFFLINE "ruby_player_radxa"
+
 
 #endif
 

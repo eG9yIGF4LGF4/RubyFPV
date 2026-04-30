@@ -6,7 +6,7 @@
 #include "hw_procs.h"
 #include <errno.h>
 #include <unistd.h>
-#if defined(HW_PLATFORM_RADXA)
+#if defined(HW_PLATFORM_RADXA) || defined(HW_PLATFORM_LINUX_GENERIC)
 #include <xf86drm.h>
 #include <xf86drmMode.h>
 #include <drm_fourcc.h> 
@@ -129,7 +129,7 @@ int _hdmi_detect_current_mode()
    return -1;
    #endif
 
-   #if defined (HW_PLATFORM_RADXA)
+   #if defined (HW_PLATFORM_RADXA) || defined (HW_PLATFORM_LINUX_GENERIC)
 
    // Mode[0] is always the current display mode
    s_nHDMI_CurrentResolutionIndex = 0;
@@ -250,7 +250,7 @@ int hdmi_enum_modes()
    return 0;
    #endif
 
-   #if defined (HW_PLATFORM_RADXA)
+   #if defined (HW_PLATFORM_RADXA) || defined (HW_PLATFORM_LINUX_GENERIC)
    return _hdmi_detect_current_mode();
    #endif
 }
@@ -449,7 +449,7 @@ int hdmi_set_current_resolution(int width, int height, int refresh)
    hw_execute_bash_command("cp config.txt /boot/config.txt", NULL);
    #endif
 
-   #if defined (HW_PLATFORM_RADXA)
+   #if defined (HW_PLATFORM_RADXA) || defined (HW_PLATFORM_LINUX_GENERIC)
    char szFile[MAX_FILE_PATH_SIZE];
    strcpy(szFile, FOLDER_CONFIG);
    strcat(szFile, "hdmi_mode.cfg");

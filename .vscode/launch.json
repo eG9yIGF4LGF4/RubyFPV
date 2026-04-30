@@ -53,6 +53,30 @@
         ]
     },
     {
+        "name": "test_ui",
+        "type": "cppdbg",
+        "request": "launch",
+        "program": "/home/dev/src/rubyfpv/RubyFPV/test_ui",
+        "args": ["-debug"],
+        "stopAtEntry": true,
+        "cwd": "${fileDirname}",
+        "environment": [],
+        "externalConsole": false,
+        "MIMode": "gdb",
+        "setupCommands": [
+            {
+                "description": "Enable pretty-printing for gdb",
+                "text": "-enable-pretty-printing",
+                "ignoreFailures": true
+            },
+            {
+                "description": "Set Disassembly Flavor to Intel",
+                "text": "-gdb-set disassembly-flavor intel",
+                "ignoreFailures": true
+            }
+        ]
+    },
+    {
         "name": "ruby_central",
         "type": "cppdbg",
         "request": "launch",
@@ -75,6 +99,6 @@
                 "ignoreFailures": true
             }
         ]
-    }  
+    }    
     ]
 }

@@ -50,6 +50,9 @@ type_drm_runtime_state s_DRMRuntimeState;
 
 int s_iDRMCoreInitialized = 0;
 int s_iDRMEnableVSync = 1;
+int s_iDRMPlaneId = 0;
+int s_iDRMTargetPlaneIndex = 0;
+int s_uDRMCurrentCrtcId = 0;
 
 static const char *_ruby_drm_core_get_connector_str(uint32_t conn_type)
 {
@@ -445,10 +448,9 @@ int _ruby_drm_find_target_plane()
          continue;
       }
 
-      if ( s_DRMRuntimeState.pPlane->possible_crtcs & (1 << s_DRMRuntimeState.objInfoCRTc.iObjIndex) )
-      {
-         log_line("[DRMCore] Plane index %d (plane id %u) supports %d formats on current crt/display",
-            i, s_DRMRuntimeState.pPlanesResources->planes[i], s_DRMRuntimeState.pPlane->count_formats);
+      //if ( s_DRMRuntimeState.pPlane->possible_crtcs & (1 << s_DRMRuntimeState.objInfoCRTc.iObjIndex) )
+      //{
+         log_line("[DRMCore] Plane index %d (plane id %u) supports %d formats on current crt/display", i, s_DRMRuntimeState.pPlanesResources->planes[i], s_DRMRuntimeState.pPlane->count_formats);
          for (int j=0; j<s_DRMRuntimeState.pPlane->count_formats; j++)
          {
             log_line("[DRMCore] Found plane-%d format %d: %s",
@@ -461,9 +463,9 @@ int _ruby_drm_find_target_plane()
                break;
             }
          }
-      }
-      else
-         log_line("[DRMCore] Skipping plane index %d as it's not supported by currently used crtc index %d", i, s_DRMRuntimeState.objInfoCRTc.iObjIndex);
+      //}
+      //else
+      //   log_line("[DRMCore] Skipping plane index %d as it's not supported by currently used crtc index %d", i, s_DRMRuntimeState.objInfoCRTc.iObjIndex);
 
       if ( s_DRMRuntimeState.objInfoPlane.uObjId != 0xFFFFFFFF )
          break;
@@ -582,8 +584,7 @@ int _ruby_drm_destroy_drm_surface_buffer(type_drm_buffer* pBuffer)
 
 int _ruby_drm_set_mode()
 {
-   //if ( (0 == s_iDRMTargetPlaneIndex) || (-1 == s_iDRMTargetPlaneIndex) )
-   /*
+   if ( (0 == s_iDRMTargetPlaneIndex) || (-1 == s_iDRMTargetPlaneIndex) )
    {
       int iRet = drmModeSetCrtc(s_fdDRM, s_DRMRuntimeState.objInfoCRTc.uObjId, s_DRMRuntimeState.drawBuffers[s_DRMRuntimeState.iActiveOnScreenDrawBuffer].uBufferId, 0, 0,
          &s_DRMRuntimeState.objInfoConnector.uObjId, 1, &s_DRMRuntimeState.targetModeInfo);
@@ -595,12 +596,10 @@ int _ruby_drm_set_mode()
       log_line("[DRMCore] Did set DRM mode for CRTc for plane index %d, plane id: %u",
           s_DRMRuntimeState.objInfoPlane.iObjIndex, s_DRMRuntimeState.objInfoPlane.uObjId);
    }
-   */
-   /*
    else
    {
       drmModeSetPlane( s_fdDRM, (u32)s_iDRMPlaneId, s_uDRMCurrentCrtcId,
-                    s_DRMDrawBuffers[s_iDRMActiveOnScreenDrawBuffer].uBufferId,
+                    s_DRMRuntimeState.drawBuffers[s_DRMRuntimeState.iActiveOnScreenDrawBuffer].uBufferId,
                     0,
                     0, 0,
                     s_DRMDisplayAttributes.iWidth, s_DRMDisplayAttributes.iHeight,
@@ -608,7 +607,6 @@ int _ruby_drm_set_mode()
                     ((uint16_t) s_DRMDisplayAttributes.iWidth) << 16, ((uint16_t) s_DRMDisplayAttributes.iHeight) << 16);
       log_line("[DRMCore] Did set plane %d for current CRTc.", s_iDRMTargetPlaneIndex );
    }
-   */
    return 0;
 }
 
@@ -844,12 +842,8 @@ int ruby_drm_swap_mainback_buffers()
 
    ruby_drm_set_object_property(&s_DRMRuntimeState.objInfoPlane, "FB_ID", s_DRMRuntimeState.drawBuffers[s_DRMRuntimeState.iActiveOnScreenDrawBuffer].uBufferId );
 
-   int iRet = drmModeAtomicCommit(s_fdDRM, s_DRMRuntimeState.pAtomicRequest, DRM_MODE_ATOMIC_ALLOW_MODESET, NULL);
-   return iRet;
-
-   //if ( (0 == s_iDRMTargetPlaneIndex) || (-1 == s_iDRMTargetPlaneIndex) )
+   if ( (0 == s_iDRMTargetPlaneIndex) || (-1 == s_iDRMTargetPlaneIndex) )
    {
-      /*
       int iRet = drmModeSetCrtc(s_fdDRM, s_DRMRuntimeState.objInfoCRTc.uObjId, s_DRMRuntimeState.drawBuffers[s_DRMRuntimeState.iActiveOnScreenDrawBuffer].uBufferId, 0, 0,
          &s_DRMRuntimeState.objInfoConnector.uObjId, 1, &s_DRMRuntimeState.targetModeInfo);
       if ( iRet < 0 )
@@ -857,20 +851,20 @@ int ruby_drm_swap_mainback_buffers()
          log_softerror_and_alarm("[DRMCore] Failed to set new mode.");
          return;
       }
-      */
    }
-   /*
    else
    {
       drmModeSetPlane( s_fdDRM, (u32)s_iDRMPlaneId, s_uDRMCurrentCrtcId,
-                    s_DRMDrawBuffers[s_iDRMActiveOnScreenDrawBuffer].uBufferId,
+                    s_DRMRuntimeState.drawBuffers[s_DRMRuntimeState.iActiveOnScreenDrawBuffer].uBufferId,
                     0,
                     0, 0,
                     s_DRMDisplayAttributes.iWidth, s_DRMDisplayAttributes.iHeight,
                     0, 0,
                     ((uint16_t) s_DRMDisplayAttributes.iWidth) << 16, ((uint16_t) s_DRMDisplayAttributes.iHeight) << 16);
    }
-   */
+
+   int iRet = drmModeAtomicCommit(s_fdDRM, s_DRMRuntimeState.pAtomicRequest, DRM_MODE_ATOMIC_ALLOW_MODESET, NULL);
+   return iRet;
 }
 
 
@@ -951,6 +945,7 @@ int ruby_drm_core_set_plane_properties_and_buffer(uint32_t uBufferId)
    ruby_drm_set_object_property(&s_DRMRuntimeState.objInfoCRTc, "MODE_ID", s_DRMRuntimeState.uModeIdBlob );
    ruby_drm_set_object_property(&s_DRMRuntimeState.objInfoCRTc, "ACTIVE", 1 );
 
+   ruby_drm_set_object_property(&s_DRMRuntimeState.objInfoPlane, "FB_ID", uBufferId );
 
    ruby_drm_set_object_property(&s_DRMRuntimeState.objInfoPlane, "CRTC_ID", s_DRMRuntimeState.objInfoCRTc.uObjId );
    ruby_drm_set_object_property(&s_DRMRuntimeState.objInfoPlane, "CRTC_X", uCrtX );
@@ -964,7 +959,6 @@ int ruby_drm_core_set_plane_properties_and_buffer(uint32_t uBufferId)
    ruby_drm_set_object_property(&s_DRMRuntimeState.objInfoPlane, "SRC_H", uSrcHeight<<16 );
 
    ruby_drm_set_object_property(&s_DRMRuntimeState.objInfoPlane, "zpos", zPos );
-   ruby_drm_set_object_property(&s_DRMRuntimeState.objInfoPlane, "FB_ID", uBufferId );
 
    int iRet = drmModeAtomicCommit(s_fdDRM, s_DRMRuntimeState.pAtomicRequest, DRM_MODE_ATOMIC_ALLOW_MODESET, NULL);
 
@@ -1006,11 +1000,11 @@ int ruby_drm_set_object_property(type_drm_object_info* pObject, const char *szNa
          }
       }
    }
-   // if ( (0 == uPropId) || (-1 == iPropIndex) )
-   // {
-   //    log_softerror_and_alarm("[DRMCore] Can't set object property. Object id %u has no property named %s", pObject->uObjId, szName);
-   //    return -EINVAL;
-   // }
+   if ( (0 == uPropId) || (-1 == iPropIndex) )
+   {
+      log_softerror_and_alarm("[DRMCore] Can't set object property. Object id %u has no property named %s", pObject->uObjId, szName);
+      return -EINVAL;
+   }
  
    if ( 0 != strcmp(szName, "FB_ID") )
       log_line("[DRMCore] Set object id %u property %s (prop index %d) value to: %u",

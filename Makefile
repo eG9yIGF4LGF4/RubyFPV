@@ -32,7 +32,7 @@ MODULE_LOC := $(FOLDER_COMMON)/strings_loc.o $(FOLDER_COMMON)/strings_table.o
 else
 ifeq ($(RUBY_BUILD_ENV),pc)
 
-LDFLAGS_CENTRAL := -L/lib/x86_64-linux-gnu -lpthread -lrt -lm
+LDFLAGS_CENTRAL := -L/lib/x86_64-linux-gnu -lpthread -lrt -lm 
 LDFLAGS_CENTRAL2 := -lpthread -lrt -lm
 
 LDFLAGS_RENDERER := -ldrm -lcairo
@@ -46,7 +46,7 @@ MODULE_LOC := $(FOLDER_COMMON)/strings_loc.o $(FOLDER_COMMON)/strings_table.o
 else
 
 LDFLAGS_CENTRAL := -L/usr/lib/arm-linux-gnueabihf -lopenmaxil -lbcm_host -lvcos -lvchiq_arm -lpthread -lrt -lm
-LDFLAGS_CENTRAL2 := -L/opt/vc/lib/ -lbrcmGLESv2 -lbrcmEGL -lopenmaxil -lbcm_host -lvcos -lvchiq_arm -lpthread -lrt -lm -lopenmaxil -lbcm_host -lvcos -lvchiq_arm -lmmal  -lmmal_core -lmmal_util -lmmal_vc_client  
+LDFLAGS_CENTRAL2 := -L/opt/vc/lib/ -lbrcmGLESv2 -lbrcmEGL -lpthread -lrt -lm -lopenmaxil -lbcm_host -lvcos -lvchiq_arm -lmmal  -lmmal_core -lmmal_util -lmmal_vc_client  
 
 LDFLAGS_RENDERER := -L../openvg -L/opt/vc/lib/ -lbrcmGLESv2 -lbrcmEGL -lfreetype -lpng -ljpeg
 CFLAGS_RENDERER := -I/usr/include/libdrm
@@ -303,14 +303,17 @@ ruby_plugin_gauge_heading: $(FOLDER_PLUGINS_OSD)/ruby_plugin_gauge_heading.o osd
 ruby_player_radxa:code/r_player/ruby_player_radxa.o code/r_player/mpp_core.o $(FOLDER_BASE)/hdmi.o $(FOLDER_BASE)/ctrl_settings.o $(FOLDER_BASE)/shared_mem.o $(CENTRAL_RENDER_CODE) $(MODULE_MINIMUM_BASE)
 	$(CXX) $(_CFLAGS) $(CFLAGS_RENDERER) -o $@ $^ $(_LDFLAGS) $(LDFLAGS_RENDERER) $(LDFLAGS_CENTRAL) $(LDFLAGS_CENTRAL2) -ldl -lc -lrockchip_mpp
 
-ifeq ($(RUBY_BUILD_ENV),radxa)
-tests: test_log test_port_rx test_port_tx test_link
-else
-tests: test_log test_port_rx test_port_tx test_link
-endif
+# ifeq ($(RUBY_BUILD_ENV),radxa)
+# tests: test_log test_port_rx test_port_tx test_link
+# else
+tests: test_log test_port_rx test_port_tx test_link test_cairo test_ui
+# endif
 
-test_cairo:$(FOLDER_TESTS)/test_cairo.o $(MODULE_BASE) $(MODULE_BASE2) $(MODULE_COMMON) $(MODULE_RADIO) $(MODULE_MODELS)
-	$(CXX) $(_CFLAGS) -o $@ $^ $(_LDFLAGS) -ldl -lc
+test_ui:$(FOLDER_TESTS)/test_ui.o $(FOLDER_BASE)/hdmi.o $(CENTRAL_RENDER_CODE) $(MODULE_BASE) $(MODULE_BASE2) $(MODULE_COMMON) $(MODULE_RADIO) $(MODULE_MODELS)
+	$(CXX) $(_CFLAGS) -o $@ $^ $(_LDFLAGS) $(LDFLAGS_RENDERER) $(LDFLAGS_CENTRAL) $(LDFLAGS_CENTRAL2) -ldl -lc
+
+test_cairo:$(FOLDER_TESTS)/test_cairo.o $(CENTRAL_RENDER_CODE) $(MODULE_BASE) $(MODULE_BASE2) $(MODULE_COMMON) $(MODULE_RADIO) $(MODULE_MODELS)
+	$(CXX) $(_CFLAGS) -o $@ $^ $(_LDFLAGS) $(LDFLAGS_RENDERER) $(LDFLAGS_CENTRAL) -ldl -lc
 
 test_log:$(FOLDER_TESTS)/test_log.o core_plugins_utils.o $(MODULE_BASE) $(MODULE_BASE2) $(MODULE_COMMON) $(MODULE_RADIO) $(MODULE_MODELS)
 	$(CXX) $(_CFLAGS) -o $@ $^ $(_LDFLAGS) -ldl -lc
