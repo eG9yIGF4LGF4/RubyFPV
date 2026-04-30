@@ -725,6 +725,11 @@ void log_line(const char* format, ...)
          fclose(fdAux);
       }
    }
+
+   #ifdef HW_PLATFORM_LINUX_GENERIC
+   //printf(format, args);
+   #endif
+   
    va_end(args);
 
    if ( ! s_logDisabledStdout )
@@ -851,8 +856,13 @@ void log_line_watchdog(const char* format, ...)
 
    if ( NULL != fd )
       vfprintf(fd, format, args);
-   if ( NULL != fd2 )
+   if ( NULL != fd2 ) {
+       #ifdef HW_PLATFORM_LINUX_GENERIC
+      // printf(format, args);
+      #else
       vfprintf(fd2, format, args);
+      #endif
+   }
    if ( ! s_logDisabledStdout )
       vprintf(format, args);
 
@@ -917,8 +927,13 @@ void log_line_commands(const char* format, ...)
 
    if ( NULL != fd )
       vfprintf(fd, format, args);
-   if ( NULL != fd2 )
+   if ( NULL != fd2 ) {
+       #ifdef HW_PLATFORM_LINUX_GENERIC
+      // printf(format, args);
+      #else
       vfprintf(fd2, format, args);
+      #endif
+   }
    if ( ! s_logDisabledStdout )
       vprintf(format, args);
 
@@ -1294,9 +1309,14 @@ void log_error_and_alarm(const char* format, ...)
       vprintf(format, args);
    if ( NULL != fd )
       vfprintf(fd, format, args);
-   if ( NULL != fd2 )
+   if ( NULL != fd2 ) {
+       #ifdef HW_PLATFORM_LINUX_GENERIC
+      // printf(format, args);
+      #else
       vfprintf(fd2, format, args);
-
+      #endif
+   }
+   
    if ( 0 != s_szAdditionalLogFile[0] )
    {
       FILE* fdAux = fopen(s_szAdditionalLogFile, "a+");
@@ -1311,8 +1331,13 @@ void log_error_and_alarm(const char* format, ...)
       printf("\n");
    if ( NULL != fd )
      fprintf(fd, "\n");  
-   if ( NULL != fd2 )
-     fprintf(fd2, "\n");  
+   if ( NULL != fd2 ) {
+      #ifdef HW_PLATFORM_LINUX_GENERIC
+      // printf(format, args);
+      #else
+      vfprintf(fd2, format, args);
+      #endif
+   }
 
    va_end(args);
    //if ( 0 == lock )
@@ -1395,8 +1420,13 @@ void log_softerror_and_alarm(const char* format, ...)
       vprintf(format, args);
    if ( NULL != fd )
       vfprintf(fd, format, args);
-   if ( NULL != fd2 )
+   if ( NULL != fd2 ) {
+      #ifdef HW_PLATFORM_LINUX_GENERIC
+      // printf(format, args);
+      #else
       vfprintf(fd2, format, args);
+      #endif
+   }
 
    if ( 0 != s_szAdditionalLogFile[0] )
    {

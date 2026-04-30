@@ -8,11 +8,22 @@
 #include "../../base/base.h"
 #include "../../base/hardware_i2c.h"
 
-#if defined(HW_CAPABILITY_I2C) && defined(HW_PLATFORM_RASPBERRY)
-#include <wiringPiI2C.h>
-#endif
 #if defined(HW_CAPABILITY_I2C) && defined(HW_PLATFORM_RADXA)
 #include "../../base/wiringPiI2C_radxa.h"
+#endif
+#if defined(HW_PLATFORM_LINUX_GENERIC)
+int wiringPiI2CSetup(const int devId) { return 0; }
+int wiringPiI2CRead(int fd) { return 0; }
+int wiringPiI2CReadReg8(int fd, int reg) { return 0; }
+int wiringPiI2CReadReg16(int fd, int reg) { return 0; }
+int wiringPiI2CWrite(int fd, int data) { return 0; }
+int wiringPiI2CWriteReg8(int fd, int reg, int data) { return 0; }
+int wiringPiI2CWriteReg16(int fd, int reg, int data) { return 0; }
+int wiringPiI2CWriteBlockData(int fd, uint8_t reg, uint8_t length, uint8_t *values) { return 0; }
+int wiringPiI2CWriteBlockDataIoctl(int fd,int addr, uint8_t reg, uint8_t length, uint8_t *values) { return 0; }
+#endif
+#if defined(HW_CAPABILITY_I2C) && defined(HW_PLATFORM_RASPBERRY)
+#include <wiringPiI2C.h>
 #endif
 
 int i2c_fd = 0;

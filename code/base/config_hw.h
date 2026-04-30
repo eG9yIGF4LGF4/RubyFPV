@@ -1,5 +1,10 @@
 #pragma once
 
+// TODO: To remove for non-pc setup
+#ifndef RUBY_BUILD_HW_PLATFORM_LINUX_GENERIC
+#define RUBY_BUILD_HW_PLATFORM_LINUX_GENERIC
+#endif
+
 //-------------------------------------------------------------
 // The platform to build for can be forced by the makefile using the define below:
 
@@ -7,6 +12,8 @@
 #define HW_PLATFORM_OPENIPC_CAMERA
 #elif defined(RUBY_BUILD_HW_PLATFORM_RADXA)
 #define HW_PLATFORM_RADXA
+#elif defined(RUBY_BUILD_HW_PLATFORM_LINUX_GENERIC)
+#define HW_PLATFORM_LINUX_GENERIC
 #else
 #define HW_PLATFORM_RASPBERRY
 #endif
@@ -43,4 +50,9 @@
 #ifdef HW_PLATFORM_RADXA
 #define HW_CAPABILITY_GPIO
 #define HW_CAPABILITY_I2C
+#endif
+
+#ifdef HW_PLATFORM_LINUX_GENERIC
+//#define HW_CAPABILITY_GPIO
+//#define HW_CAPABILITY_I2C
 #endif

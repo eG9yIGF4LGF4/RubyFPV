@@ -76,7 +76,7 @@
 #if defined (HW_PLATFORM_RASPBERRY)
 #include "../renderer/render_engine_raw.h"
 #endif
-#if defined (HW_PLATFORM_RADXA)
+#if defined (HW_PLATFORM_RADXA) || defined (HW_PLATFORM_LINUX_GENERIC)
 #include "../renderer/drm_core.h"
 #include "../renderer/render_engine_cairo.h"
 #endif
@@ -2372,7 +2372,7 @@ int main(int argc, char *argv[])
    hdmi_enum_modes();
    #endif
 
-   #if defined (HW_PLATFORM_RADXA)
+   #if defined (HW_PLATFORM_RADXA) || defined (HW_PLATFORM_LINUX_GENERIC)
    ruby_drm_core_wait_for_display_connected();
    hdmi_enum_modes();
    int iHDMIIndex = hdmi_load_current_mode();
@@ -2620,7 +2620,7 @@ void ruby_reinit_hdmi_display()
    free_all_fonts();
    render_free_engine();
    
-   #if defined (HW_PLATFORM_RADXA)
+   #if defined (HW_PLATFORM_RADXA) || defined (HW_PLATFORM_LINUX_GENERIC)
    ruby_drm_core_uninit();
    ruby_drm_core_wait_for_display_connected();
 

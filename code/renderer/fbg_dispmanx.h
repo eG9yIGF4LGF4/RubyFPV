@@ -41,7 +41,7 @@ extern "C" {
     #include <EGL/egl.h>
     #include <EGL/eglext.h>
 
-    #include "bcm_host.h"
+    // #include "bcm_host.h"
 
     #include "fbgraphics.h"
 

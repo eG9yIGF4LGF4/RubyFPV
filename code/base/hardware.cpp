@@ -151,6 +151,8 @@ void _hardware_detectSystemType()
       log_softerror_and_alarm("[Hardware] Failed to parse system type config file [%s]", szFile); 
       fclose(fd);
    }
+   
+   #if !defined(HW_PLATFORM_LINUX_GENERIC)
    log_line("[Hardware] Do full detection of board and system type...");
    hw_execute_bash_command_raw("cat /proc/device-tree/model", szBuff);
    log_line("[Hardware] Board description string: %s", szBuff);
@@ -160,6 +162,7 @@ void _hardware_detectSystemType()
    if ( szBuff[0] == 0 )
       strcpy(szBuff, "N/A");
    log_line("[Hardware] Detected board type: %s", szBuff);
+   #endif
 
    int iDoAditionalChecks = 1;
    s_iHardwareSystemIsVehicle = 0;
@@ -182,7 +185,7 @@ void _hardware_detectSystemType()
    }
    #endif
    
-   #if defined (HW_PLATFORM_RASPBERRY) || defined (HW_PLATFORM_RADXA)
+   #if defined (HW_PLATFORM_RASPBERRY) || defined (HW_PLATFORM_RADXA) || defined (HW_PLATFORM_LINUX_GENERIC)
    if( access( FILE_FORCE_VEHICLE, R_OK ) != -1 )
    {
       log_line("[Hardware] Detected file %s to force start as vehicle or relay.", FILE_FORCE_VEHICLE);
@@ -519,7 +522,6 @@ void hardware_reboot()
       }
    }
 }
-
 
 void hardware_release()
 {

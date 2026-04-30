@@ -950,7 +950,7 @@ int ruby_drm_core_set_plane_properties_and_buffer(uint32_t uBufferId)
    ruby_drm_set_object_property(&s_DRMRuntimeState.objInfoConnector, "CRTC_ID", s_DRMRuntimeState.objInfoCRTc.uObjId );
    ruby_drm_set_object_property(&s_DRMRuntimeState.objInfoCRTc, "MODE_ID", s_DRMRuntimeState.uModeIdBlob );
    ruby_drm_set_object_property(&s_DRMRuntimeState.objInfoCRTc, "ACTIVE", 1 );
-   ruby_drm_set_object_property(&s_DRMRuntimeState.objInfoPlane, "FB_ID", uBufferId );
+
 
    ruby_drm_set_object_property(&s_DRMRuntimeState.objInfoPlane, "CRTC_ID", s_DRMRuntimeState.objInfoCRTc.uObjId );
    ruby_drm_set_object_property(&s_DRMRuntimeState.objInfoPlane, "CRTC_X", uCrtX );
@@ -964,6 +964,7 @@ int ruby_drm_core_set_plane_properties_and_buffer(uint32_t uBufferId)
    ruby_drm_set_object_property(&s_DRMRuntimeState.objInfoPlane, "SRC_H", uSrcHeight<<16 );
 
    ruby_drm_set_object_property(&s_DRMRuntimeState.objInfoPlane, "zpos", zPos );
+   ruby_drm_set_object_property(&s_DRMRuntimeState.objInfoPlane, "FB_ID", uBufferId );
 
    int iRet = drmModeAtomicCommit(s_fdDRM, s_DRMRuntimeState.pAtomicRequest, DRM_MODE_ATOMIC_ALLOW_MODESET, NULL);
 
@@ -993,21 +994,23 @@ int ruby_drm_set_object_property(type_drm_object_info* pObject, const char *szNa
       return -1;
    uint32_t uPropId = 0;
    int iPropIndex = -1;
-   for (int i = 0; i < pObject->pProperties->count_props; i++)
+   if(pObject->pProperties != NULL)
    {
-      if ( 0 == strcmp(pObject->ppPropertiesInfo[i]->name, szName) )
+      for (int i = 0; i < pObject->pProperties->count_props; i++)
       {
-         uPropId = pObject->ppPropertiesInfo[i]->prop_id;
-         iPropIndex = i;
-         break;
+         if ( 0 == strcmp(pObject->ppPropertiesInfo[i]->name, szName) )
+         {
+            uPropId = pObject->ppPropertiesInfo[i]->prop_id;
+            iPropIndex = i;
+            break;
+         }
       }
    }
-
-   if ( (0 == uPropId) || (-1 == iPropIndex) )
-   {
-      log_softerror_and_alarm("[DRMCore] Can't set object property. Object id %u has no property named %s", pObject->uObjId, szName);
-      return -EINVAL;
-   }
+   // if ( (0 == uPropId) || (-1 == iPropIndex) )
+   // {
+   //    log_softerror_and_alarm("[DRMCore] Can't set object property. Object id %u has no property named %s", pObject->uObjId, szName);
+   //    return -EINVAL;
+   // }
  
    if ( 0 != strcmp(szName, "FB_ID") )
       log_line("[DRMCore] Set object id %u property %s (prop index %d) value to: %u",

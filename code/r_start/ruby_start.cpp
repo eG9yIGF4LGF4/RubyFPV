@@ -52,7 +52,7 @@
 #include "../base/ruby_ipc.h"
 #include "../base/tx_powers.h"
 
-#if defined(HW_PLATFORM_RASPBERRY) || defined(HW_PLATFORM_RADXA)
+#if defined(HW_PLATFORM_RASPBERRY) || defined(HW_PLATFORM_RADXA) || defined(HW_PLATFORM_LINUX_GENERIC)
 #include "../base/ctrl_settings.h"
 #include "../utils/utils_controller.h"
 #include "../base/ctrl_interfaces.h"
@@ -129,6 +129,12 @@ void _log_oipc_boot_step(const char* szText)
       s_iLogBootStepsOIPC++;
    }
    #endif
+
+   #ifdef HW_PLATFORM_LINUX_GENERIC
+   printf(szText);
+   printf("\n");
+   fflush(stdout);
+   #endif
 }
 
 void _log_oipc_boot_rotate()
@@ -146,7 +152,6 @@ void _log_oipc_boot_rotate()
    }
    #endif
 }
-
 
 void initLogFiles()
 {
@@ -232,7 +237,6 @@ void initLogFiles()
    }
 }
 
-
 void detectSystemType()
 {
    if ( hardware_is_vehicle() )
@@ -263,6 +267,9 @@ void detectSystemType()
    #ifdef HW_PLATFORM_RADXA
    fd = fopen("/config/ruby_systype.txt", "w");
    #endif
+   #ifdef HW_PLATFORM_LINUX_GENERIC
+   fd = fopen("/home/radxa/ruby_config/ruby_systype.txt", "w");
+   #endif
    
    if ( NULL != fd )
    {
@@ -274,14 +281,13 @@ void detectSystemType()
    }
 }
 
-
 void _check_files()
 {
    char szFilesMissing[1024];
    szFilesMissing[0] = 0;
    bool failed = false;
 
-   #if defined(HW_PLATFORM_RASPBERRY) || defined(HW_PLATFORM_RADXA)
+   #if defined(HW_PLATFORM_RASPBERRY) || defined(HW_PLATFORM_RADXA) || defined(HW_PLATFORM_LINUX_GENERIC)
    if( access( "ruby_controller", R_OK ) == -1 )
       { failed = true; strcat(szFilesMissing, " ruby_controller"); }
    if( access( "ruby_rt_station", R_OK ) == -1 )
@@ -297,10 +303,12 @@ void _check_files()
       { failed = true; strcat(szFilesMissing, " "); strcat(szFilesMissing, VIDEO_PLAYER_OFFLINE); }
    #endif
 
+   #if !defined(HW_PLATFORM_LINUX_GENERIC)
    if( access( "ruby_rt_vehicle", R_OK ) == -1 )
       { failed = true; strcat(szFilesMissing, " ruby_rt_vehicle"); }
    if( access( "ruby_tx_telemetry", R_OK ) == -1 )
       { failed = true; strcat(szFilesMissing, " ruby_tx_telemetry"); }
+   #endif
 
    #ifdef HW_PLATFORM_RASPBERRY
    if ( access( "/etc/modprobe.d/ath9k_hw.conf.org", R_OK ) == -1 )
@@ -321,7 +329,7 @@ void _check_update_drivers_on_update()
 {
    if ( s_bIgnoreDrivers )
       return;
-   #if defined (HW_PLATFORM_RASPBERRY) || defined(HW_PLATFORM_RADXA)
+   #if defined (HW_PLATFORM_RASPBERRY) || defined(HW_PLATFORM_RADXA) || defined(HW_PLATFORM_LINUX_GENERIC)
    char szOutput[4098];
    bool bNeedsInstall = false;
    hw_execute_bash_command("lsmod | grep 88XXau", szOutput);
@@ -548,7 +556,6 @@ void _test_log(int argc, char *argv[])
    //   hw_stop_process("ruby_logger");
 }
 
-
 void _check_power_levels_of_current_cards(radio_hw_info_t* pRadioInfoArrayPrev, int iCountPrev)
 {
    bool bNewCards = false;
@@ -608,7 +615,7 @@ void _check_power_levels_of_current_cards(radio_hw_info_t* pRadioInfoArrayPrev, 
    }
    else
    {
-      #if defined(HW_PLATFORM_RASPBERRY) || defined(HW_PLATFORM_RADXA)
+      #if defined(HW_PLATFORM_RASPBERRY) || defined(HW_PLATFORM_RADXA) || defined(HW_PLATFORM_LINUX_GENERIC)
       bool bUpdated = false;
       int iMaximumRawCanBeSet = 10000;
       for( int i=0; i<hardware_get_radio_interfaces_count(); i++ )
@@ -669,7 +676,6 @@ void _log_platform(bool bNewLine)
    if ( bNewLine )
       printf("\n");
 }
-
 
 int _step_process_cmd_line(int argc, char* argv[])
 {
@@ -748,7 +754,6 @@ int _step_process_cmd_line(int argc, char* argv[])
    return 0;
 }
 
-
 int _step_find_console()
 {
    char szComm[1024];
@@ -775,6 +780,11 @@ int _step_find_console()
 
    #if defined (HW_PLATFORM_RADXA)
    sprintf(szComm, "echo 'Ruby execute for Radxa Zero 3 platform' >> /tmp/ruby_boot.log");
+   hw_execute_bash_command_silent(szComm, NULL);
+   #endif
+
+   #if defined (HW_PLATFORM_LINUX_GENERIC)
+   sprintf(szComm, "echo 'Ruby execute for Linux Generic platform' >> /tmp/ruby_boot.log");
    hw_execute_bash_command_silent(szComm, NULL);
    #endif
 
@@ -826,6 +836,12 @@ int _step_find_console()
    hardware_sleep_ms(50);
    #endif
 
+   #if defined (HW_PLATFORM_LINUX_GENERIC)
+   system("sudo mount -o remount,rw /");
+   system("cd /home/radxa/ruby");
+   hardware_sleep_ms(50);
+   #endif
+
    sprintf(szComm, "mkdir -p %s", FOLDER_CONFIG);
    hw_execute_bash_command(szComm, NULL);
    sprintf(szComm, "chmod 777 %s", FOLDER_BINARIES);
@@ -863,7 +879,6 @@ int _step_find_console()
    log_line("Found good console, starting Ruby...");
    return 1;
 }
-
 
 int _step_check_file_system()
 {
@@ -915,6 +930,11 @@ int _step_check_file_system()
       system("sudo mount -o remount,rw /");
       system("sudo mount -o remount,rw /config");
       system("cd /config; sudo mount -o remount,rw /config; cd /home/radxa/ruby");
+      system("cd /home/radxa/ruby");
+      hardware_sleep_ms(100);
+      #endif
+
+      #if defined(HW_PLATFORM_LINUX_GENERIC)
       system("cd /home/radxa/ruby");
       hardware_sleep_ms(100);
       #endif
@@ -997,7 +1017,7 @@ int _step_check_file_system()
       sprintf(szComm, "chmod 777 %s%s*", FOLDER_UPDATES, SUBFOLDER_UPDATES_DRIVERS);
       hw_execute_bash_command_silent(szComm, NULL);
 
-      #if defined(HW_PLATFORM_RASPBERRY) || defined(HW_PLATFORM_RADXA)
+      #if defined(HW_PLATFORM_RASPBERRY) || defined(HW_PLATFORM_RADXA) || defined(HW_PLATFORM_LINUX_GENERIC)
       sprintf(szComm, "chmod 777 %sres/*", FOLDER_BINARIES);
       hw_execute_bash_command_silent(szComm, NULL);
       #endif
@@ -1118,6 +1138,9 @@ void _step_check_binaries_and_resources()
    #if defined(HW_PLATFORM_RADXA)
    strcat(szInfo, "Radxa");
    #endif
+   #if defined(HW_PLATFORM_LINUX_GENERIC)
+   strcat(szInfo, "Linux Generic");
+   #endif
    #if defined(HW_PLATFORM_OPENIPC_CAMERA)
    strcat(szInfo, "OpenIPC");
    #endif
@@ -1160,6 +1183,25 @@ void _step_check_binaries_and_resources()
    }
    #endif
 
+
+   #if defined (HW_PLATFORM_LINUX_GENERIC)
+   if ( access("/usr/share/fonts/truetype/noto/noto.ttf", R_OK) == -1 )
+   {
+      char szFile[MAX_FILE_PATH_SIZE];
+      strcpy(szFile, FOLDER_RESOURCES);
+      strcat(szFile, "noto.ttf");
+      if ( access(szFile, R_OK) != -1 )
+      {
+         // hw_execute_bash_command("mkdir -p /usr/share/fonts/truetype/noto/", NULL);
+         snprintf(szComm, sizeof(szComm)/sizeof(szComm[0]), "cp -rf %s /usr/share/fonts/truetype/noto/", szFile);
+         hw_execute_bash_command(szComm, NULL);
+         hw_execute_bash_command("chmod 777 /usr/share/fonts/truetype/noto", NULL);
+         hw_execute_bash_command("chmod 777 /usr/share/fonts/truetype/noto/noto.ttf", NULL);
+      }
+   }
+   #endif
+
+
    #if defined (HW_PLATFORM_OPENIPC_CAMERA)
    log_line("Check OpenIPC presence of sysupgrade stop script...");
    if ( access("/etc/rc.local.stop", R_OK) == -1 )
@@ -1178,6 +1220,10 @@ void _step_load_init_devices()
 {
    #ifdef HW_PLATFORM_RADXA
    hw_execute_bash_command("ip link set wlx down 2>&1 1>/dev/null", NULL);
+   #endif
+
+   #ifdef HW_PLATFORM_LINUX_GENERIC
+   hw_execute_bash_command("ip link set wlan1 down 2>&1 1>/dev/null", NULL);
    #endif
 
    #ifdef HW_CAPABILITY_I2C
@@ -1541,7 +1587,7 @@ int main(int argc, char *argv[])
 
    _log_oipc_boot_step("Done init radios.");
 
-   #ifdef HW_PLATFORM_RADXA
+   #if defined (HW_PLATFORM_RADXA) || defined(HW_PLATFORM_LINUX_GENERIC)
    if ( ! g_bIsFirstBoot )
    {
       strcpy(szFile, FOLDER_BINARIES);
@@ -1552,8 +1598,14 @@ int main(int argc, char *argv[])
          strcat(szFile, FILE_TEMP_INTRO_PLAYING);
          sprintf(szComm, "touch %s", szFile);
          hw_execute_bash_command(szComm, NULL);
+         
+         #if defined(HW_PLATFORM_LINUX_GENERIC)
+         sprintf(szComm, "%s res/intro.h264 &", VIDEO_PLAYER_OFFLINE);
+         hw_execute_bash_command_nonblock(szComm, NULL);         
+         #else
          sprintf(szComm, "./%s -b -f res/intro.h264 15 -endexit&", VIDEO_PLAYER_OFFLINE);
          hw_execute_bash_command_nonblock(szComm, NULL);
+         #endif
       }
    }
    #endif
@@ -1578,13 +1630,13 @@ int main(int argc, char *argv[])
    // Detect hardware camera
    hardware_getCameraType();
 
-   #if defined (HW_PLATFORM_RASPBERRY) || defined (HW_PLATFORM_RADXA)
+   #if defined (HW_PLATFORM_RASPBERRY) || defined (HW_PLATFORM_RADXA) || defined(HW_PLATFORM_LINUX_GENERIC)
    hw_execute_ruby_process(NULL, "ruby_initdhcp", NULL, NULL);
    #endif
 
    detectSystemType();
 
-   #if defined (HW_PLATFORM_RASPBERRY) || defined (HW_PLATFORM_RADXA)
+   #if defined (HW_PLATFORM_RASPBERRY) || defined (HW_PLATFORM_RADXA) || defined(HW_PLATFORM_LINUX_GENERIC)
    if ( g_bDebug )
    if ( hardware_is_station() )
    {
@@ -1634,6 +1686,9 @@ int main(int argc, char *argv[])
 #endif
 #ifdef HW_PLATFORM_RADXA
    log_line("Running on Radxa Zero 3 hardware");
+#endif
+#ifdef HW_PLATFORM_LINUX_GENERIC
+   log_line("Running on Linux generic hardware");
 #endif
 #ifdef HW_PLATFORM_OPENIPC_CAMERA
    log_line("Running on OpenIPC hardware");
@@ -1700,7 +1755,7 @@ int main(int argc, char *argv[])
        hw_execute_bash_command("systemctl mask rknpu2.service 2>&1 1>/dev/null", NULL);
        #endif
 
-       #if defined(HW_PLATFORM_RASPBERRY) || defined(HW_PLATFORM_RADXA)
+       #if defined(HW_PLATFORM_RASPBERRY) || defined(HW_PLATFORM_RADXA) || defined(HW_PLATFORM_LINUX_GENERIC)
        bool allDisabled = true;
        for( int i=0; i<hardware_get_radio_interfaces_count(); i++ )
        {
@@ -1871,6 +1926,12 @@ int main(int argc, char *argv[])
       hw_execute_bash_command("cp -rf /home/radxa/ruby/logs/log_start.txt /home/radxa/ruby/logs/log_firstboot_start.txt", NULL);
       hw_execute_bash_command("cp -rf /home/radxa/ruby/logs/log_system.txt /home/radxa/ruby/logs/log_firstboot.txt", NULL);
       #endif
+      #ifdef HW_PLATFORM_LINUX_GENERIC
+      //TODO: To fix it up!
+      hw_execute_bash_command("cp -rf /home/radxa/ruby/logs/log_start.txt /home/radxa/ruby/logs/log_firstboot_start.txt", NULL);
+      hw_execute_bash_command("cp -rf /home/radxa/ruby/logs/log_system.txt /home/radxa/ruby/logs/log_firstboot.txt", NULL);
+      #endif
+
       #ifdef HW_PLATFORM_OPENIPC_CAMERA
       hw_execute_bash_command("cp -rf /tmp/logs/log_start.txt /root/ruby/log_firstboot_start.txt", NULL);
       hw_execute_bash_command("cp -rf /tmp/logs/log_system.txt /root/ruby/log_firstboot.txt", NULL);
@@ -2009,7 +2070,7 @@ int main(int argc, char *argv[])
       sprintf(szComm, "rm -rf %s%s 2>&1 1>/dev/null", FOLDER_RUBY_TEMP, FILE_TEMP_CONTROLLER_PAUSE_WATCHDOG);
       hw_execute_bash_command_silent(szComm, NULL);
 
-      #if defined(HW_PLATFORM_RASPBERRY) || defined(HW_PLATFORM_RADXA)
+      #if defined(HW_PLATFORM_RASPBERRY) || defined(HW_PLATFORM_RADXA) || defined(HW_PLATFORM_LINUX_GENERIC)
 
       u32 uControllerId = controller_utils_getControllerId();
       log_line("Controller UID: %u", uControllerId);
@@ -2094,6 +2155,7 @@ int main(int argc, char *argv[])
       fflush(stdout);
 
       #ifdef HW_PLATFORM_RADXA
+      //#if defined(HW_PLATFORM_RADXA) || defined(HW_PLATFORM_LINUX_GENERIC)
       hw_execute_ruby_process(NULL, "ruby_alive", NULL, NULL);
       #endif
    
@@ -2233,7 +2295,7 @@ int main(int argc, char *argv[])
       log_line("Copy boot log to /boot partition. Done.");
       #endif
 
-      #ifdef HW_PLATFORM_RADXA
+      #if defined (HW_PLATFORM_RADXA) || defined(HW_PLATFORM_LINUX_GENERIC)
       hw_execute_bash_command("rm -rf /config/last_ruby_boot.txt", NULL);
       hw_execute_bash_command("cp -rf logs/log_system.txt /config/last_ruby_boot.txt", NULL);      
       log_line("Copy boot log to /config partition. Done.");

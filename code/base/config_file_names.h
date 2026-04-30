@@ -178,6 +178,42 @@
 
 #endif
 
+// --------------------------------------------------------------------------------
+
+#if defined(HW_PLATFORM_LINUX_GENERIC)
+
+#define FOLDER_BINARIES "/home/radxa/ruby/"
+#define FOLDER_DRIVERS "/home/radxa/ruby/drivers/"
+#define FOLDER_CONFIG "/home/radxa/ruby/config/"
+#define FOLDER_CONFIG_MODELS "/home/radxa/ruby/config/models/"
+#define FOLDER_VEHICLE_HISTORY "/home/radxa/ruby/config/models/history-%d/"
+#define FOLDER_LOGS "/home/radxa/ruby/logs/"
+#define FOLDER_MEDIA "/home/radxa/ruby/media/"
+#define FOLDER_MEDIA_VEHICLE_DATA "/home/radxa/ruby/media/vehicle-%u/"
+#define FOLDER_RESOURCES "/home/radxa/ruby/res/"
+#define FOLDER_OSD_PLUGINS "/home/radxa/ruby/plugins/osd/"
+#define FOLDER_CORE_PLUGINS "/home/radxa/ruby/plugins/core/"
+#define FOLDER_UPDATES "/home/radxa/ruby/updates/"
+#define FOLDER_RUBY_TEMP "/home/radxa/ruby/tmp/"
+#define FOLDER_USB_MOUNT "/home/radxa/ruby/tmp/tmpusbfiles/"
+#define FOLDER_TEMP_VIDEO_MEM "/home/radxa/ruby/tmp/memdisk/"
+#define FOLDER_WINDOWS_PARTITION "/home/radxa/ruby_config/"
+#define FOLDER_CALIBRATION_FILES "/home/radxa/ruby/cal/"
+
+#define FILE_FORCE_VEHICLE "/home/radxa/ruby_config/forcevehicle"
+#define FILE_FORCE_VEHICLE_NO_CAMERA "/home/radxa/ruby_config/force_no_camera"
+#define FILE_FORCE_CONTROLLER "/home/radxa/ruby_config/forcecontroller"
+#define FILE_FORCE_ROUTER "/home/radxa/ruby_config/forcerouter"
+#define FILE_FORCE_RESET "/home/radxa/ruby_config/forcereset"
+#define FILE_BOOT_LOG_STEPS "/home/radxa/ruby_config/bootstepslog.txt"
+
+#define VIDEO_PLAYER_PIPE "gst-play-1.0"
+#define VIDEO_PLAYER_SM "ruby_player_radxa"
+#define VIDEO_PLAYER_UDP "gst-play-1.0"
+#define VIDEO_PLAYER_OFFLINE "gst-play-1.0"
+
+#endif
+
 // -------------------------------------------------------------------------------
 
 

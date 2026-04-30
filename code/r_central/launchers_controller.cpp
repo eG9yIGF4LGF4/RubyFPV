@@ -319,7 +319,7 @@ static void * _thread_adjust_affinities(void *argument)
    {
       hw_set_proc_affinity("ruby_central", iSelfId, 1,1);
       hw_set_proc_affinity("ruby_rx_telemetry", iSelfId, 1, 1);
-      #if defined(HW_PLATFORM_RASPBERRY) || defined(HW_PLATFORM_RADXA)
+      #if defined(HW_PLATFORM_RASPBERRY) || defined(HW_PLATFORM_RADXA) || defined(HW_PLATFORM_LINUX_GENERIC)
       char szFile[MAX_FILE_PATH_SIZE];
       ControllerSettings* pCS = get_ControllerSettings();
       if ( 0 == pCS->iStreamerOutputMode )

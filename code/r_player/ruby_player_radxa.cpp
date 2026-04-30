@@ -60,8 +60,8 @@
 #include <pthread.h>
 #include <sys/ioctl.h>
 
-#ifndef HW_PLATFORM_RADXA
-#error "ONLY FOR RADXA PLATFORM!"
+#if !(defined(HW_PLATFORM_RADXA) || defined(HW_PLATFORM_LINUX_GENERIC))
+#error "ONLY FOR RADXA OR LINUX GENERIC PLATFORM!"
 #endif
 
 #include "../base/ctrl_settings.h"

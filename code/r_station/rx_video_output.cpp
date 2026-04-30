@@ -206,7 +206,7 @@ void rx_video_output_start_video_streamer()
    strcpy(szStreamerParams, "2>&1 1>/dev/null");
    #endif
 
-   #if defined (HW_PLATFORM_RADXA)
+   #if defined (HW_PLATFORM_RADXA) || defined(HW_PLATFORM_LINUX_GENERIC)
    char szCodec[32];
    szCodec[0] = 0;
    if ( g_pCurrentModel->video_params.uVideoExtraFlags & VIDEO_FLAG_GENERATE_H265 )
@@ -277,7 +277,7 @@ void rx_video_output_start_video_streamer()
       shared_mem_process_stats_close(SHARED_MEM_WATCHDOG_MPP_PLAYER, s_pSMProcessStatsMPPPlayer);
    s_pSMProcessStatsMPPPlayer = NULL;
 
-   #if defined(HW_PLATFORM_RADXA)
+   #if defined(HW_PLATFORM_RADXA) || defined(HW_PLATFORM_LINUX_GENERIC)
    uTimeStart = g_TimeNow;
    while ( g_TimeNow < uTimeStart + 2000 )
    {
@@ -1042,8 +1042,8 @@ void _rx_video_output_to_eth(u8* pData, int iLength)
              close(s_VideoETHOutputInfo.s_ForwardETHSocketVideo);
              s_VideoETHOutputInfo.s_ForwardETHSocketVideo = -1;
           }
-          //else
-          //   log_line("Sent %d bytes to port %d", video_data_length, g_pControllerSettings->nVideoForwardETHPort);
+          else
+             log_line("Sent %d bytes to port %d", res, g_pControllerSettings->nVideoForwardETHPort);
           s_VideoETHOutputInfo.s_nBufferETHPos = 0;
        }
    }
@@ -1312,7 +1312,7 @@ void rx_video_output_periodic_loop()
 {
    rx_video_recording_periodic_loop();
 
-   #if defined(HW_PLATFORM_RADXA)
+   #if defined(HW_PLATFORM_RADXA) || defined(HW_PLATFORM_LINUX_GENERIC)
    _rx_video_output_watchdog_mpp_player();
    #endif
 
