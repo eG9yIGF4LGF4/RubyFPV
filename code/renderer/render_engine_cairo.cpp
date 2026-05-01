@@ -226,8 +226,8 @@ cairo_t* RenderEngineCairo::_getActiveCairoContext()
 
 void* RenderEngineCairo::_loadRawFontImageObject(const char* szFileName)
 {
-   return NULL;
-   /*
+   //return NULL;
+   
    if ( (NULL == szFileName) || (0 == szFileName[0]) )
    {
       log_softerror_and_alarm("[RenderEngineCairo] Failed to load image. Invalid filename.");
@@ -242,7 +242,6 @@ void* RenderEngineCairo::_loadRawFontImageObject(const char* szFileName)
           cairo_image_surface_get_width(pImage),
           cairo_image_surface_get_width(pImage), pImage );
    return (void*) pImage;
-   */
 }
 
 void RenderEngineCairo::_freeRawFontImageObject(void* pImageObject)

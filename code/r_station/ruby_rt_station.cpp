@@ -185,7 +185,6 @@ void _broadcast_radio_interface_init_failed(int iInterfaceIndex)
    log_line("Sent message to central that radio interface %d failed to initialize.", iInterfaceIndex+1);
 }
 
-
 void _compute_radio_interfaces_assignment()
 {
    log_line("------------------------------------------------------------------");
@@ -601,7 +600,6 @@ void _compute_radio_interfaces_assignment()
    log_line("------------------------------------------------------------------");
 }
 
-
 bool links_set_cards_frequencies_for_search( u32 uSearchFreq, bool bSiKSearch, int iAirDataRate, int iECC, int iLBT, int iMCSTR )
 {
    log_line("Links: Set all cards frequencies for search mode to %s", str_format_frequency(uSearchFreq));
@@ -971,7 +969,6 @@ void _check_for_atheros_datarate_change_command_to_vehicle(u8* pPacketBuffer)
    g_uLastRadioLinkIndexForSentSetRadioLinkFlagsCommand = linkIndex;
    g_iLastRadioLinkDataRateSentForSetRadioLinkFlagsCommand = datarateData;
 }
-
 
 void _process_and_send_packet(u8* pPacketBuffer, int iPacketLength)
 {
@@ -2068,7 +2065,6 @@ void _main_loop_searching()
          g_pProcessStats->uAverageLoopTimeMs = g_pProcessStats->uTotalLoopTime / g_pProcessStats->uLoopCounter;
    }   
 }
-
 
 void _main_loop_simple(bool bDoBasicTxSync)
 {

@@ -48,11 +48,13 @@ class RenderEngineCairo: public RenderEngine
      virtual void drawCircle(float x, float y, float r);
      virtual void drawArc(float x, float y, float r, float a1, float a2);
      
+     virtual void* _loadRawFontImageObject(const char* szFileName);
+     virtual void _freeRawFontImageObject(void* pImageObject);
+
    protected:
       cairo_t* _createTempDrawContext();
       cairo_t* _getActiveCairoContext();
-      virtual void* _loadRawFontImageObject(const char* szFileName);
-      virtual void _freeRawFontImageObject(void* pImageObject);
+      
 
       void _updateCurrentFontToUse(RenderEngineRawFont* pFont, bool bForce);
       //virtual float _get_raw_char_width(RenderEngineRawFont* pFont, int ch);

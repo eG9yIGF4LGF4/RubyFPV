@@ -5,11 +5,14 @@
 #include <time.h>
 #include <sys/resource.h>
 
-#include "../renderer/render_engine.h"
-#include "../renderer/drm_core.h"
 #include "../base/hdmi.h"
+#include "../renderer/drm_core.h"
+// #include "../renderer/render_engine.h"
+// #include "../r_central/fonts.h"
 
 bool bQuit = false;
+
+// extern RenderEngine* g_pRenderEngine;
 
 void handle_sigint(int sig) 
 { 
@@ -37,33 +40,27 @@ int main(int argc, char *argv[])
    if ( iHDMIIndex < 0 )
       iHDMIIndex = hdmi_get_best_resolution_index_for(DEFAULT_RADXA_DISPLAY_WIDTH, DEFAULT_RADXA_DISPLAY_HEIGHT, DEFAULT_RADXA_DISPLAY_REFRESH);
 
-   int _w = hdmi_get_current_resolution_width();
-   int _h = hdmi_get_current_resolution_height();
-   int _r = hdmi_get_current_resolution_refresh();
-   //ruby_drm_core_init(0, DRM_FORMAT_ARGB8888, _w, _h, _r);
    ruby_drm_core_init(1, DRM_FORMAT_NV12, 1920, 1080, 120);
-
    ruby_drm_core_set_plane_properties_and_buffer(ruby_drm_core_get_main_draw_buffer_id());
 
-   log_line("HDMI mode to use: %d (%d x %d @ %d)", iHDMIIndex, _w, _h, _r );
+   // g_pRenderEngine = render_init_engine();
 
-   RenderEngine* g_pRenderEngine = render_init_engine();
+   // loadAllFonts(true);
+   log_line("All fonts loaded");
 
-   u32 idFontMenu = g_pRenderEngine->loadRawFont(0, "res/noto.ttf", 0);
-   int x = 0;
-   int y = 0;
-   int w = _w;
    uint8_t* col = new uint8_t[]{255, 0, 0, 1};
+   int x = 0, _w = hdmi_get_current_resolution_width();
+
    while (! bQuit )
    {
-      hardware_sleep_ms(50);
-      g_pRenderEngine->startFrame();
-      g_pRenderEngine->setFontColor(idFontMenu, (double*)col);
-      g_pRenderEngine->drawText(20, 20,  idFontMenu, "Test UI: Hello, World!");
-      g_pRenderEngine->setFill(100,100,100,1);
-      g_pRenderEngine->setStrokeSize(0);
-      g_pRenderEngine->drawRect((float)x/w, 0.1, 0.1, 0.1);
-      g_pRenderEngine->endFrame();
+      // hardware_sleep_ms(50);
+      // g_pRenderEngine->startFrame();
+      // g_pRenderEngine->setFontColor(19, (double*)col);
+      // g_pRenderEngine->drawText(20, 20,  19, "Test UI: Hello, World!");
+      // g_pRenderEngine->setFill(100,100,100,1);
+      // g_pRenderEngine->setStrokeSize(0);
+      // g_pRenderEngine->drawRect((float)x/_w, 0.1, 0.1, 0.1);
+      // g_pRenderEngine->endFrame();
 
       x++;
       if ( x > 500 ) x = 0;

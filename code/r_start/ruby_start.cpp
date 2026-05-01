@@ -110,13 +110,10 @@ void power_leds(int onoff)
    #endif
 }
 
-#if defined HW_PLATFORM_OPENIPC_CAMERA
 static int s_iLogBootStepsOIPC = 0;
-#endif
 
 void _log_oipc_boot_step(const char* szText)
 {
-   #if defined HW_PLATFORM_OPENIPC_CAMERA
    FILE* fd = fopen(FILE_BOOT_LOG_STEPS, "a+");
    if ( NULL != fd )
    {
@@ -128,13 +125,6 @@ void _log_oipc_boot_step(const char* szText)
       fclose(fd);
       s_iLogBootStepsOIPC++;
    }
-   #endif
-
-   #ifdef HW_PLATFORM_LINUX_GENERIC
-   printf(szText);
-   printf("\n");
-   fflush(stdout);
-   #endif
 }
 
 void _log_oipc_boot_rotate()
@@ -1166,7 +1156,7 @@ void _step_check_binaries_and_resources()
    printf("\n");
    fflush(stdout);
 
-   #if defined (HW_PLATFORM_RASPBERRY) || defined (HW_PLATFORM_RADXA)
+   #if defined (HW_PLATFORM_RASPBERRY) || defined (HW_PLATFORM_RADXA) || defined(HW_PLATFORM_LINUX_GENERIC)
    if ( access("/usr/share/fonts/truetype/noto/noto.ttf", R_OK) == -1 )
    {
       char szFile[MAX_FILE_PATH_SIZE];
@@ -1182,25 +1172,6 @@ void _step_check_binaries_and_resources()
       }
    }
    #endif
-
-
-   #if defined (HW_PLATFORM_LINUX_GENERIC)
-   if ( access("/usr/share/fonts/truetype/noto/noto.ttf", R_OK) == -1 )
-   {
-      char szFile[MAX_FILE_PATH_SIZE];
-      strcpy(szFile, FOLDER_RESOURCES);
-      strcat(szFile, "noto.ttf");
-      if ( access(szFile, R_OK) != -1 )
-      {
-         // hw_execute_bash_command("mkdir -p /usr/share/fonts/truetype/noto/", NULL);
-         snprintf(szComm, sizeof(szComm)/sizeof(szComm[0]), "cp -rf %s /usr/share/fonts/truetype/noto/", szFile);
-         hw_execute_bash_command(szComm, NULL);
-         hw_execute_bash_command("chmod 777 /usr/share/fonts/truetype/noto", NULL);
-         hw_execute_bash_command("chmod 777 /usr/share/fonts/truetype/noto/noto.ttf", NULL);
-      }
-   }
-   #endif
-
 
    #if defined (HW_PLATFORM_OPENIPC_CAMERA)
    log_line("Check OpenIPC presence of sysupgrade stop script...");
@@ -1234,12 +1205,12 @@ void _step_load_init_devices()
    hw_execute_bash_command_raw("lsusb", szOutput);
    strcat(szOutput, "\n*END*\n");
    log_line("USB Devices:");
-   log_line(szOutput);
+   //log_line(szOutput);
 
    hw_execute_bash_command_raw("lsmod", szOutput);
    strcat(szOutput, "\n*END*\n");
    log_line("Loaded Modules:");
-   log_line(szOutput);      
+   //log_line(szOutput);      
       
    #ifdef HW_CAPABILITY_I2C
    hw_execute_bash_command_raw("i2cdetect -l", szOutput);

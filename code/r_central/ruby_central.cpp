@@ -172,7 +172,6 @@ int ruby_get_start_sequence_step()
    return s_StartSequence;
 }
 
-
 void load_resources()
 {
    loadAllFonts(true);
@@ -304,7 +303,6 @@ void _draw_background_picture()
       }
    }
 }
-
 
 void _render_video_player(u32 timeNow)
 {
@@ -714,7 +712,6 @@ void render_all(u32 timeNow, bool bForceBackground, bool bDoInputLoop)
 {
    render_all_with_menus(timeNow, true, bForceBackground, bDoInputLoop);
 }
-
 
 void* _thread_check_controller_cpu_state(void *argument)
 {
@@ -1145,7 +1142,6 @@ void executeQuickActions()
       return;
    }
 }
-
 
 void r_check_processes_filesystem()
 {
@@ -1889,7 +1885,6 @@ void start_loop()
    }
 }
 
-
 void clear_shared_mems()
 {
    memset(&g_SM_VideoFramesStatsOutput, 0, sizeof(shared_mem_video_frames_stats));
@@ -2248,7 +2243,6 @@ void ruby_resume_watchdog(const char* szReason)
       log_line("[Watchdog] Resumed watchdog still duplicate [%d]", s_iCountRequestsPauseWatchdog);
    }
 }
-
    
 void handle_sigint(int sig) 
 { 

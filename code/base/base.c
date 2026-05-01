@@ -68,7 +68,7 @@ static key_t s_logServiceKey = 0;
 static int s_logServiceMessageQueue = -1;
 static int s_logServiceAccessErrorCount = 0;
 
-static int s_logDisabledStdout = 1;
+static int s_logDisabledStdout = 0;
 static int s_logOnlyErrors = 0;
 
 static int s_logAddTime = 1;
@@ -638,7 +638,6 @@ void log_regular_mode()
    s_iLogForceFullMode = 0;
 }
 
-
 void _log_format_time_mstens(char* szOutTime)
 {
    //u32 uMilisTens = get_current_timestamp_ms_tens();
@@ -649,13 +648,14 @@ void _log_format_time_mstens(char* szOutTime)
    log_format_time(g_TimeNow, szOutTime);
 }
 
-
 void log_format_time(u32 miliseconds, char* szOutTime)
 {
    if ( NULL == szOutTime )
       return;
    sprintf(szOutTime, "%d-%d:%02d:%02d.%03d %03u", s_bootCount, (int)(miliseconds/1000/60/60), (int)(miliseconds/1000/60)%60, (int)((miliseconds/1000)%60), (int)(miliseconds%1000), g_uLoopCounter % 1000);
 }
+
+#define STR_MALLOC_SIZE 4096
 
 void log_line(const char* format, ...)
 {
@@ -665,6 +665,12 @@ void log_line(const char* format, ...)
    va_list args;
    va_start(args, format);
 
+   const char *szFormatString = malloc(STR_MALLOC_SIZE);
+   memset(szFormatString, 0, STR_MALLOC_SIZE);
+   vsprintf(szFormatString, format, args);
+
+   va_end(args);
+
    char szTime[64];
    szTime[0] = 0;
    if ( s_logAddTime )
@@ -673,10 +679,11 @@ void log_line(const char* format, ...)
    if ( _log_check_for_service_log_access() )
    {
       char szBuff[MAX_SERVICE_LOG_ENTRY_LENGTH];
-      vsnprintf(szBuff,MAX_SERVICE_LOG_ENTRY_LENGTH-1, format, args);
+      snprintf(szBuff,MAX_SERVICE_LOG_ENTRY_LENGTH-1, szFormatString);
       szBuff[MAX_SERVICE_LOG_ENTRY_LENGTH-1] = 0;
       _log_service_entry(szTime, szBuff);
-      va_end(args);
+
+      free((void*)szFormatString);
       return;
    }
 
@@ -706,19 +713,15 @@ void log_line(const char* format, ...)
       FILE* fdAux = fopen(s_szAdditionalLogFile, "a+");
       if ( NULL != fdAux )
       {
-         vfprintf(fdAux, format, args);
+         fprintf(fdAux, szFormatString);
          fclose(fdAux);
       }
    }
 
    if ( NULL != fd )
-      vfprintf(fd, format, args);
-   // if ( ! s_logDisabledStdout )
-   //    vprintf(format, args);
-   #ifdef HW_PLATFORM_LINUX_GENERIC
-   //fprintf(stdout, format, args);
-   #endif
-   
+      fprintf(fd, szFormatString);
+   if ( ! s_logDisabledStdout )
+      printf(szFormatString);   
 
    if ( 0 != s_szAdditionalLogFile[0] )
    {
@@ -730,12 +733,6 @@ void log_line(const char* format, ...)
       }
    }
 
-   #ifdef HW_PLATFORM_LINUX_GENERIC
-   //printf(format, args);
-   #endif
-   
-   va_end(args);
-
    if ( ! s_logDisabledStdout )
       printf("\n");
    if ( NULL != fd )
@@ -745,17 +742,18 @@ void log_line(const char* format, ...)
    //   flock(fileno(fd), LOCK_UN);
    if ( NULL != fd )
       fclose(fd);
-}
 
+   free((void*)szFormatString);
+}
 
 void log_line_forced_to_file(const char* format, ...)
 {
    va_list args;
    va_start(args, format);
 
-   char szBuf[0xFF] = {};
-   memset(szBuf, 0, 0xFF);
-   sprintf(szBuf, format, args);
+   const char *szFormatString = malloc(STR_MALLOC_SIZE);
+   memset(szFormatString, 0, STR_MALLOC_SIZE);
+   vsprintf(szFormatString, format, args);
 
    va_end(args);
 
@@ -790,15 +788,15 @@ void log_line_forced_to_file(const char* format, ...)
       FILE* fdAux = fopen(s_szAdditionalLogFile, "a+");
       if ( NULL != fdAux )
       {
-         vfprintf(fdAux, "%s",szBuf);
+         fprintf(fdAux,szFormatString);
          fclose(fdAux);
       }
    }
 
    if ( NULL != fd )
-      vfprintf(fd, "%s",szBuf);
+      fprintf(fd, szFormatString);
    if ( ! s_logDisabledStdout )
-      vprintf("%s", szBuf);
+      printf(szFormatString);
 
    if ( 0 != s_szAdditionalLogFile[0] )
    {
@@ -817,6 +815,8 @@ void log_line_forced_to_file(const char* format, ...)
 
    if ( NULL != fd )
       fclose(fd);
+
+   free((void*)szFormatString);
 }
 
 void log_line_watchdog(const char* format, ...)
@@ -827,9 +827,9 @@ void log_line_watchdog(const char* format, ...)
    va_list args;
    va_start(args, format);
 
-   char szFormatString[0xFF] = {};
-   memset(szFormatString, 0, 0xFF);
-   sprintf(szFormatString, format, args);
+   const char *szFormatString = malloc(STR_MALLOC_SIZE);
+   memset(szFormatString, 0, STR_MALLOC_SIZE);
+   vsprintf(szFormatString, format, args);
 
    va_end(args);
 
@@ -841,9 +841,11 @@ void log_line_watchdog(const char* format, ...)
    if ( _log_check_for_service_log_access() )
    {
       char szBuff[MAX_SERVICE_LOG_ENTRY_LENGTH];
-      vsnprintf(szBuff, MAX_SERVICE_LOG_ENTRY_LENGTH-1, "%s", szFormatString);
+      snprintf(szBuff, MAX_SERVICE_LOG_ENTRY_LENGTH-1, szFormatString);
       szBuff[MAX_SERVICE_LOG_ENTRY_LENGTH-1] = 0;
       _log_service_entry(szTime, szBuff);
+   
+      free((void*)szFormatString);
       return;
    }
 
@@ -867,16 +869,12 @@ void log_line_watchdog(const char* format, ...)
      fprintf(fd2, "%s %s: ", szTime, sszComponentName);  
 
    if ( NULL != fd )
-      vfprintf(fd, "%s", szFormatString);
+      fprintf(fd, szFormatString);
    if ( NULL != fd2 ) {
-       #ifdef HW_PLATFORM_LINUX_GENERIC
-      // printf(format, args);
-      #else
-      vfprintf(fd2, format, args);
-      #endif
+      fprintf(fd2, szFormatString);
    }
    if ( ! s_logDisabledStdout )
-      vprintf(format, args);
+      printf(szFormatString);
 
    if ( ! s_logDisabledStdout )
       printf("\n");
@@ -885,15 +883,15 @@ void log_line_watchdog(const char* format, ...)
    if ( NULL != fd2 )
      fprintf(fd2, "\n");  
 
-   va_end(args);
    //if ( 0 == lock )
    //   flock(fileno(fd), LOCK_UN);
    if ( NULL != fd )
       fclose(fd);
    if ( NULL != fd2 )
       fclose(fd2);
-}
 
+   free((void*)szFormatString);
+}
 
 void log_line_commands(const char* format, ...)
 {
@@ -903,6 +901,12 @@ void log_line_commands(const char* format, ...)
    va_list args;
    va_start(args, format);
 
+   const char *szFormatString = malloc(STR_MALLOC_SIZE);
+   memset(szFormatString, 0, STR_MALLOC_SIZE);
+   vsprintf(szFormatString, format, args);
+
+   va_end(args);
+
    char szTime[64];
    szTime[0] = 0;
    if ( s_logAddTime )
@@ -911,10 +915,11 @@ void log_line_commands(const char* format, ...)
    if ( _log_check_for_service_log_access() )
    {
       char szBuff[MAX_SERVICE_LOG_ENTRY_LENGTH];
-      vsnprintf(szBuff, MAX_SERVICE_LOG_ENTRY_LENGTH-1, format, args);
+      snprintf(szBuff, MAX_SERVICE_LOG_ENTRY_LENGTH-1, szFormatString);
       szBuff[MAX_SERVICE_LOG_ENTRY_LENGTH-1] = 0;
       _log_service_entry(szTime, szBuff);
-      va_end(args);
+
+      free((void*)szFormatString);
       return;
    }
 
@@ -938,16 +943,12 @@ void log_line_commands(const char* format, ...)
      fprintf(fd2, "%s %s: ", szTime, sszComponentName);  
 
    if ( NULL != fd )
-      vfprintf(fd, format, args);
+      fprintf(fd, szFormatString);
    if ( NULL != fd2 ) {
-       #ifdef HW_PLATFORM_LINUX_GENERIC
-      // printf(format, args);
-      #else
-      vfprintf(fd2, format, args);
-      #endif
+      fprintf(fd2, szFormatString);
    }
    if ( ! s_logDisabledStdout )
-      vprintf(format, args);
+      printf(szFormatString);
 
    if ( ! s_logDisabledStdout )
       printf("\n");
@@ -956,13 +957,14 @@ void log_line_commands(const char* format, ...)
    if ( NULL != fd2 )
      fprintf(fd2, "\n");  
 
-   va_end(args);
    //if ( 0 == lock )
    //   flock(fileno(fd), LOCK_UN);
    if ( NULL != fd )
       fclose(fd);
    if ( NULL != fd2 )
       fclose(fd2);
+
+   free((void*)szFormatString);
 }
 
 void log_buffer(const u8* buffer, int size)
@@ -1262,6 +1264,12 @@ void log_error_and_alarm(const char* format, ...)
    va_list args;
    va_start(args, format);
 
+   const char *szFormatString = malloc(STR_MALLOC_SIZE);
+   memset(szFormatString, 0, STR_MALLOC_SIZE);
+   vsprintf(szFormatString, format, args);
+
+   va_end(args);
+
    char szTime[64];
    szTime[0] = 0;
    if ( s_logAddTime )
@@ -1270,10 +1278,11 @@ void log_error_and_alarm(const char* format, ...)
    if ( _log_check_for_service_log_access() )
    {
       char szBuff[MAX_SERVICE_LOG_ENTRY_LENGTH];
-      vsnprintf(szBuff, MAX_SERVICE_LOG_ENTRY_LENGTH-1, format, args);
+      snprintf(szBuff, MAX_SERVICE_LOG_ENTRY_LENGTH-1, szFormatString);
       szBuff[MAX_SERVICE_LOG_ENTRY_LENGTH-1] = 0;
       _log_service_entry_error(szTime, szBuff);
-      va_end(args);
+      
+      free((void*)szFormatString);
       return;
    }
 
@@ -1312,25 +1321,17 @@ void log_error_and_alarm(const char* format, ...)
       FILE* fdAux = fopen(s_szAdditionalLogFile, "a+");
       if ( NULL != fdAux )
       {
-         vfprintf(fdAux, format, args);
+         fprintf(fdAux, szFormatString);
          fclose(fdAux);
       }
    }
 
    if ( ! s_logDisabledStdout )
-      vprintf(format, args);
+      printf(szFormatString);
    if ( NULL != fd )
-      #ifdef HW_PLATFORM_LINUX_GENERIC
-      // printf(format, args);
-      #else
-      vfprintf(fd, format, args);
-      #endif
+      fprintf(fd, szFormatString);
    if ( NULL != fd2 ) {
-      #ifdef HW_PLATFORM_LINUX_GENERIC
-      // printf(format, args);
-      #else
-      vfprintf(fd2, format, args);
-      #endif
+      fprintf(fd2, szFormatString);
    }
    
    if ( 0 != s_szAdditionalLogFile[0] )
@@ -1348,14 +1349,9 @@ void log_error_and_alarm(const char* format, ...)
    if ( NULL != fd )
      fprintf(fd, "\n");  
    if ( NULL != fd2 ) {
-      #ifdef HW_PLATFORM_LINUX_GENERIC
-      // printf(format, args);
-      #else
-      vfprintf(fd2, format, args);
-      #endif
+      fprintf(fd2, szFormatString);
    }
 
-   va_end(args);
    //if ( 0 == lock )
    //   flock(fileno(fd), LOCK_UN);
    //if ( 0 == lock2 )
@@ -1365,6 +1361,8 @@ void log_error_and_alarm(const char* format, ...)
       fclose(fd);
    if ( NULL != fd2 )
       fclose(fd2);
+
+   free((void*)szFormatString);   
 }
 
 void log_softerror_and_alarm(const char* format, ...)
@@ -1377,6 +1375,12 @@ void log_softerror_and_alarm(const char* format, ...)
    va_list args;
    va_start(args, format);
 
+   const char *szFormatString = malloc(STR_MALLOC_SIZE);
+   memset(szFormatString, 0, STR_MALLOC_SIZE);
+   vsprintf(szFormatString, format, args);
+
+   va_end(args);
+
    char szTime[64];
    szTime[0] = 0;
    if ( s_logAddTime )
@@ -1385,10 +1389,11 @@ void log_softerror_and_alarm(const char* format, ...)
    if ( _log_check_for_service_log_access() )
    {
       char szBuff[MAX_SERVICE_LOG_ENTRY_LENGTH];
-      vsnprintf(szBuff, MAX_SERVICE_LOG_ENTRY_LENGTH-1, format, args);
+      snprintf(szBuff, MAX_SERVICE_LOG_ENTRY_LENGTH-1, szFormatString);
       szBuff[MAX_SERVICE_LOG_ENTRY_LENGTH-1] = 0;
       _log_service_entry_softerror(szTime, szBuff);
-      va_end(args);
+   
+      free((void*)szFormatString);
       return;
    }
 
@@ -1427,21 +1432,17 @@ void log_softerror_and_alarm(const char* format, ...)
       FILE* fdAux = fopen(s_szAdditionalLogFile, "a+");
       if ( NULL != fdAux )
       {
-         vfprintf(fdAux, format, args);
+         fprintf(fdAux, szFormatString);
          fclose(fdAux);
       }
    }
 
    if ( ! s_logDisabledStdout )
-      vprintf(format, args);
+      printf("%s", szFormatString);
    if ( NULL != fd )
-      vfprintf(fd, format, args);
+      fprintf(fd, szFormatString);
    if ( NULL != fd2 ) {
-      #ifdef HW_PLATFORM_LINUX_GENERIC
-      // printf(format, args);
-      #else
-      vfprintf(fd2, format, args);
-      #endif
+      fprintf(fd2, szFormatString);
    }
 
    if ( 0 != s_szAdditionalLogFile[0] )
@@ -1461,16 +1462,12 @@ void log_softerror_and_alarm(const char* format, ...)
    if ( NULL != fd2 )
      fprintf(fd2, "\n");  
 
-   va_end(args);
-   //if ( 0 == lock )
-   //   flock(fileno(fd), LOCK_UN);
-   //if ( 0 == lock2 )
-   //   flock(fileno(fd2), LOCK_UN);
-
    if ( NULL != fd )
       fclose(fd);
    if ( NULL != fd2 )
       fclose(fd2);
+
+   free((void*)szFormatString);
 }
 
 

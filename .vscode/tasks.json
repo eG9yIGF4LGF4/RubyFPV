@@ -1,0 +1,28 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "make",
+      "type": "shell",
+      "command": "make",
+      "args": ["all", "RUBY_BUILD_ENV=pc"],
+      "group": {
+          "kind": "build",
+          "isDefault": true
+      },
+      "problemMatcher": ["$gcc"] // adjust to your toolchain
+    },
+    {
+      "label": "make-install",
+      "type": "shell",
+      "command": "make",
+      "args": ["install", "RUBY_BUILD_ENV=pc"],
+      "group": {
+          "kind": "build",
+          "isDefault": true
+      },
+      "dependsOn": "make",
+      "problemMatcher": ["$gcc"] // adjust to your toolchain
+    }
+  ]
+}

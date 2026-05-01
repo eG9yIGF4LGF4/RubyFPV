@@ -34,20 +34,14 @@
 #include "../base/config_hw.h"
 #include <math.h>
 
-#if defined (HW_PLATFORM_RASPBERRY)
-//#include "render_engine_ovg.h"
-#include "render_engine_raw.h"
-#endif
-
-#if defined (HW_PLATFORM_LINUX_GENERIC)
-// #include "render_engine_ovg.h"
+// #if defined (HW_PLATFORM_RASPBERRY)
+// //#include "render_engine_ovg.h"
 // #include "render_engine_raw.h"
-#include "render_engine_cairo.h"
-#endif
+// #endif
 
-#if defined (HW_PLATFORM_RADXA)
+// #if defined (HW_PLATFORM_RADXA) || (HW_PLATFORM_LINUX_GENERIC)
 #include "render_engine_cairo.h"
-#endif
+// #endif
 
 #include "../base/base.h"
 #include "../base/hardware.h"

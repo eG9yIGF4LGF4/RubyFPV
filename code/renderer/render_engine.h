@@ -142,12 +142,12 @@ class RenderEngine
 
      bool rectIntersect(float x1, float y1, float w1, float h1, float x2, float y2, float w2, float h2);
 
+     virtual void* _loadRawFontImageObject(const char* szFileName);
+     virtual void _freeRawFontImageObject(void* pImageObject);
    protected:
       virtual int _getRawFontIndexFromId(u32 fontId);
       virtual RenderEngineRawFont* _getRawFontFromId(u32 fontId);
       virtual u32 _getRawFontId(RenderEngineRawFont* pRawFont);
-      virtual void* _loadRawFontImageObject(const char* szFileName);
-      virtual void _freeRawFontImageObject(void* pImageObject);
 
       virtual float _get_raw_space_width(RenderEngineRawFont* pFont);
       virtual float _get_raw_char_width(RenderEngineRawFont* pFont, int ch);

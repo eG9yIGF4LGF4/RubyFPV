@@ -231,7 +231,6 @@ ruby_central: $(FOLDER_CENTRAL)/ruby_central.o $(MODULE_BASE) $(MODULE_MODELS) $
 	$(FOLDER_BASE)/core_plugins_settings.o $(FOLDER_BASE)/hardware_files.o $(FOLDER_COMMON)/models_connect_frequencies.o $(FOLDER_BASE)/shared_mem_i2c.o $(FOLDER_BASE)/video_capture_res.o
 	$(CXX) $(_CFLAGS) $(CFLAGS_RENDERER) -export-dynamic -o $@ $^ $(_LDFLAGS) -ldl $(LDFLAGS_CENTRAL) $(LDFLAGS_CENTRAL2) $(LDFLAGS_RENDERER)
 
-
 ruby_utils: ruby_logger ruby_initdhcp ruby_sik_config ruby_alive ruby_video_proc ruby_update ruby_update_worker
 
 ruby_start: $(FOLDER_START)/ruby_start.o $(FOLDER_START)/r_start_vehicle.o $(MODULE_LOC) $(FOLDER_START)/r_test.o $(FOLDER_START)/r_initradio.o $(FOLDER_START)/first_boot.o \
@@ -309,7 +308,8 @@ ruby_player_radxa:code/r_player/ruby_player_radxa.o code/r_player/mpp_core.o $(F
 tests: test_log test_port_rx test_port_tx test_link test_cairo test_ui
 # endif
 
-test_ui:$(FOLDER_TESTS)/test_ui.o $(FOLDER_BASE)/hdmi.o $(CENTRAL_RENDER_CODE) $(MODULE_BASE) $(MODULE_BASE2) $(MODULE_COMMON) $(MODULE_RADIO) $(MODULE_MODELS)
+test_ui:$(FOLDER_TESTS)/test_ui.o $(FOLDER_BASE)/hdmi.o $(FOLDER_CENTRAL)/fonts.o $(FOLDER_CENTRAL)/shared_vars.o  \
+	$(CENTRAL_RENDER_CODE) $(MODULE_BASE) $(MODULE_BASE2) $(MODULE_COMMON) $(MODULE_RADIO) $(MODULE_MODELS)
 	$(CXX) $(_CFLAGS) -o $@ $^ $(_LDFLAGS) $(LDFLAGS_RENDERER) $(LDFLAGS_CENTRAL) $(LDFLAGS_CENTRAL2) -ldl -lc
 
 test_cairo:$(FOLDER_TESTS)/test_cairo.o $(CENTRAL_RENDER_CODE) $(MODULE_BASE) $(MODULE_BASE2) $(MODULE_COMMON) $(MODULE_RADIO) $(MODULE_MODELS)
@@ -381,3 +381,10 @@ cleanstation:
           $(FOLDER_BASE)/*.o $(FOLDER_COMMON)/*.o $(FOLDER_RADIO)/*.o $(FOLDER_START)/*.o $(FOLDER_RUTILS)/*.o $(FOLDER_UTILS)/*.o $(FOLDER_STATION)/*.o \
           $(FOLDER_TESTS)/*.o $(FOLDER_PLUGINS_OSD)/*.o \
           code/r_i2c/*.o code/r_utils/*.o code/r_player/*.o
+
+
+copybins:
+	cp -f ./ruby_* /home/radxa/ruby && \
+	cp -f ./test_* /home/radxa/ruby
+
+install: all copybins

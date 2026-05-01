@@ -56,13 +56,14 @@
         "name": "test_ui",
         "type": "cppdbg",
         "request": "launch",
-        "program": "/home/dev/src/rubyfpv/RubyFPV/test_ui",
+        "program": "/home/radxa/ruby/test_ui",
         "args": ["-debug"],
         "stopAtEntry": true,
         "cwd": "${fileDirname}",
         "environment": [],
         "externalConsole": false,
         "MIMode": "gdb",
+        "preLaunchTask": "make-install",
         "setupCommands": [
             {
                 "description": "Enable pretty-printing for gdb",
@@ -87,6 +88,7 @@
         "environment": [],
         "externalConsole": false,
         "MIMode": "gdb",
+        "preLaunchTask": "make-install",
         "setupCommands": [
             {
                 "description": "Enable pretty-printing for gdb",
