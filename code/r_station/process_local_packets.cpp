@@ -68,6 +68,7 @@
 #include "adaptive_video.h"
 #include "radio_links_sik.h"
 #include "test_link_params.h"
+#include "process_local_packets.h"
 
 
 bool _switch_to_vehicle_radio_link(int iVehicleRadioLinkId)
@@ -651,6 +652,17 @@ void process_local_control_packet(u8* pPacketBuffer)
 
    t_packet_header* pPH = (t_packet_header*)pPacketBuffer;
 
+   if ( pPH->packet_type == PACKET_TYPE_LOCAL_CONTROLLER_RENDERER_REQUEST )
+   {
+      t_packet_renderer_request_data* pData = (t_packet_renderer_request_data*)(pPacketBuffer + sizeof(t_packet_header));
+      t_packet_renderer_request_type uType = pData->type;
+
+      // TODO In case if IPC-based renderer inded become required due to Gst/Gtk based player
+
+      log_line("Received local message from renderer (type=%d)", uType);
+      return;
+   }
+
    if ( pPH->packet_type == PACKET_TYPE_TEST_RADIO_LINK )
    {
       pPacketBuffer += sizeof(t_packet_header);
@@ -675,6 +687,7 @@ void process_local_control_packet(u8* pPacketBuffer)
       adaptive_video_enable_test_mode(pPH->vehicle_id_src?true:false);
       return;
    }
+   
    if ( pPH->packet_type == PACKET_TYPE_LOCAL_CONTROL_VIDEO_RECORDING )
    {
       u8 uCmd = pPacketBuffer[sizeof(t_packet_header)];
@@ -983,7 +996,7 @@ void process_local_control_packet(u8* pPacketBuffer)
       g_pControllerSettings = get_ControllerSettings();
       int iOldTxMode = g_pControllerSettings->iRadioTxUsesPPCAP;
       int iOldSocketBuffers = g_pControllerSettings->iRadioBypassSocketBuffers;
-      #if defined (HW_PLATFORM_RADXA)
+      #if defined (HW_PLATFORM_RADXA) || defined(HW_PLATFORM_LINUX_GENERIC)
       int iOldHDMIVSync = g_pControllerSettings->iHDMIVSync;
       #endif
       hw_serial_port_info_t oldSerialPorts[MAX_SERIAL_PORTS];
@@ -998,7 +1011,7 @@ void process_local_control_packet(u8* pPacketBuffer)
       load_ControllerSettings();
       g_pControllerSettings = get_ControllerSettings();
 
-      #if defined (HW_PLATFORM_RADXA)
+      #if defined (HW_PLATFORM_RADXA) || defined(HW_PLATFORM_LINUX_GENERIC)
       if ( g_pControllerSettings->iHDMIVSync != iOldHDMIVSync )
       {
          g_TimeNow = get_current_timestamp_ms();

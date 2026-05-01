@@ -34,7 +34,7 @@
 #include <ctype.h>
 #include "strings_table.h"
 
-#if defined (HW_PLATFORM_RADXA) || defined (HW_PLATFORM_RASPBERRY)
+#if defined (HW_PLATFORM_RADXA) || defined (HW_PLATFORM_RASPBERRY) || defined(HW_PLATFORM_LINUX_GENERIC)
 
 type_localized_strings s_LocalizedStringsTable[] = 
 {

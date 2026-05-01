@@ -10,6 +10,7 @@
 #define IPC_CHANNEL_TYPE_RC_TO_ROUTER 69
 #define IPC_CHANNEL_TYPE_ROUTER_TO_COMMANDS 77
 #define IPC_CHANNEL_TYPE_COMMANDS_TO_ROUTER 78
+#define IPC_CHANNEL_TYPE_RENDERER_TO_PLAYER 86
 #define IPC_CHANNEL_CSI_VIDEO_COMMANDS 81
 
 #define IPC_CHANNEL_MAX_MSG_SIZE 1600
@@ -28,7 +29,6 @@ int ruby_open_ipc_channel_write_endpoint(int nChannelType);
 int ruby_open_ipc_channel_read_endpoint(int nChannelType);
 
 int ruby_close_ipc_channel(int iChannelUniqueId);
-
 
 int ruby_ipc_channel_send_message(int iChannelUniqueId, u8* pMessage, int iLength);
 u8* ruby_ipc_try_read_message(int iChannelUniqueId, u8* pTempBuffer, int* pTempBufferPos, u8* pOutputBuffer);

@@ -42,8 +42,8 @@
 #include <sys/msg.h>
 #include <errno.h>
 
-//#define RUBY_USE_FIFO_PIPES 1
-#define RUBY_USES_MSGQUEUES 1
+#define RUBY_USE_FIFO_PIPES 1
+//#define RUBY_USES_MSGQUEUES 1
 
 #define FIFO_RUBY_ROUTER_TO_CENTRAL "/tmp/ruby/fiforoutercentral"
 #define FIFO_RUBY_CENTRAL_TO_ROUTER "/tmp/ruby/fifocentralrouter"
@@ -51,6 +51,7 @@
 #define FIFO_RUBY_COMMANDS_TO_ROUTER "/tmp/ruby/fifocommandsrouter"
 #define FIFO_RUBY_ROUTER_TO_TELEMETRY "/tmp/ruby/fiforoutertelemetry"
 #define FIFO_RUBY_TELEMETRY_TO_ROUTER "/tmp/ruby/fifotelemetryrouter"
+#define FIFO_RUBY_RENDERER_TO_PLAYER "/tmp/ruby/fiforendererplayer"
 #define FIFO_RUBY_ROUTER_TO_RC "/tmp/ruby/fiforouterrc"
 #define FIFO_RUBY_RC_TO_ROUTER "/tmp/ruby/fiforcrouter"
 
@@ -113,6 +114,9 @@ char* _ruby_ipc_get_channel_name(int nChannelType)
    if ( nChannelType == IPC_CHANNEL_TYPE_COMMANDS_TO_ROUTER )
       strcpy(s_szRubyIPCChannelType, "[COMMANDS-TO-ROUTER]");
 
+   if ( nChannelType == IPC_CHANNEL_TYPE_RENDERER_TO_PLAYER )
+      strcpy(s_szRubyIPCChannelType, "[RENDERER-TO-PLAYER]");
+
    return s_szRubyIPCChannelType;
 }
 
@@ -142,8 +146,8 @@ char* _ruby_ipc_get_pipe_name(int nChannelType )
    if ( nChannelType == IPC_CHANNEL_TYPE_ROUTER_TO_COMMANDS )
       strcpy(s_szRubyPipeName, FIFO_RUBY_ROUTER_TO_COMMANDS);
 
-   if ( nChannelType == IPC_CHANNEL_TYPE_COMMANDS_TO_ROUTER )
-      strcpy(s_szRubyPipeName, FIFO_RUBY_COMMANDS_TO_ROUTER);
+   if ( nChannelType == IPC_CHANNEL_TYPE_RENDERER_TO_PLAYER )
+      strcpy(s_szRubyPipeName, FIFO_RUBY_RENDERER_TO_PLAYER);
 
    return s_szRubyPipeName;
 }
@@ -195,7 +199,7 @@ void _check_ruby_ipc_consistency()
 
 int ruby_init_ipc_channels()
 {
-   #if defined(HW_PLATFORM_RASPBERRY) || defined(HW_PLATFORM_RADXA)
+   #if defined(HW_PLATFORM_RASPBERRY) || defined(HW_PLATFORM_RADXA) || defined(HW_PLATFORM_LINUX_GENERIC)
    char szBuff[256];
    sprintf(szBuff, "mkfifo %s", FIFO_RUBY_CAMERA1);
    hw_execute_bash_command(szBuff, NULL);
@@ -220,6 +224,9 @@ int ruby_init_ipc_channels()
    #endif
 
    #ifdef RUBY_USE_FIFO_PIPES
+
+   sprintf(szBuff, "mkfifo %s", FIFO_RUBY_RENDERER_TO_PLAYER);
+   hw_execute_bash_command(szBuff, NULL);
 
    sprintf(szBuff, "mkfifo %s", FIFO_RUBY_ROUTER_TO_CENTRAL );
    hw_execute_bash_command(szBuff, NULL);

@@ -753,6 +753,12 @@ void log_line_forced_to_file(const char* format, ...)
    va_list args;
    va_start(args, format);
 
+   char szBuf[0xFF] = {};
+   memset(szBuf, 0, 0xFF);
+   sprintf(szBuf, format, args);
+
+   va_end(args);
+
    char szTime[64];
    szTime[0] = 0;
    if ( s_logAddTime )
@@ -784,15 +790,15 @@ void log_line_forced_to_file(const char* format, ...)
       FILE* fdAux = fopen(s_szAdditionalLogFile, "a+");
       if ( NULL != fdAux )
       {
-         vfprintf(fdAux, format, args);
+         vfprintf(fdAux, "%s",szBuf);
          fclose(fdAux);
       }
    }
 
    if ( NULL != fd )
-      vfprintf(fd, format, args);
+      vfprintf(fd, "%s",szBuf);
    if ( ! s_logDisabledStdout )
-      vprintf(format, args);
+      vprintf("%s", szBuf);
 
    if ( 0 != s_szAdditionalLogFile[0] )
    {
@@ -809,9 +815,6 @@ void log_line_forced_to_file(const char* format, ...)
    if ( NULL != fd )
      fprintf(fd, "\n");  
 
-   va_end(args);
-   //if ( 0 == lock )
-   //   flock(fileno(fd), LOCK_UN);
    if ( NULL != fd )
       fclose(fd);
 }
@@ -824,6 +827,12 @@ void log_line_watchdog(const char* format, ...)
    va_list args;
    va_start(args, format);
 
+   char szFormatString[0xFF] = {};
+   memset(szFormatString, 0, 0xFF);
+   sprintf(szFormatString, format, args);
+
+   va_end(args);
+
    char szTime[64];
    szTime[0] = 0;
    if ( s_logAddTime )
@@ -832,10 +841,9 @@ void log_line_watchdog(const char* format, ...)
    if ( _log_check_for_service_log_access() )
    {
       char szBuff[MAX_SERVICE_LOG_ENTRY_LENGTH];
-      vsnprintf(szBuff, MAX_SERVICE_LOG_ENTRY_LENGTH-1, format, args);
+      vsnprintf(szBuff, MAX_SERVICE_LOG_ENTRY_LENGTH-1, "%s", szFormatString);
       szBuff[MAX_SERVICE_LOG_ENTRY_LENGTH-1] = 0;
       _log_service_entry(szTime, szBuff);
-      va_end(args);
       return;
    }
 
@@ -859,7 +867,7 @@ void log_line_watchdog(const char* format, ...)
      fprintf(fd2, "%s %s: ", szTime, sszComponentName);  
 
    if ( NULL != fd )
-      vfprintf(fd, format, args);
+      vfprintf(fd, "%s", szFormatString);
    if ( NULL != fd2 ) {
        #ifdef HW_PLATFORM_LINUX_GENERIC
       // printf(format, args);

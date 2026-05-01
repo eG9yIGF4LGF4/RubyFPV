@@ -99,7 +99,6 @@ RenderEngineCairo::RenderEngineCairo()
    log_line("[RenderEngineCairo] Render init done.");
 }
 
-
 RenderEngineCairo::~RenderEngineCairo()
 {
    if ( NULL != m_pCairoCtx )
@@ -119,7 +118,6 @@ void* RenderEngineCairo::getDrawContext()
 {
    return m_pCairoCtx;
 }
-
 
 void RenderEngineCairo::startFrame()
 {
@@ -178,7 +176,6 @@ void RenderEngineCairo::endFrame()
    RenderEngine::endFrame();
 }
 
-
 void RenderEngineCairo::setStroke(const double* color, float fStrokeSize)
 {
    RenderEngine::setStroke(color, fStrokeSize);
@@ -188,7 +185,6 @@ void RenderEngineCairo::setStroke(const double* color, float fStrokeSize)
    //   cairo_set_line_width(m_pCairoCtx, m_fStrokeSizePx);
    cairo_set_line_width(m_pCairoCtx, 1.1);
 }
-
 
 void RenderEngineCairo::setStrokeSize(float fStrokeSize)
 {
@@ -840,7 +836,6 @@ void RenderEngineCairo::bltIcon(float xPosDest, float yPosDest, int iSrcX, int i
    }
 }
 
-
 inline void RenderEngineCairo::_blend_pixel(unsigned char* pixel, unsigned char r, unsigned char g, unsigned char b, unsigned char a)
 {
    // Output surface format order is: BGRA
@@ -1195,7 +1190,6 @@ void RenderEngineCairo::drawRoundRect(float xPos, float yPos, float fWidth, floa
    */
 }
 
-
 void RenderEngineCairo::drawRoundRectMenu(float xPos, float yPos, float fWidth, float fHeight, float fCornerRadius)
 {
    if ( m_ColorFill[3] < 150 )
@@ -1321,7 +1315,6 @@ void RenderEngineCairo::fillTriangle(float x1, float y1, float x2, float y2, flo
    }
 }
 
-
 void RenderEngineCairo::drawPolyLine(float* x, float* y, int count)
 {
    for( int i=0; i<count-1; i++ )
@@ -1413,7 +1406,6 @@ if ( count < 3 || count > 120 )
       drawLine(x[i], y[i], x[i+1], y[i+1]);
    drawLine(x[count-1], y[count-1], x[0], y[0]);
 }
-
 
 void RenderEngineCairo::fillCircle(float x, float y, float r)
 {
@@ -1645,39 +1637,6 @@ float RenderEngineCairo::textRawWidthScaled(u32 fontId, float fScale, const char
    //cairo_text_extents(pCairoCtx, szText, &cte);
    //float fWidth = cte.x_advance;
 }
-
-/*
-float RenderEngineCairo::_get_raw_char_width(RenderEngineRawFont* pFont, int ch)
-{
-   cairo_t* pCairoCtx = _getActiveCairoContext();
-   if ( NULL == pCairoCtx )
-       pCairoCtx = _createTempDrawContext();
-
-   //return RenderEngine::_get_raw_char_width(pFont, ch);
-   
-   char szText[8];
-   szText[0] = ch;
-   szText[1] = 0;
-
-   cairo_move_to(pCairoCtx, 0,0);
-   _updateCurrentFontToUse(pFont, false);
-   cairo_set_font_size(pCairoCtx, pFont->lineHeight*0.8);
-
-   cairo_text_extents_t cte;
-   cairo_text_extents(pCairoCtx, szText, &cte);
-   float fWidth = cte.width;
-
-   if ( fWidth <= m_fPixelWidth )
-   {
-      char szTmp[2];
-      szTmp[0] = 'W';
-      szTmp[1] =0;
-      cairo_text_extents(pCairoCtx, szTmp, &cte);
-      fWidth = cte.width;
-   }
-   return fWidth * m_fPixelWidth;
-}
-*/
 
 void RenderEngineCairo::_drawSimpleText(RenderEngineRawFont* pFont, const char* szText, float xPos, float yPos)
 {

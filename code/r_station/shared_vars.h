@@ -70,6 +70,7 @@ extern int g_fIPCToTelemetry;
 extern int g_fIPCFromTelemetry;
 extern int g_fIPCToRC;
 extern int g_fIPCFromRC;
+extern int g_fIPCToPlayer;
 
 extern t_sik_radio_state g_SiKRadiosState;
 
