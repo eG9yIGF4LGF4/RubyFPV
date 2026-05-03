@@ -383,6 +383,10 @@ int _hardware_detect_card_model(const char* szProductId)
       return CARD_MODEL_RTL8733BU;
    if ( NULL != strstr( szProductId, "0bda:b731" ) )
       return CARD_MODEL_RTL8733BU;
+
+   if ( NULL != strstr( szProductId, "pcie:8852" ) )
+      return CARD_MODEL_RTW8852BE;
+
    return 0;
 }
 
@@ -639,6 +643,8 @@ int hardware_radio_get_driver_id_card_model(int iCardModel)
       return RADIO_HW_DRIVER_REALTEK_8812EU;
    else if ( iCardModel == CARD_MODEL_RTL8733BU )
       return RADIO_HW_DRIVER_REALTEK_8733BU;
+   else if ( iCardModel == CARD_MODEL_RTW8852BE )
+      return RADIO_HW_DRIVER_REALTEK_8852BE;
    else if ( (iCardModel > 0) && (iCardModel <50) )
       return RADIO_HW_DRIVER_REALTEK_RTL88XXAU;
 
@@ -915,7 +921,8 @@ int _hardware_enumerate_wifi_radios()
            (NULL != strstr(pszDriver,"rtl88XXau")) ||
            (NULL != strstr(pszDriver,"8812eu")) ||
            (NULL != strstr(pszDriver,"88x2eu")) ||
-           (NULL != strstr(pszDriver,"8733bu")) )
+           (NULL != strstr(pszDriver,"8733bu")) ||
+           (NULL != strstr(pszDriver,"rtw89_8852be_git")))
       {
          s_iHwRadiosSupportedCount++;
          sRadioInfo[i].isSupported = 1;
@@ -946,6 +953,11 @@ int _hardware_enumerate_wifi_radios()
             sRadioInfo[i].iRadioType = RADIO_TYPE_REALTEK;
             sRadioInfo[i].iRadioDriver = RADIO_HW_DRIVER_REALTEK_8733BU;
          }
+         if ( NULL != strstr(pszDriver,"rtw89_8852be_git") )
+         {
+            sRadioInfo[i].iRadioType = RADIO_TYPE_REALTEK;
+            sRadioInfo[i].iRadioDriver = RADIO_HW_DRIVER_REALTEK_8852BE;
+         }
       }
       // Experimental
       if ( NULL != strstr(pszDriver,"rtl88x2bu") )
@@ -957,7 +969,14 @@ int _hardware_enumerate_wifi_radios()
          sRadioInfo[i].iRadioType = RADIO_TYPE_REALTEK;
          sRadioInfo[i].iRadioDriver = RADIO_HW_DRIVER_REALTEK_RTL88X2BU;
       }
-
+      if ( NULL != strstr(pszDriver,"rtw89_8852be_git") )
+      {
+         s_iHwRadiosSupportedCount++;
+         sRadioInfo[i].isSupported = 1;
+         strcpy(sRadioInfo[i].szDescription, "Realtek");
+         sRadioInfo[i].iRadioType = RADIO_TYPE_REALTEK;
+         sRadioInfo[i].iRadioDriver = RADIO_HW_DRIVER_REALTEK_8852BE;
+      }
       if ( NULL != strstr(pszDriver,"rt2800usb") )
       {
          s_iHwRadiosSupportedCount++;
@@ -1270,6 +1289,24 @@ int hardware_load_driver_rtl8733bu()
    return 1;
 }
 
+int hardware_load_driver_rtw8852be()
+{
+   char szPlatform[128];
+   hw_execute_bash_command("uname -r", szPlatform);
+   removeTrailingNewLines(szPlatform);
+   log_line("[Hardware] Loading driver RTW8852BE for platform: %s ...", szPlatform);
+
+   #if defined (HW_PLATFORM_OPENIPC_CAMERA)
+   hw_execute_bash_command("modprobe cfg80211", NULL);
+   hw_execute_bash_command_raw("insmod /lib/modules/$(uname -r)/extra/8733bu.ko rtw_tx_pwr_by_rate=0 rtw_tx_pwr_lmt_enable=0 2>&1", NULL);
+   hardware_sleep_ms(50);
+   hw_execute_bash_command_raw("modprobe 8852be rtw_tx_pwr_by_rate=0 rtw_tx_pwr_lmt_enable=0 2>&1", NULL);
+   return 1;
+   #endif
+
+   hw_execute_bash_command("sudo modprobe cfg80211", NULL);
+   return 1;
+}
 // Called only once, from ruby_start process
 int hardware_radio_load_radio_modules(int iEchoToConsole)
 {
@@ -1787,7 +1824,6 @@ void hardware_install_drivers(int iEchoToConsole)
    }
 }
 
-
 int _configure_radio_interface_atheros(int iInterfaceIndex, radio_hw_info_t* pRadioHWInfo, u32 uDelayMS)
 {
    if ( (NULL == pRadioHWInfo) || (iInterfaceIndex < 0) || (iInterfaceIndex >= hardware_get_radio_interfaces_count()) )
@@ -1993,7 +2029,6 @@ int hardware_get_radio_index_from_mac(const char* szMAC)
          return i;
    return -1;
 }
-
 
 radio_hw_info_t* hardware_get_radio_info(int iRadioIndex)
 {

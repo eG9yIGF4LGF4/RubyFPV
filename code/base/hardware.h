@@ -130,6 +130,7 @@ int isKeyMinusPressed();
 int isKeyQA1Pressed();
 int isKeyQA2Pressed();
 int isKeyQA3Pressed();
+int isKeyShellPressed();
 
 int isKeyMenuLongPressed();
 int isKeyMenuLongLongPressed();

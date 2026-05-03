@@ -571,6 +571,8 @@ u32 keyboard_add_triggered_gpio_input_events()
       s_uKeyboardInputEventsSum |= INPUT_EVENT_PRESS_QA2;
    if ( isKeyQA3Pressed() )
       s_uKeyboardInputEventsSum |= INPUT_EVENT_PRESS_QA3;
+   if ( isKeyShellPressed() )
+      s_uKeyboardInputEventsSum |= INPUT_EVENT_PRESS_SHELL;
 
    return s_uKeyboardInputEventsSum;
 }

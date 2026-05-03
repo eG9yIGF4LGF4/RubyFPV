@@ -35,13 +35,15 @@ ifeq ($(RUBY_BUILD_ENV),pc)
 LDFLAGS_CENTRAL := -L/lib/x86_64-linux-gnu -lpthread -lrt -lm 
 LDFLAGS_CENTRAL2 := -lpthread -lrt -lm
 
-LDFLAGS_RENDERER := -ldrm -lcairo
-CFLAGS_RENDERER := -I/usr/include/drm -I/usr/include/libdrm
+LDFLAGS_RENDERER := -ldrm -lcairo 
+LDFLAGS_RENDERER += `pkg-config --libs gtk+-3.0`
+CFLAGS_RENDERER := -I/usr/include/drm -I/usr/include/libdrm -I/usr/include/gtk-3.0
 CFLAGS_RENDERER += `pkg-config cairo --cflags`
+CFLAGS_RENDERER += `pkg-config --cflags gtk+-3.0`
 _LDFLAGS := $(LDFLAGS) -lrt -lpcap -lpthread -lgpiod -li2c -Wl,--gc-sections 
 _CFLAGS := $(_CFLAGS) -DRUBY_BUILD_HW_PLATFORM_LINUX_GENERIC 
 _CPPFLAGS := $(_CPPFLAGS) -DRUBY_BUILD_HW_PLATFORM_LINUX_GENERIC 
-CENTRAL_RENDER_CODE := $(FOLDER_CENTRAL_RENDERER)/lodepng.o $(FOLDER_CENTRAL_RENDERER)/nanojpeg.o $(FOLDER_CENTRAL_RENDERER)/fbgraphics.o $(FOLDER_CENTRAL_RENDERER)/render_engine.o $(FOLDER_CENTRAL_RENDERER)/render_engine_cairo.o $(FOLDER_CENTRAL_RENDERER)/render_engine_ui.o $(FOLDER_CENTRAL_RENDERER)/drm_core.o
+CENTRAL_RENDER_CODE := $(FOLDER_CENTRAL_RENDERER)/lodepng.o $(FOLDER_CENTRAL_RENDERER)/nanojpeg.o $(FOLDER_CENTRAL_RENDERER)/fbgraphics.o $(FOLDER_CENTRAL_RENDERER)/render_engine.o $(FOLDER_CENTRAL_RENDERER)/render_engine_cairo.o $(FOLDER_CENTRAL_RENDERER)/render_engine_cairo_gtk.o $(FOLDER_CENTRAL_RENDERER)/render_engine_ui.o $(FOLDER_CENTRAL_RENDERER)/drm_core.o
 MODULE_LOC := $(FOLDER_COMMON)/strings_loc.o $(FOLDER_COMMON)/strings_table.o 
 else
 
@@ -300,6 +302,9 @@ ruby_plugin_gauge_heading: $(FOLDER_PLUGINS_OSD)/ruby_plugin_gauge_heading.o osd
 	gcc $(FOLDER_PLUGINS_OSD)/ruby_plugin_gauge_heading.o osd_plugins_utils.o core_plugins_utils.o -shared -Wl,-soname,ruby_plugin_gauge_heading2.so.1 -o ruby_plugin_gauge_heading2.so.1.0.1 -lc
 
 ruby_player_radxa:code/r_player/ruby_player_radxa.o code/r_player/mpp_core.o $(FOLDER_BASE)/hdmi.o $(FOLDER_BASE)/ctrl_settings.o $(FOLDER_BASE)/shared_mem.o $(CENTRAL_RENDER_CODE) $(MODULE_MINIMUM_BASE)
+	$(CXX) $(_CFLAGS) $(CFLAGS_RENDERER) -o $@ $^ $(_LDFLAGS) $(LDFLAGS_RENDERER) $(LDFLAGS_CENTRAL) $(LDFLAGS_CENTRAL2) -ldl -lc -lrockchip_mpp
+
+ruby_player_gtk:code/r_player/ruby_player_gtk.o code/r_player/mpp_core.o $(FOLDER_BASE)/hdmi.o $(FOLDER_BASE)/ctrl_settings.o $(FOLDER_BASE)/shared_mem.o $(CENTRAL_RENDER_CODE) $(MODULE_MINIMUM_BASE)
 	$(CXX) $(_CFLAGS) $(CFLAGS_RENDERER) -o $@ $^ $(_LDFLAGS) $(LDFLAGS_RENDERER) $(LDFLAGS_CENTRAL) $(LDFLAGS_CENTRAL2) -ldl -lc -lrockchip_mpp
 
 # ifeq ($(RUBY_BUILD_ENV),radxa)

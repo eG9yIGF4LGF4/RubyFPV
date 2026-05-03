@@ -12,6 +12,7 @@
 #define INPUT_EVENT_PRESS_QA3 ((u32)64)
 #define INPUT_EVENT_PRESS_QAPLUS ((u32)128)
 #define INPUT_EVENT_PRESS_QAMINUS ((u32)256)
+#define INPUT_EVENT_PRESS_SHELL ((u32)512)
 
 
 int keyboard_init();

@@ -39,9 +39,12 @@
 // #include "render_engine_raw.h"
 // #endif
 
-// #if defined (HW_PLATFORM_RADXA) || (HW_PLATFORM_LINUX_GENERIC)
+#if defined (HW_PLATFORM_RADXA) || defined (HW_PLATFORM_LINUX_GENERIC)
+
 #include "render_engine_cairo.h"
-// #endif
+// #include "render_engine_cairo_gtk.h"
+
+#endif
 
 #include "../base/base.h"
 #include "../base/hardware.h"
@@ -63,9 +66,13 @@ RenderEngine* render_init_engine()
       s_pRenderEngine = new RenderEngineCairo();
       #endif
       #if defined (HW_PLATFORM_LINUX_GENERIC)
+
       s_bRenderEngineSupportsRawFonts = true;
+      
       // s_pRenderEngine = new RenderEngineRaw();
       s_pRenderEngine = new RenderEngineCairo();
+      // s_pRenderEngine = new RenderEngineCairoGtk();
+
       #endif
 
       if (NULL != s_pRenderEngine )

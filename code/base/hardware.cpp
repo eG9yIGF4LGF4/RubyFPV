@@ -78,6 +78,7 @@ int sKeyQA22Pressed = 0;
 int sKeyQA3Pressed = 0;
 int sKeyQAPlusPressed = 0;
 int sKeyQAMinusPressed = 0;
+int sKeyShellPressed = 0;
 
 u32 keyMenuDownStartTime = 0;
 u32 keyMenuInitialDownStartTime = 0;
@@ -99,6 +100,7 @@ int sInitialReadQA22 = 0;
 int sInitialReadQA3 = 0;
 int sInitialReadQAPlus = 0;
 int sInitialReadQAMinus = 0;
+int sInitialReadShell = 0;
 
 static u32 s_long_key_press_delta = 700;
 #ifdef HW_CAPABILITY_GPIO
@@ -1589,6 +1591,14 @@ int isKeyQA3Pressed()
    if ( sInitialReadQA3 > 0 )
       return 0;
    return (sKeyQA3Pressed > 0);
+}
+
+int isKeyShellPressed()
+{
+   int pressed = 0;
+   if ( 0 == sInitialReadShell )
+      pressed = pressed || (sKeyShellPressed > 0);
+   return pressed;
 }
 
 void hardware_override_keys(int iKeyMenu, int iKeyBack, int iKeyPlus, int iKeyMinus, int iKeyMenuLong, int iKeyBackLong, int iKeyPlusLong, int iKeyMinusLong)

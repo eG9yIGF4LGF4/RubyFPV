@@ -1,0 +1,64 @@
+# ruby_player_gst - GStreamer Player Configuration
+# Supported source types: shm, pipe, udp, file
+
+player:
+  name: "Ruby Player GST"
+  version: "1.0.0"
+  window:
+    width: 1280
+    height: 720
+    title: "Ruby Player"
+
+# Active source — change 'type' to switch input
+source:
+  type: shm           # Options: shm | pipe | udp | file
+  autoplay: false
+  loop: false
+
+  # Shared Memory source (type: shm)
+  shm:
+    path: "/tmp/myvideofeed"
+    socket_path: "/tmp/myvideofeed"
+    width: 1920
+    height: 1080
+    framerate: 30
+    format: "BGRx"      # BGRx | I420 | NV12 | RGBA
+
+  # Named Pipe source (type: pipe)
+  pipe:
+    path: "/tmp/ruby_video.pipe"
+    format: "video/x-raw"
+    width: 1280
+    height: 720
+    framerate: 30
+
+  # UDP source (type: udp)
+  udp:
+    host: "0.0.0.0"
+    port: 5600
+    multicast_group: ""     # Leave empty for unicast
+    encoding: "h264"        # h264 | h265 | mjpeg | raw
+    latency_ms: 200
+    buffer_size: 1048576    # 1 MB
+
+  # File source (type: file)
+  file:
+    path: ""                # Absolute path to media file
+    # Supported: mp4, mkv, avi, ts, webm, mov, flv, ogg, h264, h265
+
+video:
+  sink: "autovideosink"     # autovideosink | gtksink | xvimagesink | glimagesink
+  deinterlace: false
+  flip: false               # Horizontal flip
+  rotate: 0                 # Degrees: 0 | 90 | 180 | 270
+
+audio:
+  enabled: true
+  sink: "autoaudiosink"
+  volume: 1.0               # 0.0 – 1.0
+  mute: false
+
+logging:
+  level: "info"             # debug | info | warning | error
+  gst_debug: "1"            # GStreamer GST_DEBUG level 0-9
+  log_file: "/tmp/ruby_player.log"

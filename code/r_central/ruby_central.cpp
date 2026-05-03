@@ -153,6 +153,8 @@ static u32 s_uTimeFreezeOSD = 0;
 
 static u32 s_uTimeToSwitchLogLevel = 0;
 
+static bool s_bShowShell = false;
+
 Popup popupNoModel("No vehicle defined or linked to!", 0.2, 0.45, 5);
 Popup popupStartup("System starting. Please wait.", 0.05, 0.16, 0);
 
@@ -2090,6 +2092,19 @@ void ruby_processing_loop(bool bNoKeys)
       forward_streams_loop();
       link_watch_loop();
       warnings_periodic_loop();
+   }
+
+   if( isKeyShellPressed() ) 
+   {
+      if( ! s_bShowShell ) {
+         log_line("Showing shell...");
+      
+         s_bShowShell = true;
+      } else {
+         log_line("Hiding shell...");
+
+         s_bShowShell = false;
+      }
    }
 
    u32 uTime10 = get_current_timestamp_ms();
