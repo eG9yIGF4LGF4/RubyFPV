@@ -30,6 +30,9 @@
     SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
+// #define ENABLE_PLAYER_DRM 1
+#define ENABLE_PLAYER_GTK 1
+
 #include <stdio.h>
 #include <stdio.h>
 #include <stdint.h>
@@ -54,6 +57,11 @@
 #include <sys/resource.h>
 #include <pthread.h>
 
+#if defined (ENABLE_PLAYER_GTK)
+#include <thread>
+#include <atomic>
+#endif
+
 #include "ruby_central.h"
 #include "../radio/radiolink.h"
 #include "../radio/radiopackets2.h"
@@ -77,8 +85,17 @@
 #include "../renderer/render_engine_raw.h"
 #endif
 #if defined (HW_PLATFORM_RADXA) || defined (HW_PLATFORM_LINUX_GENERIC)
+
+#if defined (ENABLE_PLAYER_DRM)
+
 #include "../renderer/drm_core.h"
 #include "../renderer/render_engine_cairo.h"
+
+#elif defined (ENABLE_PLAYER_GTK)
+
+#include "../renderer/render_engine_cairo_gtk.h"
+
+#endif
 #endif
 
 #include "../common/string_utils.h"
@@ -306,50 +323,56 @@ void _draw_background_picture()
    }
 }
 
+std::atomic<bool> isRendering(false);
+
 void _render_video_player(u32 timeNow)
 {
    char szBuff[1024];
-
-   g_pRenderEngine->startFrame();
-
-   double cColor[] = {0,0,0,0.7};
-   g_pRenderEngine->setColors(cColor, 0.9);
-   g_pRenderEngine->drawRoundRect(0.02, 0.03, 0.36, 0.1, 0.02);
-   g_pRenderEngine->setColors(get_Color_MenuText());
-
-   g_pRenderEngine->setFill(255,255,255,1);
-   g_pRenderEngine->setStroke(0,0,0,1);
-   g_pRenderEngine->setStrokeSize(1);
-   float y = 0.046;
-
-   if ( g_uVideoPlayingTimeMs/1000 > g_uVideoPlayingLengthSec+1 )
+   
+   if (!isRendering.exchange(true)) 
    {
-      sprintf(szBuff, "Finished.");
-      g_pRenderEngine->drawText(0.04, y, g_idFontMenuLarge, szBuff);
+      g_pRenderEngine->startFrame();
+
+      double cColor[] = {0,0,0,0.7};
+      g_pRenderEngine->setColors(cColor, 0.9);
+      g_pRenderEngine->drawRoundRect(0.02, 0.03, 0.36, 0.1, 0.02);
+      g_pRenderEngine->setColors(get_Color_MenuText());
+
+      g_pRenderEngine->setFill(255,255,255,1);
+      g_pRenderEngine->setStroke(0,0,0,1);
+      g_pRenderEngine->setStrokeSize(1);
+      float y = 0.046;
+
+      if ( g_uVideoPlayingTimeMs/1000 > g_uVideoPlayingLengthSec+1 )
+      {
+         sprintf(szBuff, "Finished.");
+         g_pRenderEngine->drawText(0.04, y, g_idFontMenuLarge, szBuff);
+      }
+      else
+      {
+         char szVerb[32];
+         strcpy(szVerb, "Playing");
+         if ( access("/tmp/pausedvr", R_OK) != -1 )
+            strcpy(szVerb, "Paused");
+
+         sprintf(szBuff, "%s %02d", szVerb, ((g_uVideoPlayingTimeMs/1000)/60));
+         float fWidth = g_pRenderEngine->textWidth(g_idFontMenuLarge, szBuff);
+         g_pRenderEngine->drawText(0.04, y, g_idFontMenuLarge, szBuff);
+
+         fWidth += 0.15*g_pRenderEngine->textWidth(g_idFontMenuLarge, "A");
+
+         if ( (g_uVideoPlayingTimeMs/500)%2 )
+            g_pRenderEngine->drawText(0.04 + fWidth, y, g_idFontMenuLarge, ":");
+         fWidth += 0.5*g_pRenderEngine->textWidth(g_idFontMenuLarge, "A");
+         sprintf(szBuff, "%02d / %d:%02d", (g_uVideoPlayingTimeMs/1000)%60, g_uVideoPlayingLengthSec/60, g_uVideoPlayingLengthSec%60);
+         g_pRenderEngine->drawText(0.04 + fWidth, y, g_idFontMenuLarge, szBuff);
+      }
+      sprintf(szBuff, "Press [Menu] for pause/resume or [Back] to stop");
+      g_pRenderEngine->drawText(0.04, 0.084, g_idFontMenu, szBuff);  
+
+      g_pRenderEngine->endFrame();
+      isRendering.store(false);
    }
-   else
-   {
-      char szVerb[32];
-      strcpy(szVerb, "Playing");
-      if ( access("/tmp/pausedvr", R_OK) != -1 )
-         strcpy(szVerb, "Paused");
-
-      sprintf(szBuff, "%s %02d", szVerb, ((g_uVideoPlayingTimeMs/1000)/60));
-      float fWidth = g_pRenderEngine->textWidth(g_idFontMenuLarge, szBuff);
-      g_pRenderEngine->drawText(0.04, y, g_idFontMenuLarge, szBuff);
-
-      fWidth += 0.15*g_pRenderEngine->textWidth(g_idFontMenuLarge, "A");
-
-      if ( (g_uVideoPlayingTimeMs/500)%2 )
-         g_pRenderEngine->drawText(0.04 + fWidth, y, g_idFontMenuLarge, ":");
-      fWidth += 0.5*g_pRenderEngine->textWidth(g_idFontMenuLarge, "A");
-      sprintf(szBuff, "%02d / %d:%02d", (g_uVideoPlayingTimeMs/1000)%60, g_uVideoPlayingLengthSec/60, g_uVideoPlayingLengthSec%60);
-      g_pRenderEngine->drawText(0.04 + fWidth, y, g_idFontMenuLarge, szBuff);
-   }
-   sprintf(szBuff, "Press [Menu] for pause/resume or [Back] to stop");
-   g_pRenderEngine->drawText(0.04, 0.084, g_idFontMenu, szBuff);  
-
-   g_pRenderEngine->endFrame();
 }
 
 void _render_video_background()
@@ -578,7 +601,10 @@ void render_all_with_menus(u32 timeNow, bool bRenderMenus, bool bForceBackground
       return;
    }
 
-   g_pRenderEngine->startFrame();
+      
+   if (!isRendering.exchange(true)) 
+   {
+      g_pRenderEngine->startFrame();
    
    _render_background_and_paddings(bForceBackground);
    
@@ -599,115 +625,116 @@ void render_all_with_menus(u32 timeNow, bool bRenderMenus, bool bForceBackground
       }
       if ( g_bIsRouterReady )
          alarms_render();
-   }
-
-   bool bDevMode = false;
-   if ( (NULL != pCS) && (0 != pCS->iDeveloperMode) )
-      bDevMode = true;
-  
-   if ( bDevMode )
-   //if ( ! bForceBackground )
-   if ( (! g_bToglleAllOSDOff) && (!g_bToglleStatsOff) )
-   if ( ! p->iDebugShowFullRXStats )
-   if ( ! g_bDebugStats )
-   //if ( g_bIsRouterReady )
-   {
-      char szBuff[64];
-      float yPos = osd_getMarginY() + osd_getBarHeight() + osd_getSecondBarHeight() + 0.01*osd_getScaleOSD();
-      float xPos = osd_getMarginX() + 0.02*osd_getScaleOSD();
-      if ( NULL != g_pCurrentModel && osd_get_current_layout_index() >= 0 && osd_get_current_layout_index() < MODEL_MAX_OSD_SCREENS )
-      if ( g_pCurrentModel->osd_params.osd_flags2[osd_get_current_layout_index()] & OSD_FLAG2_LAYOUT_LEFT_RIGHT )
-      {
-         xPos = osd_getMarginX() + osd_getVerticalBarWidth() + 0.01*osd_getScaleOSD();
-         yPos = osd_getMarginY() + 0.01*osd_getScaleOSD();
       }
+
+      bool bDevMode = false;
+      if ( (NULL != pCS) && (0 != pCS->iDeveloperMode) )
+         bDevMode = true;
    
-      if ( p->iShowCPULoad )
+      if ( bDevMode )
+      if ( (! g_bToglleAllOSDOff) && (!g_bToglleStatsOff) )
+      if ( ! p->iDebugShowFullRXStats )
+      if ( ! g_bDebugStats )
       {
-         osd_set_colors();
-         g_pRenderEngine->setFill(0,0,0,0.5);
-         g_pRenderEngine->setStroke(0,0,0,0);
-         g_pRenderEngine->disableRectBlending();
-         g_pRenderEngine->drawRect(xPos, yPos-0.003, 0.46, 0.03);
-      }
+         char szBuff[64];
+         float yPos = osd_getMarginY() + osd_getBarHeight() + osd_getSecondBarHeight() + 0.01*osd_getScaleOSD();
+         float xPos = osd_getMarginX() + 0.02*osd_getScaleOSD();
+         if ( NULL != g_pCurrentModel && osd_get_current_layout_index() >= 0 && osd_get_current_layout_index() < MODEL_MAX_OSD_SCREENS )
+         if ( g_pCurrentModel->osd_params.osd_flags2[osd_get_current_layout_index()] & OSD_FLAG2_LAYOUT_LEFT_RIGHT )
+         {
+            xPos = osd_getMarginX() + osd_getVerticalBarWidth() + 0.01*osd_getScaleOSD();
+            yPos = osd_getMarginY() + 0.01*osd_getScaleOSD();
+         }
+      
+         if ( p->iShowCPULoad )
+         {
+            osd_set_colors();
+            g_pRenderEngine->setFill(0,0,0,0.5);
+            g_pRenderEngine->setStroke(0,0,0,0);
+            g_pRenderEngine->disableRectBlending();
+            g_pRenderEngine->drawRect(xPos, yPos-0.003, 0.46, 0.03);
+         }
 
-      osd_set_colors_text(get_Color_Dev());
-      if ( (g_TimeNow/500) % 2 )
-      {
-         float fHeight = g_pRenderEngine->textHeight(g_idFontOSDBig);
-         float fWidth = fHeight/g_pRenderEngine->getAspectRatio();
-         g_pRenderEngine->setFill(0,0,0,0.5);
-         g_pRenderEngine->setStroke(0,0,0,0);
-         g_pRenderEngine->disableRectBlending();
-         g_pRenderEngine->drawRect(xPos, yPos, fWidth*2, fHeight*1.6);
          osd_set_colors_text(get_Color_Dev());
-         float fTWidth = g_pRenderEngine->textWidth(g_idFontOSDBig, "[D]");
-         osd_show_value( xPos+fWidth-fTWidth*0.5, yPos+fHeight*0.2, "[D]", g_idFontOSDBig );
+         if ( (g_TimeNow/500) % 2 )
+         {
+            float fHeight = g_pRenderEngine->textHeight(g_idFontOSDBig);
+            float fWidth = fHeight/g_pRenderEngine->getAspectRatio();
+            g_pRenderEngine->setFill(0,0,0,0.5);
+            g_pRenderEngine->setStroke(0,0,0,0);
+            g_pRenderEngine->disableRectBlending();
+            g_pRenderEngine->drawRect(xPos, yPos, fWidth*2, fHeight*1.6);
+            osd_set_colors_text(get_Color_Dev());
+            float fTWidth = g_pRenderEngine->textWidth(g_idFontOSDBig, "[D]");
+            osd_show_value( xPos+fWidth-fTWidth*0.5, yPos+fHeight*0.2, "[D]", g_idFontOSDBig );
+         }
+
+         if ( p->iShowCPULoad )
+         {
+            xPos += 0.02*osd_getScaleOSD();
+            yPos += 0.003;
+            sprintf(szBuff, "UI FPS: %d", s_iRubyFPS);
+            osd_show_value(xPos, yPos, szBuff, g_idFontOSDSmall );
+
+            xPos += 0.05*osd_getScaleOSD();
+            sprintf(szBuff, "Menu: %.1f ms/frame", s_iMicroTimeMenuRender/1000.0);
+            osd_show_value(xPos, yPos, szBuff, g_idFontOSDSmall );
+
+            xPos += 0.095*osd_getScaleOSD();
+            sprintf(szBuff, "OSD: %.1f ms/frame", s_iMicroTimeOSDRender/1000.0);
+            osd_show_value(xPos, yPos, szBuff, g_idFontOSDSmall );
+
+            xPos += 0.095*osd_getScaleOSD();
+            sprintf(szBuff, "OSD: %d ms/sec", (int)(s_iMicroTimeOSDRender*s_iRubyFPS/1000.0));
+            osd_show_value(xPos, yPos, szBuff, g_idFontOSDSmall );
+         }
+         g_pRenderEngine->enableRectBlending();
       }
 
-      if ( p->iShowCPULoad )
-      {
-         xPos += 0.02*osd_getScaleOSD();
-         yPos += 0.003;
-         sprintf(szBuff, "UI FPS: %d", s_iRubyFPS);
-         osd_show_value(xPos, yPos, szBuff, g_idFontOSDSmall );
+      u32 t = get_current_timestamp_micros();
+      popups_render();
+      if ( bRenderMenus )
+         menu_render();
+      popups_render_topmost();
 
-         xPos += 0.05*osd_getScaleOSD();
-         sprintf(szBuff, "Menu: %.1f ms/frame", s_iMicroTimeMenuRender/1000.0);
-         osd_show_value(xPos, yPos, szBuff, g_idFontOSDSmall );
-
-         xPos += 0.095*osd_getScaleOSD();
-         sprintf(szBuff, "OSD: %.1f ms/frame", s_iMicroTimeOSDRender/1000.0);
-         osd_show_value(xPos, yPos, szBuff, g_idFontOSDSmall );
-
-         xPos += 0.095*osd_getScaleOSD();
-         sprintf(szBuff, "OSD: %d ms/sec", (int)(s_iMicroTimeOSDRender*s_iRubyFPS/1000.0));
-         osd_show_value(xPos, yPos, szBuff, g_idFontOSDSmall );
-      }
-      g_pRenderEngine->enableRectBlending();
-   }
-
-   u32 t = get_current_timestamp_micros();
-   popups_render();
-   if ( bRenderMenus )
-      menu_render();
-   popups_render_topmost();
-
-   t = get_current_timestamp_micros() - t;
-   if ( t < 300000 )
-      s_iMicroTimeMenuRender = (s_iMicroTimeMenuRender*8 + t*2)/10;
-  
-   if ( handle_commands_is_command_in_progress() )
-      render_commands();
-
-   s_iFPSCount++;
-   if ( timeNow >= s_iFPSLastTimeCheck + 1000 )
-   {
-      s_iRubyFPS = s_iFPSCount;
-      s_iFPSCount = 0;
-      s_iFPSLastTimeCheck = timeNow;
-   }
+      t = get_current_timestamp_micros() - t;
+      if ( t < 300000 )
+         s_iMicroTimeMenuRender = (s_iMicroTimeMenuRender*8 + t*2)/10;
    
+      if ( handle_commands_is_command_in_progress() )
+         render_commands();
 
-   if ( s_bShowMira )
-   {
-      static u32 s_idImageCalibrateHDMI2 = g_pRenderEngine->loadImage("res/calibrate_hdmi.png");
-      if ( 0 == s_idImageCalibrateHDMI2 )
-         log_softerror_and_alarm("Failed to load tv mira image for HDMI calibration.");
-      else
-         log_line("Loaded image for TV mira for HDMI calibration.");
+      s_iFPSCount++;
+      if ( timeNow >= s_iFPSLastTimeCheck + 1000 )
+      {
+         s_iRubyFPS = s_iFPSCount;
+         s_iFPSCount = 0;
+         s_iFPSLastTimeCheck = timeNow;
+      }
+      
 
-      if ( 0 != s_idImageCalibrateHDMI2 )
-         g_pRenderEngine->drawImage(0,0, 1,1, s_idImageCalibrateHDMI2);
+      if ( s_bShowMira )
+      {
+         static u32 s_idImageCalibrateHDMI2 = g_pRenderEngine->loadImage("res/calibrate_hdmi.png");
+         if ( 0 == s_idImageCalibrateHDMI2 )
+            log_softerror_and_alarm("Failed to load tv mira image for HDMI calibration.");
+         else
+            log_line("Loaded image for TV mira for HDMI calibration.");
 
-      osd_set_colors_text(get_Color_Dev());
-      g_pRenderEngine->drawText(0.05, 0.05, g_idFontMenuLarge, "Press [Back]/[Cancel] to close it.");
+         if ( 0 != s_idImageCalibrateHDMI2 )
+            g_pRenderEngine->drawImage(0,0, 1,1, s_idImageCalibrateHDMI2);
+
+         osd_set_colors_text(get_Color_Dev());
+         g_pRenderEngine->drawText(0.05, 0.05, g_idFontMenuLarge, "Press [Back]/[Cancel] to close it.");
+      }
+
+      if ( NULL != p && p->iOSDFlipVertical )
+         g_pRenderEngine->rotate180();
+
+      g_pRenderEngine->endFrame();
+
+      isRendering.store(false);
    }
-
-   if ( NULL != p && p->iOSDFlipVertical )
-      g_pRenderEngine->rotate180();
-
-   g_pRenderEngine->endFrame();
 }
 
 void render_all(u32 timeNow, bool bForceBackground, bool bDoInputLoop)
@@ -2127,7 +2154,13 @@ void main_loop_r_central()
       hardware_sleep_ms(5);
       start_loop();
       log_line("Startup sequence now after executing a step: %d", s_StartSequence);
+
       render_all(g_TimeNow, false, false);
+      // gdk_threads_add_idle([](gpointer) -> gboolean {
+      //    render_all(g_TimeNow, false, false);
+      //    return G_SOURCE_REMOVE;
+      // }, NULL);
+      
       if ( NULL != g_pProcessStatsCentral )
          g_pProcessStatsCentral->lastActiveTime = g_TimeNow;
       log_line("Startup sequence now after rendering a step: %d", s_StartSequence);
@@ -2157,6 +2190,11 @@ void main_loop_r_central()
       ruby_signal_alive();
       s_TimeLastRender = g_TimeNow;
       render_all(g_TimeNow, false, false);
+      // gdk_threads_add_idle([](gpointer) -> gboolean {
+      //    render_all(g_TimeNow, false, false);
+      //    return G_SOURCE_REMOVE;
+      // }, NULL);
+
       if ( NULL != g_pProcessStatsCentral )
          g_pProcessStatsCentral->lastActiveTime = g_TimeNow;
 
@@ -2266,6 +2304,80 @@ void handle_sigint(int sig)
    log_line("--------------------------");
    g_bQuit = true;
 } 
+
+#if defined (HW_PLATFORM_LINUX_GENERIC)
+#if defined (ENABLE_PLAYER_GTK)
+static void renderFrame()
+{
+   // if(!isRendering.exchange(true))
+   // {
+   //    g_pRenderEngine->startFrame();
+
+   //    // --- your drawing calls go here ---
+   //    double colorRed[4]   = { 255, 0, 0, 255 };
+   //    double colorWhite[4] = { 255, 255, 255, 255 };
+
+   //    g_pRenderEngine->setFill(255, 0, 0, 255);
+   //    g_pRenderEngine->setStroke(colorWhite, 1.0);
+   //    g_pRenderEngine->drawRect(0.1, 0.1, 0.8, 0.8);
+   //    // ----------------------------------
+
+   //    g_pRenderEngine->endFrame();  // triggers gtk_widget_queue_draw internally
+   //    isRendering.store(false);
+   // }
+}
+
+// GTK "idle" callback - drives the render loop
+static gboolean onIdle(gpointer /*pData*/)
+{
+   renderFrame();
+   return G_SOURCE_CONTINUE; // keep calling
+}
+
+// Called when the window is resized - recreate engine if needed
+static void onResize(GtkWidget* pWidget, GdkEventConfigure* pEvent, gpointer pData)
+{
+   if ( NULL == g_pRenderEngine )
+         return;
+   if ( pEvent->width == (int)g_pRenderEngine->getScreenWidth() &&
+         pEvent->height == (int)g_pRenderEngine->getScreenHeight() )
+         return;
+
+   g_pRenderEngine->setSize(pEvent->y, pEvent->width);
+   // int w = pEvent->width;
+   // int h = pEvent->height;
+}
+
+static void main_loop_thread(Preferences* p)
+{
+   while (!g_bQuit) 
+   {
+      g_uLoopCounter++;
+      g_TimeNow = get_current_timestamp_ms();
+      g_TimeNowMicros = get_current_timestamp_micros();
+
+      if ( rx_scope_is_started() )
+      {
+         try_read_messages_from_router(10);
+         rx_scope_loop();
+      }
+      else
+      {
+         main_loop_r_central();
+
+         if ( 0 != s_uTimeToSwitchLogLevel )
+         if ( g_TimeNow > s_uTimeToSwitchLogLevel )
+         {
+            s_uTimeToSwitchLogLevel = 0;
+            log_line("Check and switch log level to: %d", p->nLogLevel);
+            if ( p->nLogLevel != 0 )
+               log_only_errors();
+         }
+      }
+   }
+}
+#endif
+#endif
 
 int main(int argc, char *argv[])
 {
@@ -2382,6 +2494,8 @@ int main(int argc, char *argv[])
    #endif
 
    #if defined (HW_PLATFORM_RADXA) || defined (HW_PLATFORM_LINUX_GENERIC)
+   
+   #if defined (ENABLE_PLAER_DRM)
    ruby_drm_core_wait_for_display_connected();
    hdmi_enum_modes();
    int iHDMIIndex = hdmi_load_current_mode();
@@ -2393,8 +2507,33 @@ int main(int argc, char *argv[])
    ruby_drm_enable_vsync(pCS->iHDMIVSync);
    #endif
 
+   #if defined (ENABLE_PLAYER_GTK)
+   gtk_init(&argc, &argv);
+   #endif
+
+   #endif
+
    g_pRenderEngine = render_init_engine();
    log_line("Render Engine was initialized.");
+
+   #if defined (HW_PLATFORM_LINUX_GENERIC)
+   #if defined (ENABLE_PLAYER_GTK)
+
+   GtkWidget* pWindow = gtk_window_new(GTK_WINDOW_TOPLEVEL);
+   gtk_window_set_title(GTK_WINDOW(pWindow), "Ruby OSD");
+   gtk_window_set_resizable(GTK_WINDOW(pWindow), true);
+   gtk_window_set_default_size(GTK_WINDOW(pWindow), g_pRenderEngine->getScreenWidth(), g_pRenderEngine->getScreenHeight());
+   // gtk_window_fullscreen(GTK_WINDOW(pWindow)); 
+   g_signal_connect(pWindow, "destroy", G_CALLBACK(gtk_main_quit), NULL);
+   GtkWidget* pDrawingArea = gtk_drawing_area_new();
+   gtk_container_add(GTK_CONTAINER(pWindow), pDrawingArea);
+   ((RenderEngineCairoGtk*)g_pRenderEngine)->connectDrawSignal(pDrawingArea);
+   gtk_widget_show_all(pWindow);
+   g_idle_add(onIdle, NULL);
+   g_signal_connect(pWindow, "size-allocate", G_CALLBACK(onResize), NULL);
+
+   #endif
+   #endif
 
    if ( g_bPlayIntro )
    {
@@ -2524,6 +2663,15 @@ int main(int argc, char *argv[])
 
    log_line("Start main loop.");
 
+   #if defined (ENABLE_PLAYER_GTK)
+ 
+   std::thread mainLoopThread = std::thread(&main_loop_thread, p);
+   mainLoopThread.detach();
+   
+   gtk_main();
+
+   #else
+
    while (!g_bQuit) 
    {
       g_uLoopCounter++;
@@ -2549,6 +2697,8 @@ int main(int argc, char *argv[])
          }
       }
    }
+
+   #endif
    
    keyboard_uninit();
    
@@ -2630,6 +2780,8 @@ void ruby_reinit_hdmi_display()
    render_free_engine();
    
    #if defined (HW_PLATFORM_RADXA) || defined (HW_PLATFORM_LINUX_GENERIC)
+   #if defined (ENABLE_PLAER_DRM)
+
    ruby_drm_core_uninit();
    ruby_drm_core_wait_for_display_connected();
 
@@ -2642,6 +2794,8 @@ void ruby_reinit_hdmi_display()
    ruby_drm_core_set_plane_properties_and_buffer(ruby_drm_core_get_main_draw_buffer_id());
    ControllerSettings* pCS = get_ControllerSettings();
    ruby_drm_enable_vsync(pCS->iHDMIVSync);
+
+   #endif 
    #endif
 
    g_pRenderEngine = render_init_engine();

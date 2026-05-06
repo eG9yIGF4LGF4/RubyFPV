@@ -49,6 +49,7 @@ class RenderEngine
      RenderEngine();
      virtual ~RenderEngine();
 
+     void setSize(int iWidth, int iHeight);
      virtual bool initEngine();
      virtual bool uninitEngine();
      int getScreenWidth();

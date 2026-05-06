@@ -39,11 +39,16 @@
 // #include "render_engine_raw.h"
 // #endif
 
+// #define ENABLE_PLAYER_DRM 1
+#define ENABLE_PLAYER_GTK 1
+
+
 #if defined (HW_PLATFORM_RADXA) || defined (HW_PLATFORM_LINUX_GENERIC)
-
+#if defined (ENABLE_PLAYER_DRM)
 #include "render_engine_cairo.h"
-// #include "render_engine_cairo_gtk.h"
-
+#elif defined (ENABLE_PLAYER_GTK)
+#include "render_engine_cairo_gtk.h"
+#endif
 #endif
 
 #include "../base/base.h"
@@ -69,9 +74,13 @@ RenderEngine* render_init_engine()
 
       s_bRenderEngineSupportsRawFonts = true;
       
-      // s_pRenderEngine = new RenderEngineRaw();
+      #if defined (ENABLE_PLAYER_DRM)
       s_pRenderEngine = new RenderEngineCairo();
-      // s_pRenderEngine = new RenderEngineCairoGtk();
+      #endif 
+      
+      #if defined (ENABLE_PLAYER_GTK)
+      s_pRenderEngine = new RenderEngineCairoGtk();
+      #endif
 
       #endif
 
@@ -140,6 +149,16 @@ RenderEngine::RenderEngine()
    m_iCountRawFonts = 0;
 }
 
+void RenderEngine::setSize(int iWidth, int iHeight)
+{
+   m_iRenderWidth = iWidth;
+   m_iRenderHeight = iHeight;
+   if ( m_iRenderWidth > 0 && m_iRenderHeight > 0 )
+   {
+      m_fPixelWidth = 1.0f / (float)m_iRenderWidth;
+      m_fPixelHeight = 1.0f / (float)m_iRenderHeight;
+   }
+}
 
 RenderEngine::~RenderEngine()
 {
@@ -686,11 +705,10 @@ void RenderEngine::changeImageHue(u32 uImageId, u8 r, u8 g, u8 b)
 {
 
 }
-
      
 void RenderEngine::startFrame()
 {
-   if ( m_bStartedFrame  )
+   if ( m_bStartedFrame )
       return;
    m_bStartedFrame = true;
    m_iRenderDepth++;
@@ -709,7 +727,6 @@ bool RenderEngine::isFrameStarted()
 {
    return m_bStartedFrame;
 }
-
 
 void RenderEngine::rotate180()
 {
