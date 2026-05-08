@@ -1099,11 +1099,13 @@ const char* str_get_radio_card_model_string(int cardModel)
    if ( cardModel == CARD_MODEL_RTL8812AU_OIPC_USIGHT2 ) strcpy(s_szCardModelDescription, "RTL8812AU Ultrasight 2");
    if ( cardModel == CARD_MODEL_RTL8812AU_AF1 )     strcpy(s_szCardModelDescription, "RTL8812AU-AF1");
    if ( cardModel == CARD_MODEL_RTL8733BU )         strcpy(s_szCardModelDescription, "RTL8733BU");
-   if ( cardModel == CARD_MODEL_RTW8852BE )         strcpy(s_szCardModelDescription, "RTW8852BE");
-   
+   if ( cardModel == CARD_MODEL_RTL8852BE )         strcpy(s_szCardModelDescription, "RTL8852BE");
    if ( cardModel == CARD_MODEL_SIK_RADIO )         strcpy(s_szCardModelDescription, "SiK-Radio");
    if ( cardModel == CARD_MODEL_SERIAL_RADIO )      strcpy(s_szCardModelDescription, "Serial-Radio");
    if ( cardModel == CARD_MODEL_SERIAL_RADIO_ELRS ) strcpy(s_szCardModelDescription, "ELRS-Radio");
+
+   if ( cardModel == CARD_MODEL_ETHERNET )          strcpy(s_szCardModelDescription, "Generic Ethernet");
+   if ( cardModel == CARD_MODEL_BUILTIN )           strcpy(s_szCardModelDescription, "Generic Wireless");   
 
    return s_szCardModelDescription;
 }
@@ -1137,11 +1139,14 @@ const char* str_get_radio_card_model_string_short(int cardModel)
    if ( cardModel == CARD_MODEL_RTL8812AU_OIPC_USIGHT2 ) strcpy(s_szCardModelDescription, "RTL8812AU USight2");
    if ( cardModel == CARD_MODEL_RTL8812AU_AF1 )     strcpy(s_szCardModelDescription, "RTL8812AU-AF1");
    if ( cardModel == CARD_MODEL_RTL8733BU )         strcpy(s_szCardModelDescription, "RTL8733BU");
-   if ( cardModel == CARD_MODEL_RTW8852BE )         strcpy(s_szCardModelDescription, "RTW8852BE");
+   if ( cardModel == CARD_MODEL_RTL8852BE )         strcpy(s_szCardModelDescription, "RTL8852BE");
 
    if ( cardModel == CARD_MODEL_SIK_RADIO )         strcpy(s_szCardModelDescription, "SiK-Radio");
    if ( cardModel == CARD_MODEL_SERIAL_RADIO )      strcpy(s_szCardModelDescription, "Serial-Radio");
    if ( cardModel == CARD_MODEL_SERIAL_RADIO_ELRS ) strcpy(s_szCardModelDescription, "ELRS");
+
+   if ( cardModel == CARD_MODEL_ETHERNET )          strcpy(s_szCardModelDescription, "Ethernet");
+   if ( cardModel == CARD_MODEL_BUILTIN )           strcpy(s_szCardModelDescription, "Wireless");   
 
    return s_szCardModelDescription;
 }

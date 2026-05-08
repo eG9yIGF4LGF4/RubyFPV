@@ -59,6 +59,7 @@ extern "C" {
 #endif  
 
 void radio_init_link_structures();
+void radio_init_link_structures_extra(int enableOverUDP, int isController);
 void radio_link_cleanup();
 void radio_enable_crc_gen(int enable);
 void radio_set_debug_flag(int iDebugFlag);

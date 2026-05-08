@@ -48,6 +48,7 @@
 #include <time.h>
 #include <sys/resource.h>
 #include "radiolink.h"
+#include "udplink.h"
 #include "radiopackets2.h"
 #include "radio_rx.h"
 
@@ -55,6 +56,8 @@
 //#define DEBUG_PACKET_SENT
 
 int s_bRadioDebugFlag = 0;
+int s_bRadioOverUdpFlag = 0;
+int s_bRadioControllerFlag = 0;
 int s_iUsePCAPForTx = DEFAULT_USE_PPCAP_FOR_TX;
 int s_iBypassSocketBuffers = DEFAULT_BYPASS_SOCKET_BUFFERS;
 int s_iRadioInterfacesBroken = 0;
@@ -145,6 +148,16 @@ int _radio_encode_port(int port)
 {
    //return (port * 2) + 1;
    return ((port<<4) | 0x0F);
+}
+
+void radio_init_link_structures_extra(int enableOverUDP, int isController)
+{
+   s_bRadioOverUdpFlag = enableOverUDP;
+   s_bRadioControllerFlag = isController;
+
+   if(enableOverUDP == 1) {
+      radio_process_udp_init(isController);
+   }
 }
 
 void radio_init_link_structures()
@@ -680,23 +693,30 @@ int radio_open_interface_for_read(int interfaceIndex, int portNumber)
    if ( NULL == pRadioHWInfo )
       return -1;
 
-   int port_encoded = _radio_encode_port(portNumber);
-   sprintf(szFilter, "ether[0x00:2] == 0x0801 && ether[0x0a:4] == 0x13123456 && ether[0x04:1] == 0x%.2x", port_encoded);
-   sprintf(szFilterPrism, "radio[0x40:2] == 0x0801 && radio[0x4a:4] == 0x13123456 && radio[0x44:1] == 0x%.2x", port_encoded);
+   if(pRadioHWInfo->iCardModel == CARD_MODEL_ETHERNET && pRadioHWInfo->iRadioDriver == RADIO_HW_DRIVER_ETHERNET) {
+      // pRadioHWInfo->openedForRead = 0;
+      // pRadioHWInfo->runtimeInterfaceInfoRx.nPort = radio_process_udp_open_rx(s_bRadioControllerFlag);
+      // pRadioHWInfo->runtimeInterfaceInfoRx.selectable_fd = -1;
+      pRadioHWInfo->openedForRead = 1;
+   } else {
+      int port_encoded = _radio_encode_port(portNumber);
+      sprintf(szFilter, "ether[0x00:2] == 0x0801 && ether[0x0a:4] == 0x13123456 && ether[0x04:1] == 0x%.2x", port_encoded);
+      sprintf(szFilterPrism, "radio[0x40:2] == 0x0801 && radio[0x4a:4] == 0x13123456 && radio[0x44:1] == 0x%.2x", port_encoded);
 
-   int iResult = _radio_open_interface_for_read_with_filter(interfaceIndex, szFilter, szFilterPrism);
-   
-   if ( iResult < 0 )
-      return iResult;
+      int iResult = _radio_open_interface_for_read_with_filter(interfaceIndex, szFilter, szFilterPrism);
+      
+      if ( iResult < 0 )
+         return iResult;
 
-   pRadioHWInfo->runtimeInterfaceInfoRx.nPort = portNumber;
+      pRadioHWInfo->runtimeInterfaceInfoRx.nPort = portNumber;
 
-   if ( portNumber == RADIO_PORT_ROUTER_UPLINK )
-      log_line("Opened radio interface %d (%s) for reading on uplink on %s. Returned fd=%d, ppcap: %d", interfaceIndex+1, pRadioHWInfo->szName, str_format_frequency(pRadioHWInfo->uCurrentFrequencyKhz), pRadioHWInfo->runtimeInterfaceInfoRx.selectable_fd, pRadioHWInfo->runtimeInterfaceInfoRx.ppcap);
-   else if ( portNumber == RADIO_PORT_ROUTER_DOWNLINK )
-      log_line("Opened radio interface %d (%s) for reading on downlink on %s. Returned fd=%d, ppcap: %d", interfaceIndex+1, pRadioHWInfo->szName, str_format_frequency(pRadioHWInfo->uCurrentFrequencyKhz), pRadioHWInfo->runtimeInterfaceInfoRx.selectable_fd, pRadioHWInfo->runtimeInterfaceInfoRx.ppcap);
-   else
-      log_line("Opened radio interface %d (%s) for reading on custom port %d on %s. Returned fd=%d, ppcap: %d", interfaceIndex+1, pRadioHWInfo->szName, portNumber, str_format_frequency(pRadioHWInfo->uCurrentFrequencyKhz), pRadioHWInfo->runtimeInterfaceInfoRx.selectable_fd, pRadioHWInfo->runtimeInterfaceInfoRx.ppcap);
+      if ( portNumber == RADIO_PORT_ROUTER_UPLINK )
+         log_line("Opened radio interface %d (%s) for reading on uplink on %s. Returned fd=%d, ppcap: %d", interfaceIndex+1, pRadioHWInfo->szName, str_format_frequency(pRadioHWInfo->uCurrentFrequencyKhz), pRadioHWInfo->runtimeInterfaceInfoRx.selectable_fd, pRadioHWInfo->runtimeInterfaceInfoRx.ppcap);
+      else if ( portNumber == RADIO_PORT_ROUTER_DOWNLINK )
+         log_line("Opened radio interface %d (%s) for reading on downlink on %s. Returned fd=%d, ppcap: %d", interfaceIndex+1, pRadioHWInfo->szName, str_format_frequency(pRadioHWInfo->uCurrentFrequencyKhz), pRadioHWInfo->runtimeInterfaceInfoRx.selectable_fd, pRadioHWInfo->runtimeInterfaceInfoRx.ppcap);
+      else
+         log_line("Opened radio interface %d (%s) for reading on custom port %d on %s. Returned fd=%d, ppcap: %d", interfaceIndex+1, pRadioHWInfo->szName, portNumber, str_format_frequency(pRadioHWInfo->uCurrentFrequencyKhz), pRadioHWInfo->runtimeInterfaceInfoRx.selectable_fd, pRadioHWInfo->runtimeInterfaceInfoRx.ppcap);
+   }
 
    return pRadioHWInfo->runtimeInterfaceInfoRx.selectable_fd;
 }
@@ -708,107 +728,115 @@ int radio_open_interface_for_write(int interfaceIndex)
    if ( NULL == pRadioHWInfo )
       return -1;
 
-   if ( ! hardware_radio_is_wifi_radio(pRadioHWInfo) )
-   // Bad karma
-   {
-      log_softerror_and_alarm("Tried to open a non 2.4/5.8 radio in high capacity 2.4/5.8 mode.");
-      return -1;
-   }
-
-   log_line("Opened radio interface %d (%s) for writing...", interfaceIndex+1, pRadioHWInfo->szName);
-
-   pRadioHWInfo->openedForWrite = 0;
-   pRadioHWInfo->runtimeInterfaceInfoTx.selectable_fd = -1;
-   pRadioHWInfo->runtimeInterfaceInfoTx.iErrorCount = 0;
-
-   if ( s_iUsePCAPForTx )
-   {
-      log_line("Using ppcap for tx packets.");
-      char errbuf[PCAP_ERRBUF_SIZE];
-
-      pRadioHWInfo->runtimeInterfaceInfoTx.ppcap = pcap_create(pRadioHWInfo->szName, errbuf);
-      if (pRadioHWInfo->runtimeInterfaceInfoTx.ppcap == NULL)
+   if(pRadioHWInfo->iCardModel == CARD_MODEL_ETHERNET && pRadioHWInfo->iRadioDriver == RADIO_HW_DRIVER_ETHERNET) {
+      // pRadioHWInfo->openedForWrite = 0;
+      // pRadioHWInfo->runtimeInterfaceInfoTx.nPort = radio_process_udp_open_tx(s_bRadioControllerFlag);
+      // pRadioHWInfo->runtimeInterfaceInfoTx.selectable_fd = -1;
+      pRadioHWInfo->openedForWrite = 1;
+   } else {   
+      if ( ! hardware_radio_is_wifi_radio(pRadioHWInfo) )
+      // Bad karma
       {
-         log_error_and_alarm("Failed to get ppcap for write");
-         return -1;
-      }
-      log_line("Created ppcap interface. Setting params...");
-
-      if (pcap_set_snaplen(pRadioHWInfo->runtimeInterfaceInfoTx.ppcap, 4096) !=0) log_line("set_snaplen failed");
-      if (pcap_set_promisc(pRadioHWInfo->runtimeInterfaceInfoTx.ppcap, 1) != 0) log_line("set_promisc failed");
-      if (pcap_set_timeout(pRadioHWInfo->runtimeInterfaceInfoTx.ppcap, -1) !=0) log_line("set_timeout failed");
-      if (pcap_set_immediate_mode(pRadioHWInfo->runtimeInterfaceInfoTx.ppcap, 1) != 0) log_line("pcap_set_immediate_mode failed: %s", pcap_geterr(pRadioHWInfo->runtimeInterfaceInfoTx.ppcap));
-      if (pcap_activate(pRadioHWInfo->runtimeInterfaceInfoTx.ppcap) !=0) log_line("pcap_activate failed: %s", pcap_geterr(pRadioHWInfo->runtimeInterfaceInfoTx.ppcap));
-
-      pRadioHWInfo->runtimeInterfaceInfoTx.selectable_fd = pcap_get_selectable_fd(pRadioHWInfo->runtimeInterfaceInfoTx.ppcap);
-      log_line("ppcap returned a selectable fd for write for interface %d: ppcap: %d, fd=%d", interfaceIndex + 1, pRadioHWInfo->runtimeInterfaceInfoTx.ppcap, pRadioHWInfo->runtimeInterfaceInfoTx.selectable_fd);
-      
-      //if ( pRadioHWInfo->openedForRead )
-      //   pRadioHWInfo->runtimeInterfaceInfoTx.selectable_fd = pRadioHWInfo->runtimeInterfaceInfoRx.selectable_fd;
-      //else
-      //   log_line("Failed to reuse read interface for write.");
-   }
-   else
-   {   
-      log_line("Using socket for tx packets.");
-      struct sockaddr_ll ll_addr;
-      struct ifreq ifr;
-      pRadioHWInfo->runtimeInterfaceInfoTx.selectable_fd = socket(PF_PACKET, SOCK_RAW, 0);
-      if (pRadioHWInfo->runtimeInterfaceInfoTx.selectable_fd == -1)
-      {
-         log_error_and_alarm("Error:\tSocket failed");
+         log_softerror_and_alarm("Tried to open a non 2.4/5.8 radio in high capacity 2.4/5.8 mode.");
          return -1;
       }
 
-      if ( s_iBypassSocketBuffers )
-      {
-          const int iVal = 1;
-          if ( 0 != setsockopt(pRadioHWInfo->runtimeInterfaceInfoTx.selectable_fd, SOL_PACKET, PACKET_QDISC_BYPASS, (const void *)&iVal, sizeof(iVal)) )
-             log_softerror_and_alarm("Failed to set PACKET_QDISC_BYPASS option on socket fd %d, error code: %d, error: (%s)", pRadioHWInfo->runtimeInterfaceInfoTx.selectable_fd, errno, strerror(errno));
-          else
-             log_line("Did set PACKET_QDISC_BYPASS option on socket fd %d", pRadioHWInfo->runtimeInterfaceInfoTx.selectable_fd);
-      }
-      ll_addr.sll_family = AF_PACKET;
-      ll_addr.sll_protocol = 0;
+      log_line("Opened radio interface %d (%s) for writing...", interfaceIndex+1, pRadioHWInfo->szName);
 
-      if ( strlen(pRadioHWInfo->szName) < IFNAMSIZ-1 )
-         strcpy(ifr.ifr_name, pRadioHWInfo->szName);
+      pRadioHWInfo->openedForWrite = 0;
+      pRadioHWInfo->runtimeInterfaceInfoTx.selectable_fd = -1;
+      pRadioHWInfo->runtimeInterfaceInfoTx.iErrorCount = 0;
+
+      if ( s_iUsePCAPForTx )
+      {
+         log_line("Using ppcap for tx packets.");
+         char errbuf[PCAP_ERRBUF_SIZE];
+
+         pRadioHWInfo->runtimeInterfaceInfoTx.ppcap = pcap_create(pRadioHWInfo->szName, errbuf);
+         if (pRadioHWInfo->runtimeInterfaceInfoTx.ppcap == NULL)
+         {
+            log_error_and_alarm("Failed to get ppcap for write");
+            return -1;
+         }
+         log_line("Created ppcap interface. Setting params...");
+
+         if (pcap_set_snaplen(pRadioHWInfo->runtimeInterfaceInfoTx.ppcap, 4096) !=0) log_line("set_snaplen failed");
+         if (pcap_set_promisc(pRadioHWInfo->runtimeInterfaceInfoTx.ppcap, 1) != 0) log_line("set_promisc failed");
+         if (pcap_set_timeout(pRadioHWInfo->runtimeInterfaceInfoTx.ppcap, -1) !=0) log_line("set_timeout failed");
+         if (pcap_set_immediate_mode(pRadioHWInfo->runtimeInterfaceInfoTx.ppcap, 1) != 0) log_line("pcap_set_immediate_mode failed: %s", pcap_geterr(pRadioHWInfo->runtimeInterfaceInfoTx.ppcap));
+         if (pcap_activate(pRadioHWInfo->runtimeInterfaceInfoTx.ppcap) !=0) log_line("pcap_activate failed: %s", pcap_geterr(pRadioHWInfo->runtimeInterfaceInfoTx.ppcap));
+
+         pRadioHWInfo->runtimeInterfaceInfoTx.selectable_fd = pcap_get_selectable_fd(pRadioHWInfo->runtimeInterfaceInfoTx.ppcap);
+         log_line("ppcap returned a selectable fd for write for interface %d: ppcap: %d, fd=%d", interfaceIndex + 1, pRadioHWInfo->runtimeInterfaceInfoTx.ppcap, pRadioHWInfo->runtimeInterfaceInfoTx.selectable_fd);
+         
+         //if ( pRadioHWInfo->openedForRead )
+         //   pRadioHWInfo->runtimeInterfaceInfoTx.selectable_fd = pRadioHWInfo->runtimeInterfaceInfoRx.selectable_fd;
+         //else
+         //   log_line("Failed to reuse read interface for write.");
+      }
       else
-      {
-         char szBuff[64];
-         strcpy(szBuff, pRadioHWInfo->szName);
-         szBuff[IFNAMSIZ-1] = 0;
-         strcpy(ifr.ifr_name, szBuff);
+      {   
+         log_line("Using socket for tx packets.");
+         struct sockaddr_ll ll_addr;
+         struct ifreq ifr;
+         pRadioHWInfo->runtimeInterfaceInfoTx.selectable_fd = socket(PF_PACKET, SOCK_RAW, 0);
+         if (pRadioHWInfo->runtimeInterfaceInfoTx.selectable_fd == -1)
+         {
+            log_error_and_alarm("Error:\tSocket failed");
+            return -1;
+         }
+
+         if ( s_iBypassSocketBuffers )
+         {
+            const int iVal = 1;
+            if ( 0 != setsockopt(pRadioHWInfo->runtimeInterfaceInfoTx.selectable_fd, SOL_PACKET, PACKET_QDISC_BYPASS, (const void *)&iVal, sizeof(iVal)) )
+               log_softerror_and_alarm("Failed to set PACKET_QDISC_BYPASS option on socket fd %d, error code: %d, error: (%s)", pRadioHWInfo->runtimeInterfaceInfoTx.selectable_fd, errno, strerror(errno));
+            else
+               log_line("Did set PACKET_QDISC_BYPASS option on socket fd %d", pRadioHWInfo->runtimeInterfaceInfoTx.selectable_fd);
+         }
+         ll_addr.sll_family = AF_PACKET;
+         ll_addr.sll_protocol = 0;
+
+         if ( strlen(pRadioHWInfo->szName) < IFNAMSIZ-1 )
+            strcpy(ifr.ifr_name, pRadioHWInfo->szName);
+         else
+         {
+            char szBuff[64];
+            strcpy(szBuff, pRadioHWInfo->szName);
+            szBuff[IFNAMSIZ-1] = 0;
+            strcpy(ifr.ifr_name, szBuff);
+         }
+         if (ioctl(pRadioHWInfo->runtimeInterfaceInfoTx.selectable_fd, SIOCGIFINDEX, &ifr) < 0)
+         {
+            log_error_and_alarm("Error:\tioctl(SIOCGIFINDEX) failed");
+            return -1;
+         }
+         ll_addr.sll_ifindex = ifr.ifr_ifindex;
+         if (ioctl(pRadioHWInfo->runtimeInterfaceInfoTx.selectable_fd, SIOCGIFHWADDR, &ifr) < 0)
+         {
+               log_error_and_alarm("Error:\tioctl(SIOCGIFHWADDR) failed");
+               return -1;
+         }
+         memcpy(ll_addr.sll_addr, ifr.ifr_hwaddr.sa_data, ETH_ALEN);
+         if (bind (pRadioHWInfo->runtimeInterfaceInfoTx.selectable_fd, (struct sockaddr *)&ll_addr, sizeof(ll_addr)) == -1)
+         {
+            log_error_and_alarm("Error:\tbind failed");
+            close(pRadioHWInfo->runtimeInterfaceInfoTx.selectable_fd);
+            pRadioHWInfo->runtimeInterfaceInfoTx.selectable_fd = -1;
+            return -1;
+         }
+         if (pRadioHWInfo->runtimeInterfaceInfoTx.selectable_fd == -1 ) 
+         {
+            log_error_and_alarm("Error:\tCannot open socket.\tInfo: Must be root with an 802.11 card with RFMON enabled");
+            return -1;
+         }
+         log_line("Opened socket for write fd=%d.", pRadioHWInfo->runtimeInterfaceInfoTx.selectable_fd);
       }
-      if (ioctl(pRadioHWInfo->runtimeInterfaceInfoTx.selectable_fd, SIOCGIFINDEX, &ifr) < 0)
-      {
-        	log_error_and_alarm("Error:\tioctl(SIOCGIFINDEX) failed");
-        	return -1;
-      }
-      ll_addr.sll_ifindex = ifr.ifr_ifindex;
-      if (ioctl(pRadioHWInfo->runtimeInterfaceInfoTx.selectable_fd, SIOCGIFHWADDR, &ifr) < 0)
-      {
-         	log_error_and_alarm("Error:\tioctl(SIOCGIFHWADDR) failed");
-         	return -1;
-      }
-      memcpy(ll_addr.sll_addr, ifr.ifr_hwaddr.sa_data, ETH_ALEN);
-      if (bind (pRadioHWInfo->runtimeInterfaceInfoTx.selectable_fd, (struct sockaddr *)&ll_addr, sizeof(ll_addr)) == -1)
-      {
-        	log_error_and_alarm("Error:\tbind failed");
-        	close(pRadioHWInfo->runtimeInterfaceInfoTx.selectable_fd);
-         pRadioHWInfo->runtimeInterfaceInfoTx.selectable_fd = -1;
-   	     return -1;
-      }
-      if (pRadioHWInfo->runtimeInterfaceInfoTx.selectable_fd == -1 ) 
-      {
-          log_error_and_alarm("Error:\tCannot open socket.\tInfo: Must be root with an 802.11 card with RFMON enabled");
-          return -1;
-      }
-      log_line("Opened socket for write fd=%d.", pRadioHWInfo->runtimeInterfaceInfoTx.selectable_fd);
+
+      pRadioHWInfo->openedForWrite = 1;
+      log_line("Opened radio interface %d (%s) for writing on %s. Returned fd=%d", interfaceIndex+1, pRadioHWInfo->szName, str_format_frequency(pRadioHWInfo->uCurrentFrequencyKhz), pRadioHWInfo->runtimeInterfaceInfoTx.selectable_fd);
    }
 
-   pRadioHWInfo->openedForWrite = 1;
-   log_line("Opened radio interface %d (%s) for writing on %s. Returned fd=%d", interfaceIndex+1, pRadioHWInfo->szName, str_format_frequency(pRadioHWInfo->uCurrentFrequencyKhz), pRadioHWInfo->runtimeInterfaceInfoTx.selectable_fd);
    return pRadioHWInfo->runtimeInterfaceInfoTx.selectable_fd;
 }
 
@@ -830,6 +858,10 @@ void radio_close_interface_for_read(int interfaceIndex)
    }
    else
       log_line("Radio interface %d was not opened for read.", interfaceIndex+1);
+
+   if(pRadioHWInfo->iCardModel == CARD_MODEL_ETHERNET && pRadioHWInfo->iRadioDriver == RADIO_HW_DRIVER_ETHERNET) {
+      //close(pRadioHWInfo->runtimeInterfaceInfoRx.selectable_fd);
+   }
 
    pRadioHWInfo->runtimeInterfaceInfoRx.ppcap = NULL;
    pRadioHWInfo->runtimeInterfaceInfoRx.selectable_fd = -1;
@@ -882,12 +914,17 @@ void radio_close_interface_for_write(int interfaceIndex)
    pRadioHWInfo->openedForWrite = 0;
 }
 
-
 u8* radio_process_wlan_data_in(int interfaceNumber, int* outPacketLength, u32 uTimeNow)
 {
    radio_hw_info_t* pRadioHWInfo = hardware_get_radio_info(interfaceNumber);
 
    s_iRadioLastReadErrorCode = RADIO_READ_ERROR_NO_ERROR;
+
+   if(s_bRadioOverUdpFlag == 1) {
+      if(pRadioHWInfo->iCardModel == CARD_MODEL_ETHERNET && pRadioHWInfo->iRadioDriver == RADIO_HW_DRIVER_ETHERNET) {
+         return radio_process_udp_data_in(interfaceNumber, outPacketLength, uTimeNow);
+      }
+   }
 
    if ( NULL != outPacketLength )
       *outPacketLength = 0;
@@ -1475,7 +1512,6 @@ int radio_build_new_raw_ieee_packet(int iLocalRadioLinkId, u8* pRawPacket, u8* p
    return totalRadioLength;
 }
 
-
 int radio_write_raw_ieee_packet(int interfaceIndex, u8* pData, int dataLength, int iRepeatCount)
 {
    radio_hw_info_t* pRadioHWInfo = hardware_get_radio_info(interfaceIndex);
@@ -1490,6 +1526,13 @@ int radio_write_raw_ieee_packet(int interfaceIndex, u8* pData, int dataLength, i
       log_softerror_and_alarm("RadioError: Tried to send an empty radio message.");
       return 0;
    }
+
+   if(s_bRadioOverUdpFlag == 1) {
+      if(pRadioHWInfo->iCardModel == CARD_MODEL_ETHERNET && pRadioHWInfo->iRadioDriver == RADIO_HW_DRIVER_ETHERNET) {
+         return radio_process_udp_data_out(interfaceIndex, pData, dataLength);
+      }
+   }
+
 
    if ( s_bRadioDebugFlag )
    {

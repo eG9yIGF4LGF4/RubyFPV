@@ -384,9 +384,6 @@ int _hardware_detect_card_model(const char* szProductId)
    if ( NULL != strstr( szProductId, "0bda:b731" ) )
       return CARD_MODEL_RTL8733BU;
 
-   if ( NULL != strstr( szProductId, "pcie:8852" ) )
-      return CARD_MODEL_RTW8852BE;
-
    return 0;
 }
 
@@ -643,8 +640,12 @@ int hardware_radio_get_driver_id_card_model(int iCardModel)
       return RADIO_HW_DRIVER_REALTEK_8812EU;
    else if ( iCardModel == CARD_MODEL_RTL8733BU )
       return RADIO_HW_DRIVER_REALTEK_8733BU;
-   else if ( iCardModel == CARD_MODEL_RTW8852BE )
+   else if ( iCardModel == CARD_MODEL_RTL8852BE )
       return RADIO_HW_DRIVER_REALTEK_8852BE;
+   else if ( iCardModel == CARD_MODEL_BUILTIN )
+      return RADIO_HW_DRIVER_BUILTIN;
+   else if ( iCardModel == CARD_MODEL_ETHERNET )
+      return RADIO_HW_DRIVER_ETHERNET;
    else if ( (iCardModel > 0) && (iCardModel <50) )
       return RADIO_HW_DRIVER_REALTEK_RTL88XXAU;
 
@@ -793,14 +794,17 @@ int _hardware_enumerate_wifi_radios()
    log_line("[HardwareRadio] Enumerating wifi radios for generic Linux platform...");
    #endif
 
+   char szMac[20];
    char szDriver[128];
+   char szPciDevId[128];
+   char szPciDevClass[128];
    char szComm[256];
    char szBuff[1024];
 
    _hardware_find_usb_radio_interfaces_info();
 
    log_line("[HardwareRadio] Finding wireless radio cards...");
-   FILE* fp = popen("ls /sys/class/net/ | nice grep -v eth0 | nice grep -v lo | nice grep -v usb | nice grep -v intwifi | nice grep -v relay | nice grep -v wifihotspot", "r" );
+   FILE* fp = popen("ls /sys/class/net/ | nice grep -v lo | nice grep -v veth | nice grep -v usb | nice grep -v intwifi | nice grep -v relay | nice grep -v wifihotspot", "r" );
    if ( NULL == fp )
    {
       log_error_and_alarm("Failed to enumerate 2.4/5.8 radios.");
@@ -821,6 +825,7 @@ int _hardware_enumerate_wifi_radios()
       log_line("[HardwareRadio] Parsing found wireless radio: [%s]", sRadioInfo[s_iHwRadiosCount].szName);
       if ( 0 == strstr(sRadioInfo[s_iHwRadiosCount].szName, "wlan" ) )
       if ( 0 == strstr(sRadioInfo[s_iHwRadiosCount].szName, "wlx" ) )
+      if ( 0 == strstr(sRadioInfo[s_iHwRadiosCount].szName, "eth" ) )
       {
          log_line("[HardwareRadio] Skipping wireless radio [%s]", sRadioInfo[s_iHwRadiosCount].szName);
          continue;
@@ -881,6 +886,16 @@ int _hardware_enumerate_wifi_radios()
       #else
       sprintf(szComm, "cat /sys/class/net/%s/device/uevent | nice grep DRIVER | sed 's/DRIVER=//'", sRadioInfo[i].szName);
       hw_execute_bash_command(szComm, szDriver);
+
+      sprintf(szComm, "cat /sys/class/net/%s/address", sRadioInfo[i].szName);
+      hw_execute_bash_command(szComm, szMac);
+
+      sprintf(szComm, "cat /sys/class/net/%s/device/uevent | nice grep PCI_ID | sed 's/PCI_ID=//'", sRadioInfo[i].szName);
+      hw_execute_bash_command(szComm, szPciDevId);
+
+      sprintf(szComm, "cat /sys/class/net/%s/device/uevent | nice grep PCI_CLASS | sed 's/PCI_CLASS=//'", sRadioInfo[i].szName);
+      hw_execute_bash_command(szComm, szPciDevClass);
+
       #endif
       removeTrailingNewLines(szDriver);
 
@@ -922,7 +937,8 @@ int _hardware_enumerate_wifi_radios()
            (NULL != strstr(pszDriver,"8812eu")) ||
            (NULL != strstr(pszDriver,"88x2eu")) ||
            (NULL != strstr(pszDriver,"8733bu")) ||
-           (NULL != strstr(pszDriver,"rtw89_8852be_git")))
+           (NULL != strstr(szPciDevClass,"28000")) ||
+           (NULL != strstr(szPciDevClass,"20000")) )
       {
          s_iHwRadiosSupportedCount++;
          sRadioInfo[i].isSupported = 1;
@@ -953,10 +969,38 @@ int _hardware_enumerate_wifi_radios()
             sRadioInfo[i].iRadioType = RADIO_TYPE_REALTEK;
             sRadioInfo[i].iRadioDriver = RADIO_HW_DRIVER_REALTEK_8733BU;
          }
-         if ( NULL != strstr(pszDriver,"rtw89_8852be_git") )
+         if ( NULL != strstr(szPciDevClass,"28000") )
          {
-            sRadioInfo[i].iRadioType = RADIO_TYPE_REALTEK;
-            sRadioInfo[i].iRadioDriver = RADIO_HW_DRIVER_REALTEK_8852BE;
+            sRadioInfo[i].iRadioType = RADIO_TYPE_BUILTIN;
+            sRadioInfo[i].iRadioDriver = RADIO_HW_DRIVER_BUILTIN;
+            sRadioInfo[i].iCardModel = CARD_MODEL_BUILTIN;
+            strcpy(sRadioInfo[i].szDescription, "Wireless Network Controller");
+
+            if( NULL != strstr(szPciDevId, "10EC:"))
+            {
+               sRadioInfo[i].iRadioType = RADIO_TYPE_REALTEK;
+            }
+            if( NULL != strstr(szPciDevId, "14E4:"))
+            {
+               sRadioInfo[i].iRadioType = RADIO_TYPE_BROADCOM;
+            }
+            if( NULL != strstr(szPciDevId, "14C3:"))
+            {
+               sRadioInfo[i].iRadioType = RADIO_TYPE_MEDIATEK;
+            }
+            if( NULL != strstr(szPciDevId, "10EC:B852"))
+            {
+               sRadioInfo[i].iRadioDriver = RADIO_HW_DRIVER_BUILTIN;
+               sRadioInfo[i].iCardModel = CARD_MODEL_RTL8852BE;
+            }
+         }
+         if ( NULL != strstr(szPciDevClass,"20000") )
+         {
+            sRadioInfo[i].iRadioType = RADIO_TYPE_BUILTIN;
+            sRadioInfo[i].iRadioDriver = RADIO_HW_DRIVER_ETHERNET;
+            sRadioInfo[i].iCardModel = CARD_MODEL_ETHERNET;
+
+            strcpy(sRadioInfo[i].szDescription, "Other Network Controller");
          }
       }
       // Experimental
@@ -968,14 +1012,6 @@ int _hardware_enumerate_wifi_radios()
          strcpy(sRadioInfo[i].szDescription, "Realtek");
          sRadioInfo[i].iRadioType = RADIO_TYPE_REALTEK;
          sRadioInfo[i].iRadioDriver = RADIO_HW_DRIVER_REALTEK_RTL88X2BU;
-      }
-      if ( NULL != strstr(pszDriver,"rtw89_8852be_git") )
-      {
-         s_iHwRadiosSupportedCount++;
-         sRadioInfo[i].isSupported = 1;
-         strcpy(sRadioInfo[i].szDescription, "Realtek");
-         sRadioInfo[i].iRadioType = RADIO_TYPE_REALTEK;
-         sRadioInfo[i].iRadioDriver = RADIO_HW_DRIVER_REALTEK_8852BE;
       }
       if ( NULL != strstr(pszDriver,"rt2800usb") )
       {
@@ -1017,7 +1053,7 @@ int _hardware_enumerate_wifi_radios()
          log_softerror_and_alarm("Found unsupported radio (%s), driver %s, skipping.", sRadioInfo[i].szName, szDriver);
       else
          log_line("[HardwareRadio] Found supported radio type: %s, driver: %s, driver string short: %s, driver string: [%s]", str_get_radio_type_description(sRadioInfo[i].iRadioType), str_get_radio_driver_description(sRadioInfo[i].iRadioDriver), sRadioInfo[i].szDriver, pszDriver);
-      sRadioInfo[i].iCardModel = 0;
+      //sRadioInfo[i].iCardModel = 0; // TODO - to uncomment ??
 
       for( int kk=0; kk<(int)(sizeof(sRadioInfo[i].szUSBPort)/sizeof(sRadioInfo[i].szUSBPort[0])); kk++ )
          sRadioInfo[i].szUSBPort[kk] = 0;
@@ -1025,37 +1061,38 @@ int _hardware_enumerate_wifi_radios()
       for( int kk=0; kk<(int)(sizeof(sRadioInfo[i].szProductId)/sizeof(sRadioInfo[i].szProductId[0])); kk++ )
          sRadioInfo[i].szProductId[kk] = 0;
 
-      // Find the MAC address
-      sprintf(szComm, "iw dev %s info | grep addr", sRadioInfo[i].szName );
-      if ( 1 != hw_execute_bash_command_raw(szComm, szBuff) )
-      {
-         log_softerror_and_alarm("Failed to find MAC address for %s", sRadioInfo[i].szName);
-      }
-      else if ( 1 != sscanf(szBuff, "%*s %s", szComm) )
-      {
-         log_softerror_and_alarm("Failed to find MAC address for %s", sRadioInfo[i].szName);
-      }
-      else
-      {
-         log_line("Found MAC address %s for %s", szComm, sRadioInfo[i].szName);
-         szComm[MAX_MAC_LENGTH-1] = 0;
-         int iSt = 0;
-         int iEnd = 0;
-         while ( iEnd < strlen(szComm) )
-         {
-            if ( szComm[iEnd] == ':' )
-               iEnd++;
-            else
-            {
-               szComm[iSt] = toupper(szComm[iEnd]);
-               iSt++;
-               iEnd++;
-            }
-         }
-         szComm[iSt] = 0;
-         strncpy(sRadioInfo[i].szMAC, szComm, MAX_MAC_LENGTH-1);
-         sRadioInfo[i].szMAC[MAX_MAC_LENGTH-1] = 0;
-      }
+      // // Find the MAC address
+      // sprintf(szComm, "iw dev %s info | grep addr", sRadioInfo[i].szName );
+      // if ( 1 != hw_execute_bash_command_raw(szComm, szBuff) )
+      // {
+      //    log_softerror_and_alarm("Failed to find MAC address for %s", sRadioInfo[i].szName);
+      // }
+      // else if ( 1 != sscanf(szBuff, "%*s %s", szComm) )
+      // {
+      //    log_softerror_and_alarm("Failed to find MAC address for %s", sRadioInfo[i].szName);
+      // }
+      // else
+      // {
+      //    log_line("Found MAC address %s for %s", szComm, sRadioInfo[i].szName);
+      //    szComm[MAX_MAC_LENGTH-1] = 0;
+      //    int iSt = 0;
+      //    int iEnd = 0;
+      //    while ( iEnd < strlen(szComm) )
+      //    {
+      //       if ( szComm[iEnd] == ':' )
+      //          iEnd++;
+      //       else
+      //       {
+      //          szComm[iSt] = toupper(szComm[iEnd]);
+      //          iSt++;
+      //          iEnd++;
+      //       }
+      //    }
+      //    szComm[iSt] = 0;
+      //    strncpy(sRadioInfo[i].szMAC, szComm, MAX_MAC_LENGTH-1);
+      //    sRadioInfo[i].szMAC[MAX_MAC_LENGTH-1] = 0;
+      // }
+      strcpy(sRadioInfo[i].szMAC, szMac);
 
       // Find physical interface number, in form phy#0
 

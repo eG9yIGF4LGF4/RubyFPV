@@ -368,7 +368,7 @@ int main(int argc, char *argv[])
    log_init("TestLink"); 
    log_enable_stdout();
 
-   radio_init_link_structures();
+   radio_init_link_structures(1);
    radio_enable_crc_gen(1);
 
    radio_set_use_pcap_for_tx(g_iUsePCAPForTx);

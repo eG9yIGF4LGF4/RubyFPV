@@ -1639,7 +1639,11 @@ int main(int argc, char *argv[])
    else if ( iCPUCoresCount > 1 )
       hw_set_proc_affinity("ruby_rt_station", iSelfId, 2,2);
 
+   int enableRadioOverUDP = 1;
+   int thisIsController = 1;
+
    radio_init_link_structures();
+   radio_init_link_structures_extra(enableRadioOverUDP, thisIsController);
    radio_enable_crc_gen(1);
    hardware_enumerate_radio_interfaces(); 
 

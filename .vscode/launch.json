@@ -15,7 +15,8 @@
         "environment": [],
         "externalConsole": false,
         "MIMode": "gdb",
-        "miDebuggerPath": "/home/dev/src/rubyfpv/RubyFPV/sudo_gdb.sh",
+        "miDebuggerPath": "/usr/bin/gdb",
+        "miDebuggerServerAddress": "localhost:12345",
         "setupCommands": [
             {
                 "description": "Enable pretty-printing for gdb",
@@ -93,7 +94,7 @@
         // "miDebuggerPath": "/home/dev/src/rubyfpv/RubyFPV/sudo_gdb.sh",
         "miDebuggerPath": "/usr/bin/gdb",
         "miDebuggerServerAddress": "localhost:12345",
-        "preLaunchTask": "start-debug-central",
+        // "preLaunchTask": "start-debug-central",
         "setupCommands": [
             {
                 "description": "Enable pretty-printing for gdb",

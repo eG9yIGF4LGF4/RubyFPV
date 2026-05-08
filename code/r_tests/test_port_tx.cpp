@@ -33,7 +33,7 @@ int main(int argc, char *argv[])
    log_init("TX_TEST_PORT"); 
    log_enable_stdout();
 
-   radio_init_link_structures();
+   radio_init_link_structures(1);
    radio_enable_crc_gen(1);
 
 

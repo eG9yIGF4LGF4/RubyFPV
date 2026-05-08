@@ -1198,6 +1198,7 @@ int main(int argc, char *argv[])
   
    hardware_sleep_ms(50);
    radio_init_link_structures();
+   radio_init_link_structures_extra(1, 0);
 
    if ( g_pCurrentModel->uDeveloperFlags & DEVELOPER_FLAGS_USE_PCAP_RADIO_TX )
       radio_set_use_pcap_for_tx(1);
