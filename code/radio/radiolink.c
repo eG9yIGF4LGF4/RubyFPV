@@ -697,6 +697,7 @@ int radio_open_interface_for_read(int interfaceIndex, int portNumber)
       // pRadioHWInfo->openedForRead = 0;
       // pRadioHWInfo->runtimeInterfaceInfoRx.nPort = radio_process_udp_open_rx(s_bRadioControllerFlag);
       // pRadioHWInfo->runtimeInterfaceInfoRx.selectable_fd = -1;
+      radio_process_udp_open_rx();
       pRadioHWInfo->openedForRead = 1;
    } else {
       int port_encoded = _radio_encode_port(portNumber);
@@ -730,8 +731,9 @@ int radio_open_interface_for_write(int interfaceIndex)
 
    if(pRadioHWInfo->iCardModel == CARD_MODEL_ETHERNET && pRadioHWInfo->iRadioDriver == RADIO_HW_DRIVER_ETHERNET) {
       // pRadioHWInfo->openedForWrite = 0;
-      // pRadioHWInfo->runtimeInterfaceInfoTx.nPort = radio_process_udp_open_tx(s_bRadioControllerFlag);
+      // pRadioHWInfo->runtimeInterfaceInfoTx.nPort = 
       // pRadioHWInfo->runtimeInterfaceInfoTx.selectable_fd = -1;
+      radio_process_udp_open_tx();
       pRadioHWInfo->openedForWrite = 1;
    } else {   
       if ( ! hardware_radio_is_wifi_radio(pRadioHWInfo) )

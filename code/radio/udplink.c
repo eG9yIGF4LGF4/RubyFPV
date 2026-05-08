@@ -1,50 +1,117 @@
+#include <string.h>
+#include <unistd.h>
+#include <arpa/inet.h>
 #include "radiolink.h"
 #include "udplink.h"
 
-u8 sPacketBufferRead[MAX_PACKET_LENGTH_PCAP];
-struct sockaddr_in server_out_addr, server_in_addr;
+// TODO: For a wg0 interface with 192.168.43.1/24 subnet
+#define ADDR_LOCAL   "192.168.43.2"
+#define ADDR_REMOTE  "192.168.43.3"
+
+static u8  sPacketBufferRead[MAX_PACKET_LENGTH_PCAP];
+
+static int s_rx_sock       = -1;
+static int s_tx_sock       = -1;
+static int s_is_controller = 0;
+
+static struct sockaddr_in s_bind_addr;  /* local address  — RX binds here  */
+static struct sockaddr_in s_dest_addr;  /* remote address — TX sends here   */
+
+/* ------------------------------------------------------------------ */
+/*  Public API                                                          */
+/* ------------------------------------------------------------------ */
 
 void radio_process_udp_init(int isController)
 {
-   memset(&server_in_addr, 0, sizeof(server_in_addr));
-   memset(&server_out_addr, 0, sizeof(server_out_addr));
-   memset(sPacketBufferRead, 0, MAX_PACKET_LENGTH_PCAP);
-    
-   server_in_addr.sin_family = AF_INET;
-   server_in_addr.sin_addr.s_addr = inet_addr("127.0.0.1");
-   server_in_addr.sin_port = htons( isController == 1 ? UDP_PORT_STATION : UDP_PORT_VEHICLE );   
+    s_is_controller = isController;
+    memset(sPacketBufferRead, 0, MAX_PACKET_LENGTH_PCAP);
 
-   server_out_addr.sin_family = AF_INET;
-   server_out_addr.sin_addr.s_addr = inet_addr("127.0.0.1");
-   server_out_addr.sin_port = htons( isController == 1 ? UDP_PORT_VEHICLE : UDP_PORT_STATION );   
+    /*
+     * Controller  : local = 192.168.43.1, remote = 192.168.43.2
+     * Vehicle     : local = 192.168.43.2, remote = 192.168.43.1
+     */
+    const char *local_ip  = isController ? ADDR_LOCAL  : ADDR_REMOTE;
+    const char *remote_ip = isController ? ADDR_REMOTE : ADDR_LOCAL;
+
+    memset(&s_bind_addr, 0, sizeof(s_bind_addr));
+    s_bind_addr.sin_family      = AF_INET;
+    s_bind_addr.sin_addr.s_addr = inet_addr(local_ip);
+    s_bind_addr.sin_port        = htons(isController ? UDP_PORT_STATION : UDP_PORT_VEHICLE);
+
+    memset(&s_dest_addr, 0, sizeof(s_dest_addr));
+    s_dest_addr.sin_family      = AF_INET;
+    s_dest_addr.sin_addr.s_addr = inet_addr(remote_ip);
+    s_dest_addr.sin_port        = htons(isController ? UDP_PORT_VEHICLE : UDP_PORT_STATION);
+}
+
+int radio_process_udp_open_rx(void)
+{
+    if (s_rx_sock >= 0)
+        close(s_rx_sock);
+
+    s_rx_sock = socket(AF_INET, SOCK_DGRAM, 0);
+    if (s_rx_sock < 0)
+        return -1;
+
+    int opt = 1;
+    setsockopt(s_rx_sock, SOL_SOCKET, SO_REUSEADDR, &opt, sizeof(opt));
+
+    if (bind(s_rx_sock, (struct sockaddr *)&s_bind_addr, sizeof(s_bind_addr)) < 0)
+    {
+        close(s_rx_sock);
+        s_rx_sock = -1;
+        return -1;
+    }
+
+    return 0;
+}
+
+int radio_process_udp_open_tx(void)
+{
+    if (s_tx_sock >= 0)
+        close(s_tx_sock);
+
+    s_tx_sock = socket(AF_INET, SOCK_DGRAM, 0);
+    if (s_tx_sock < 0)
+        return -1;
+
+    return 0;
 }
 
 u8* radio_process_udp_data_in(int interfaceNumber, int* outPacketLength, u32 uTimeNow)
 {
-   u8* buf[MAX_PACKET_LENGTH_PCAP];
-   int s = socket(AF_INET, SOCK_DGRAM, 0);
-   
-   *outPacketLength = recvfrom(s, buf, MAX_PACKET_LENGTH_PCAP, 0, (struct sockaddr *)&server_in_addr, sizeof(server_in_addr));
+    (void)interfaceNumber;
+    (void)uTimeNow;
 
-   memcpy(sPacketBufferRead, buf, *outPacketLength);
-   
-   return sPacketBufferRead;
+    *outPacketLength = 0;
+
+    if (s_rx_sock < 0)
+        return NULL;
+
+    struct sockaddr_in src_addr;
+    socklen_t src_len = sizeof(src_addr);
+
+    int n = recvfrom(s_rx_sock,
+                     sPacketBufferRead, MAX_PACKET_LENGTH_PCAP,
+                     0,
+                     (struct sockaddr *)&src_addr, &src_len);
+    if (n < 0)
+        return NULL;
+
+    *outPacketLength = n;
+    return sPacketBufferRead;
 }
 
 u32 radio_process_udp_data_out(int interfaceNumber, u8* pBuffer, u32 pBufferLen)
 {
-   int s = socket(AF_INET, SOCK_DGRAM, 0); 
+    (void)interfaceNumber;
 
-   return sendto(s, pBuffer, pBufferLen, 0, (struct sockaddr *)&server_out_addr, sizeof(server_out_addr) );
+    if (s_tx_sock < 0)
+        return 0;
+
+    int n = sendto(s_tx_sock,
+                   pBuffer, pBufferLen,
+                   0,
+                   (struct sockaddr *)&s_dest_addr, sizeof(s_dest_addr));
+    return (n < 0) ? 0 : (u32)n;
 }
-
-int radio_process_udp_open_rx(int isController)
-{
-   return 0;  
-}
-
-int radio_process_udp_open_tx(int isController)
-{
-   return 0;
-}
-
