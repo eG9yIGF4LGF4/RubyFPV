@@ -296,7 +296,8 @@ int load_ControllerSettings()
    if ( 1 != fscanf(fd, "%d", &s_CtrlSettings.iVideoMPPBuffersSize) )
       { log_softerror_and_alarm("Load ctrl settings, failed on line 27");
          s_CtrlSettings.iVideoMPPBuffersSize = DEFAULT_MPP_BUFFERS_SIZE;
-         iWriteOptionalValues = 1; }
+         iWriteOptionalValues = 1; 
+      }
 
    if ( 1 != fscanf(fd, "%d", &s_CtrlSettings.iHDMIVSync) )
    {
@@ -306,6 +307,13 @@ int load_ControllerSettings()
 
    if ( 1 != fscanf(fd, "%d", &s_CtrlSettings.iEasterEgg1) )
       s_CtrlSettings.iEasterEgg1 = 0;
+
+   if ( 1 != fscanf(fd, "%d", &s_CtrlSettings.iTunnel) )
+   {
+      s_CtrlSettings.iTunnel = 0;
+      iWriteOptionalValues = 1;
+   }
+
    fclose(fd);
 
    //--------------------------------------------------------
@@ -346,6 +354,10 @@ int load_ControllerSettings()
 
    if ( (s_CtrlSettings.iHDMIVSync != 0) && (s_CtrlSettings.iHDMIVSync != 1) )
       s_CtrlSettings.iHDMIVSync = 1;
+
+   if ( (s_CtrlSettings.iTunnel != 0) && (s_CtrlSettings.iTunnel != 1) )
+      s_CtrlSettings.iTunnel = 1;
+
    if ( failed )
    {
       log_line("Invalid settings file %s, error code: %d. Reseted to default.", szFile, failed);

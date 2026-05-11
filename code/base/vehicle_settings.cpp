@@ -106,6 +106,11 @@ int load_VehicleSettings()
       failed = 1;
    }
 
+   if ( 1 != fscanf(fd, "%d", &s_VehicleSettings.iTunnel) )
+   {
+      s_VehicleSettings.iTunnel = 0;
+   }
+
    fclose(fd);
 
    if ( failed )

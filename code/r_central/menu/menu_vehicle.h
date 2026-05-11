@@ -32,6 +32,7 @@ class MenuVehicle: public Menu
       int m_IndexRadio;
       int m_IndexLogType;
       int m_IndexDeveloper;
+      int m_IndexTunnel;
 
       bool m_bWaitingForVehicleInfo;
 };
