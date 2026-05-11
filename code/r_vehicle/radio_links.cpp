@@ -308,12 +308,13 @@ bool radio_links_apply_settings(Model* pModel, int iRadioLink, type_radio_links_
    // Update frequencies if needed
    // Update HT20/HT40 if needed
 
-   bool bUpdateFreq = false;
-   if ( pRadioLinkParamsOld->link_frequency_khz[iRadioLink] != pRadioLinkParamsNew->link_frequency_khz[iRadioLink] )
-      bUpdateFreq = true;
-   if ( (pRadioLinkParamsOld->link_radio_flags[iRadioLink] & RADIO_FLAG_HT40_VEHICLE) != 
-        (pRadioLinkParamsNew->link_radio_flags[iRadioLink] & RADIO_FLAG_HT40_VEHICLE) )
-      bUpdateFreq = true;
+   // bool bUpdateFreq = false;
+   // if ( pRadioLinkParamsOld->link_frequency_khz[iRadioLink] != pRadioLinkParamsNew->link_frequency_khz[iRadioLink] )
+   //    bUpdateFreq = true;
+   // if ( (pRadioLinkParamsOld->link_radio_flags[iRadioLink] & RADIO_FLAG_HT40_VEHICLE) != 
+   //      (pRadioLinkParamsNew->link_radio_flags[iRadioLink] & RADIO_FLAG_HT40_VEHICLE) )
+   //    bUpdateFreq = true;
+   bool bUpdateFreq = true;
 
    if ( bUpdateFreq )     
    {
