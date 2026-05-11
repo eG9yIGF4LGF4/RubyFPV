@@ -51,6 +51,7 @@
 #include "../common/string_utils.h"
 #include "../common/radio_stats.h"
 #include "../radio/radiolink.h"
+#include "../radio/udplink.h"
 #include "../radio/radiopackets2.h"
 #include "../radio/radiopacketsqueue.h"
 #include "../radio/radio_rx.h"
@@ -1645,10 +1646,8 @@ int main(int argc, char *argv[])
    else if ( iCPUCoresCount > 1 )
       hw_set_proc_affinity("ruby_rt_station", iSelfId, 2,2);
 
-   int enableRadioOverUDP = 1;
-   int thisIsController = 1;
-
    radio_init_link_structures();
+
    radio_enable_crc_gen(1);
    hardware_enumerate_radio_interfaces(); 
 
@@ -1668,6 +1667,8 @@ int main(int argc, char *argv[])
    if ( pP->nLogLevel != 0 )
       log_only_errors();
  
+   radio_set_ip_tunnel(g_pControllerSettings->nUseIPTunnel);
+   
    if ( NULL != g_pControllerSettings )
       radio_rx_set_timeout_interval(g_pControllerSettings->iDevRxLoopTimeout);
      

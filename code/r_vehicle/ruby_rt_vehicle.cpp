@@ -83,6 +83,7 @@
 
 #include "../radio/radiopackets2.h"
 #include "../radio/radiolink.h"
+#include "../radio/udplink.h"
 #include "../radio/radiopacketsqueue.h"
 #include "../radio/radio_rx.h"
 #include "../radio/radio_tx.h"
@@ -1198,6 +1199,7 @@ int main(int argc, char *argv[])
   
    hardware_sleep_ms(50);
    radio_init_link_structures();
+   radio_set_ip_tunnel(g_pCurrentModel->enableIPTunnel);
 
    if ( g_pCurrentModel->uDeveloperFlags & DEVELOPER_FLAGS_USE_PCAP_RADIO_TX )
       radio_set_use_pcap_for_tx(1);

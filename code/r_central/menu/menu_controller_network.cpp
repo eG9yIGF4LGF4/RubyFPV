@@ -43,6 +43,7 @@
 
 #include <time.h>
 #include <sys/resource.h>
+#include "../../radio/radiolink.h"
 
 MenuControllerNetwork::MenuControllerNetwork(void)
 :Menu(MENU_ID_CONTROLLER_NETWORK, "Controller Local Network Settings", NULL)
@@ -195,7 +196,9 @@ void MenuControllerNetwork::onSelectItem()
       pCS->nUseIPTunnel = m_pItemsSelect[2]->getSelectedIndex();
       save_ControllerSettings();
       valuesToUI();
-      send_control_message_to_router(PACKET_TYPE_LOCAL_CONTROL_CONTROLLER_CHANGED, PACKET_COMPONENT_LOCAL_CONTROL);       
+
+      send_control_message_to_router(PACKET_TYPE_LOCAL_CONTROL_CONTROLLER_CHANGED, PACKET_COMPONENT_LOCAL_CONTROL);    
+      handle_commands_send_to_vehicle(COMMAND_ID_VEHICLE_SET_IP_TUNNEL, pCS->nUseIPTunnel, NULL, 0);   
       return;
    }
 

@@ -209,7 +209,6 @@ void radio_reset_packets_default_frequencies(int iRCEnabled)
       s_uFrequencyRadioPacketsOnSlowLinkControllerToVehicle[i] = 500;
    }
 
-
    s_uFrequencyRadioPacketsOnSlowLinkControllerToVehicle[PACKET_TYPE_RUBY_PING_CLOCK] = 100;
    s_uFrequencyRadioPacketsOnSlowLinkControllerToVehicle[PACKET_TYPE_RUBY_PING_CLOCK_REPLY] = 100;
 
@@ -267,6 +266,16 @@ void radio_enable_crc_gen(int enable)
    log_line("Set radio enable crc generation to: %d", sEnableCRCGen);
 }
 
+void radio_set_ip_tunnel(int enable)
+{
+   if (enable) {
+      radio_process_udp_init();
+      radio_process_udp_open_rx();
+      radio_process_udp_open_tx();
+   } else {
+      radio_process_udp_free();
+   }
+}
 
 void radio_set_debug_flag(int iDebugFlag)
 {
@@ -681,13 +690,6 @@ int radio_open_interface_for_read(int interfaceIndex, int portNumber)
    if ( NULL == pRadioHWInfo )
       return -1;
 
-   if(pRadioHWInfo->iCardModel == CARD_MODEL_ETHERNET && pRadioHWInfo->iRadioDriver == RADIO_HW_DRIVER_ETHERNET) {
-      // pRadioHWInfo->openedForRead = 0;
-      // pRadioHWInfo->runtimeInterfaceInfoRx.nPort = radio_process_udp_open_rx(s_bRadioControllerFlag);
-      // pRadioHWInfo->runtimeInterfaceInfoRx.selectable_fd = -1;
-      radio_process_udp_open_rx();
-      pRadioHWInfo->openedForRead = 1;
-   } else {
       int port_encoded = _radio_encode_port(portNumber);
       sprintf(szFilter, "ether[0x00:2] == 0x0801 && ether[0x0a:4] == 0x13123456 && ether[0x04:1] == 0x%.2x", port_encoded);
       sprintf(szFilterPrism, "radio[0x40:2] == 0x0801 && radio[0x4a:4] == 0x13123456 && radio[0x44:1] == 0x%.2x", port_encoded);
@@ -705,7 +707,6 @@ int radio_open_interface_for_read(int interfaceIndex, int portNumber)
          log_line("Opened radio interface %d (%s) for reading on downlink on %s. Returned fd=%d, ppcap: %d", interfaceIndex+1, pRadioHWInfo->szName, str_format_frequency(pRadioHWInfo->uCurrentFrequencyKhz), pRadioHWInfo->runtimeInterfaceInfoRx.selectable_fd, pRadioHWInfo->runtimeInterfaceInfoRx.ppcap);
       else
          log_line("Opened radio interface %d (%s) for reading on custom port %d on %s. Returned fd=%d, ppcap: %d", interfaceIndex+1, pRadioHWInfo->szName, portNumber, str_format_frequency(pRadioHWInfo->uCurrentFrequencyKhz), pRadioHWInfo->runtimeInterfaceInfoRx.selectable_fd, pRadioHWInfo->runtimeInterfaceInfoRx.ppcap);
-   }
 
    return pRadioHWInfo->runtimeInterfaceInfoRx.selectable_fd;
 }
@@ -717,13 +718,7 @@ int radio_open_interface_for_write(int interfaceIndex)
    if ( NULL == pRadioHWInfo )
       return -1;
 
-   if(pRadioHWInfo->iCardModel == CARD_MODEL_ETHERNET && pRadioHWInfo->iRadioDriver == RADIO_HW_DRIVER_ETHERNET) {
-      // pRadioHWInfo->openedForWrite = 0;
-      // pRadioHWInfo->runtimeInterfaceInfoTx.nPort = 
-      // pRadioHWInfo->runtimeInterfaceInfoTx.selectable_fd = -1;
-      radio_process_udp_open_tx();
-      pRadioHWInfo->openedForWrite = 1;
-   } else {   
+   
       if ( ! hardware_radio_is_wifi_radio(pRadioHWInfo) )
       // Bad karma
       {
@@ -825,7 +820,6 @@ int radio_open_interface_for_write(int interfaceIndex)
 
       pRadioHWInfo->openedForWrite = 1;
       log_line("Opened radio interface %d (%s) for writing on %s. Returned fd=%d", interfaceIndex+1, pRadioHWInfo->szName, str_format_frequency(pRadioHWInfo->uCurrentFrequencyKhz), pRadioHWInfo->runtimeInterfaceInfoTx.selectable_fd);
-   }
 
    return pRadioHWInfo->runtimeInterfaceInfoTx.selectable_fd;
 }

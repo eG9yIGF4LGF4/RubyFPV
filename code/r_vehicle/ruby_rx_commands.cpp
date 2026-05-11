@@ -32,6 +32,7 @@
 
 #include "../base/shared_mem.h"
 #include "../radio/radiolink.h"
+#include "../r_utils/udplink.h"
 #include "../radio/radiopackets2.h"
 #include "../base/config.h"
 #include "../base/hw_procs.h"
@@ -3012,6 +3013,9 @@ bool process_command(u8* pBuffer, int length)
    if ( uCommandType == COMMAND_ID_VEHICLE_SET_IP_TUNNEL )
    {
       sendCommandReply(COMMAND_RESPONSE_FLAGS_OK, 0, 0);
+
+      radio_process_udp_open_rx();
+      radio_process_udp_open_tx();
       
       g_pCurrentModel->enableIPTunnel = pPHC->command_param;
 

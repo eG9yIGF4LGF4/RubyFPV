@@ -383,6 +383,8 @@ int _hardware_detect_card_model(const char* szProductId)
       return CARD_MODEL_RTL8733BU;
    if ( NULL != strstr( szProductId, "0bda:b731" ) )
       return CARD_MODEL_RTL8733BU;
+   if ( NULL != strstr( szProductId, "10EC:B852" ) )
+      return CARD_MODEL_RTL8852BE;
 
    return 0;
 }
@@ -804,7 +806,7 @@ int _hardware_enumerate_wifi_radios()
    _hardware_find_usb_radio_interfaces_info();
 
    log_line("[HardwareRadio] Finding wireless radio cards...");
-   FILE* fp = popen("ls /sys/class/net/ | nice grep -v lo | nice grep -v veth | nice grep -v usb | nice grep -v intwifi | nice grep -v relay | nice grep -v wifihotspot", "r" );
+   FILE* fp = popen("ls /sys/class/net/ | nice grep -v eth0 | nice grep -v lo | nice grep -v veth | nice grep -v usb | nice grep -v intwifi | nice grep -v relay | nice grep -v wifihotspot", "r" );
    if ( NULL == fp )
    {
       log_error_and_alarm("Failed to enumerate 2.4/5.8 radios.");
@@ -825,7 +827,6 @@ int _hardware_enumerate_wifi_radios()
       log_line("[HardwareRadio] Parsing found wireless radio: [%s]", sRadioInfo[s_iHwRadiosCount].szName);
       if ( 0 == strstr(sRadioInfo[s_iHwRadiosCount].szName, "wlan" ) )
       if ( 0 == strstr(sRadioInfo[s_iHwRadiosCount].szName, "wlx" ) )
-      if ( 0 == strstr(sRadioInfo[s_iHwRadiosCount].szName, "eth" ) )
       {
          log_line("[HardwareRadio] Skipping wireless radio [%s]", sRadioInfo[s_iHwRadiosCount].szName);
          continue;
@@ -974,6 +975,7 @@ int _hardware_enumerate_wifi_radios()
             sRadioInfo[i].iRadioType = RADIO_TYPE_BUILTIN;
             sRadioInfo[i].iRadioDriver = RADIO_HW_DRIVER_BUILTIN;
             sRadioInfo[i].iCardModel = CARD_MODEL_BUILTIN;
+            
             strcpy(sRadioInfo[i].szDescription, "Wireless Network Controller");
 
             if( NULL != strstr(szPciDevId, "10EC:"))
@@ -990,8 +992,10 @@ int _hardware_enumerate_wifi_radios()
             }
             if( NULL != strstr(szPciDevId, "10EC:B852"))
             {
-               sRadioInfo[i].iRadioDriver = RADIO_HW_DRIVER_BUILTIN;
+               sRadioInfo[i].iRadioType = RADIO_TYPE_REALTEK;
+               sRadioInfo[i].iRadioDriver = RADIO_HW_DRIVER_REALTEK_8852BE;
                sRadioInfo[i].iCardModel = CARD_MODEL_RTL8852BE;
+               memcpy(sRadioInfo[i].szProductId, "10EC:B852", 10);
             }
          }
          if ( NULL != strstr(szPciDevClass,"20000") )

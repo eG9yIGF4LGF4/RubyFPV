@@ -583,7 +583,7 @@ int send_packet_to_radio_interfaces(u8* pPacketData, int nPacketLength, int iSen
    // If Use IP Tunnel enabled, then send the packet to IP Tunnel endpoint 
    ControllerSettings* pCS = get_ControllerSettings();
    if(pCS->nUseIPTunnel) {
-      radio_process_udp_data_out(-1, pPacketData, nPacketLength);
+      radio_process_udp_data_out(pPacketData, nPacketLength);
    }
    
    // Send the packet to each local radio link

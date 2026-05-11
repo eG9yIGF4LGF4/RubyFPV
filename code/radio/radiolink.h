@@ -61,6 +61,7 @@ extern "C" {
 void radio_init_link_structures();
 void radio_link_cleanup();
 void radio_enable_crc_gen(int enable);
+void radio_set_ip_tunnel(int enable);
 void radio_set_debug_flag(int iDebugFlag);
 void radio_set_link_clock_delta(int iVehicleBehindMilisec);
 int  radio_get_link_clock_delta();

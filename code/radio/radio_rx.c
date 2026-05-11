@@ -594,7 +594,7 @@ int _radio_rx_parse_received_wifi_radio_data(int iInterfaceIndex, int iMaxReads)
       iBufferLength = 0;
 
       if ( s_RadioRxState.bEnableIPTunnel ) 
-         pPacketBuffer = radio_process_udp_data_in(iInterfaceIndex, &iBufferLength, s_uRadioRxTimeNow);
+         pPacketBuffer = radio_process_udp_data_in(&iBufferLength, s_uRadioRxTimeNow);
 
       if ( iBufferLength == 0 )
          pPacketBuffer = radio_process_wlan_data_in(iInterfaceIndex, &iBufferLength, s_uRadioRxTimeNow);

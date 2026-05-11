@@ -154,7 +154,7 @@ int main(int argc, char *argv[])
 
       u8 uBuffer[2025];
       socklen_t len = sizeof(client_addr);
-      int nRecv = recvfrom(socket_server, uBuffer, 1500, 
+      int nRecv = recvfrom(socket_server, uBuffer, 1500,
                 MSG_WAITALL, ( struct sockaddr *) &client_addr,
                 &len);
       //int nRecv = recv(socket_server, szBuff, 1024, )
