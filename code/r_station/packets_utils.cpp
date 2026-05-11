@@ -42,6 +42,7 @@
 #include "../common/radio_stats.h"
 #include "../common/string_utils.h"
 #include "../radio/radiolink.h"
+#include "../r_utils/udplink.h"
 #include "../radio/radiopackets2.h"
 #include "../radio/radio_tx.h"
 #include "../base/ctrl_interfaces.h"
@@ -578,6 +579,12 @@ int send_packet_to_radio_interfaces(u8* pPacketData, int nPacketLength, int iSen
       s_StreamsTxPacketIndex[uStreamId]++;
 
    pPH->stream_packet_idx = (((u32)uStreamId)<<PACKET_FLAGS_MASK_SHIFT_STREAM_INDEX) | (s_StreamsTxPacketIndex[uStreamId] & PACKET_FLAGS_MASK_STREAM_PACKET_IDX);
+
+   // If Use IP Tunnel enabled, then send the packet to IP Tunnel endpoint 
+   ControllerSettings* pCS = get_ControllerSettings();
+   if(pCS->nUseIPTunnel) {
+      radio_process_udp_data_out(-1, pPacketData, nPacketLength);
+   }
    
    // Send the packet to each local radio link
 

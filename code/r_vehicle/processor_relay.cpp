@@ -304,6 +304,11 @@ void relay_on_relay_params_changed()
    u32 uAcceptedFirmwareType = g_pCurrentModel->getVehicleFirmwareType();
    //if ( g_pCurrentModel->relay_params.isRelayEnabledOnRadioLinkId >= 0 )
    //if ( 0 != g_pCurrentModel->relay_params.uRelayedVehicleId )
+   if ( g_pCurrentModel->enableIPTunnel ) {
+      radio_rx_ip_tunnel_enable();
+   } else {
+      radio_rx_ip_tunnel_disable();
+   }
    radio_rx_start_rx_thread(&g_SM_RadioStats, 0, uAcceptedFirmwareType);
    
    log_line("[Relay] Done processing notification that relay parameters where updated by user command. Notify all local components about new radio config.");

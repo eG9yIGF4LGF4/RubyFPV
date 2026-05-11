@@ -52,6 +52,7 @@
 
 #include "../radio/radiopackets2.h"
 #include "../radio/radiolink.h"
+#include "../radio/udplink.h"
 #include "../radio/radio_tx.h"
 
 u8 s_RadioRawPacket[MAX_PACKET_TOTAL_SIZE];
@@ -759,6 +760,12 @@ int send_packet_to_radio_interfaces(u8* pPacketData, int nPacketLength, int iSen
       bIsAudioPacket = true;
    if ( uStreamId >= STREAM_ID_VIDEO_1 )
       bIsVideoPacket = true;
+
+
+   // If Use IP Tunnel enabled, then send the packet to IP Tunnel endpoint 
+   if(g_pCurrentModel->enableIPTunnel) {
+      radio_process_udp_data_out(-1, pPacketData, nPacketLength);
+   }
 
    // Send packet on all radio links that can send this packet or just to the single radio interface that user wants
    // Exception: Ping reply packet is sent only on the associated radio link for this ping

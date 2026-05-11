@@ -142,6 +142,12 @@ MenuVehicleExpert::MenuVehicleExpert(void)
    m_pItemsSelect[5]->setUseMultiViewLayout();
    m_IndexDHCP = addMenuItem(m_pItemsSelect[5]);
 
+   m_pItemsSelect[6] = new MenuItemSelect("Enable IP Tunnel", "Enables IP Tunnel between station and vehicle on the vehicle.");  
+   m_pItemsSelect[6]->addSelection("No");
+   m_pItemsSelect[6]->addSelection("Yes");
+   m_pItemsSelect[6]->setUseMultiViewLayout();
+   m_IndexTunnel = addMenuItem(m_pItemsSelect[6]);
+
    m_IndexReset = addMenuItem(new MenuItem("Reset CPU Freq", "Restarts the vehicle CPU and GPU frequencies to default values."));
    m_IndexReboot = addMenuItem(new MenuItem("Restart", "Restarts the vehicle."));
 }
@@ -228,6 +234,10 @@ void MenuVehicleExpert::valuesToUI()
    m_pItemsSelect[5]->setSelection(0);
    if ( g_pCurrentModel->enableDHCP )
       m_pItemsSelect[5]->setSelection(1);
+
+      m_pItemsSelect[6]->setSelection(0);
+   if ( g_pCurrentModel->enableIPTunnel )
+      m_pItemsSelect[6]->setSelection(1);   
 }
 
 void MenuVehicleExpert::addTopInfo()
@@ -439,6 +449,16 @@ void MenuVehicleExpert::onSelectItem()
          valuesToUI();
       return;
    }
+
+   // if ( m_IndexTunnel == m_SelectedIndex )
+   // {
+   //    int val = 1;
+   //    if ( m_pItemsSelect[6]->getSelectedIndex() == 0 )
+   //       val = 0;
+   //    if ( ! handle_commands_send_to_vehicle(COMMAND_ID_SET_ENABLE_TUNNEL, val , NULL, 0) )
+   //       valuesToUI();
+   //    return;
+   // }
 
    if ( m_IndexReboot == m_SelectedIndex )
    {

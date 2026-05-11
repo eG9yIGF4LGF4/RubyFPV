@@ -21,6 +21,7 @@ class MenuVehicleGeneral: public Menu
       MenuItemSlider* m_pItemsSlider[10];
       int m_IndexVehicleType;
       int m_IndexBoardType;
+      int m_IndexIPTunnel;
       
       void populate();
       void addTopDescription();

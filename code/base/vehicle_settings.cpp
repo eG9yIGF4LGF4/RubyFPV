@@ -106,9 +106,9 @@ int load_VehicleSettings()
       failed = 1;
    }
 
-   if ( 1 != fscanf(fd, "%d", &s_VehicleSettings.iTunnel) )
+   if ( 1 != fscanf(fd, "%d", &s_VehicleSettings.nUseIPTunnel) )
    {
-      s_VehicleSettings.iTunnel = 0;
+      s_VehicleSettings.nUseIPTunnel = 0;
    }
 
    fclose(fd);

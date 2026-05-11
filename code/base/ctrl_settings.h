@@ -34,7 +34,7 @@ typedef struct
    int iTelemetryForwardUSBPacketSize;
    int iDisableHDMIOverscan;
    int iDeveloperMode;
-   int iTunnel;
+   int nUseIPTunnel;
    int iRenderFPS;
    int iShowVoltage;
    int nRetryRetransmissionAfterTimeoutMS;

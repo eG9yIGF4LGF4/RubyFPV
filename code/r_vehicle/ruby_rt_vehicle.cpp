@@ -1198,7 +1198,6 @@ int main(int argc, char *argv[])
   
    hardware_sleep_ms(50);
    radio_init_link_structures();
-   radio_init_link_structures_extra(1, 0);
 
    if ( g_pCurrentModel->uDeveloperFlags & DEVELOPER_FLAGS_USE_PCAP_RADIO_TX )
       radio_set_use_pcap_for_tx(1);
@@ -1349,6 +1348,13 @@ int main(int argc, char *argv[])
    log_line("Start sequence: Done creating audio processor.");
 
    radio_duplicate_detection_init();
+
+
+   if ( g_pCurrentModel->enableIPTunnel ) {
+      radio_rx_ip_tunnel_enable();
+   } else {
+      radio_rx_ip_tunnel_disable();
+   }
    radio_rx_start_rx_thread(&g_SM_RadioStats, 0, g_pCurrentModel->getVehicleFirmwareType());
    
    send_radio_config_to_controller();

@@ -57,6 +57,8 @@ typedef struct
    u32 uAcceptedFirmwareType;
    u32 uTimeLastMinuteStatsUpdate;
    u32 uTimeLastStatsUpdate;
+   
+   u8  bEnableIPTunnel;
 } ALIGN_STRUCT_SPEC_INFO t_radio_rx_state;
 
 typedef struct
@@ -74,6 +76,9 @@ extern "C" {
 void * _thread_radio_rx(void *argument);
 int radio_rx_start_rx_thread(shared_mem_radio_stats* pSMRadioStats, int iSearchMode, u32 uAcceptedFirmwareType);
 void radio_rx_stop_rx_thread();
+
+void radio_rx_ip_tunnel_enable();
+void radio_rx_ip_tunnel_disable();
 
 void radio_rx_set_custom_thread_priority(int iPriority);
 void radio_rx_set_timeout_interval(int iMiliSec);

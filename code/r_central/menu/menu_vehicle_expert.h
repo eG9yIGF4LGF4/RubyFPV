@@ -25,6 +25,7 @@ class MenuVehicleExpert: public Menu
 
       int m_IndexReboot;
       int m_IndexDHCP;
+      int m_IndexTunnel;
       int m_IndexCPUEnabled;
       int m_IndexGPUEnabled;
       int m_IndexVoltageEnabled;

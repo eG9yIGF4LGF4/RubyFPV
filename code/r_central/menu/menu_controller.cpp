@@ -49,7 +49,6 @@
 #include "menu_preferences_ui.h"
 #include "menu_preferences.h"
 #include "menu_controller_radio.h"
-#include "menu_controller_tunnel.h"
 #include "menu_controller_update.h"
 #include "../../base/ctrl_settings.h"
 
@@ -117,16 +116,12 @@ void MenuController::addItems()
    m_IndexNetwork = addMenuItem(new MenuItem(L("Local Network Settings"), L("Change the local network settings on the controller (DHCP/Fixed IP)")));
    m_pMenuItems[m_IndexNetwork]->showArrow();
 
-   m_IndexIPTunnel = addMenuItem(new MenuItem(L("IP Tunnel"), L("Configure IP tunnel settings for vehicle/controller")));
-   m_pMenuItems[m_IndexIPTunnel]->showArrow();
-
    m_IndexEncryption = -1;
    m_IndexEncryption = addMenuItem(new MenuItem("Encryption", "Change the encryption global settings"));
    m_pMenuItems[m_IndexEncryption]->showArrow();
    m_pMenuItems[m_IndexEncryption]->setEnabled(false);
 
    m_IndexButtons = addMenuItem(new MenuItem(L("Buttons"), L("Change buttons actions.")));
-   m_IndexPreferences = -1;
    m_IndexPreferences = addMenuItem(new MenuItem("Preferences", "Change preferences about messages."));
    m_IndexPreferencesUI = addMenuItem(new MenuItem(L("User Interface"), L("Change user interface preferences: language, fonts, colors, sizes, display units.")));
 
@@ -146,8 +141,8 @@ void MenuController::addItems()
 
    m_IndexPlugins = addMenuItem(new MenuItem(L("Manage Plugins"), L("Configure, add and remove controller software plugins.")));
    m_IndexUpdate = addMenuItem(new MenuItem(L("Update Software"), L("Updates software on this controller using a USB memory stick.")));
-   //m_IndexReboot = addMenuItem(new MenuItem(L("Restart Controller"), L("Restarts the controller.")));
-   m_IndexReboot = -1;
+   m_IndexReboot = addMenuItem(new MenuItem(L("Restart Controller"), L("Restarts the controller.")));
+   //m_IndexReboot = -1;
 }
 
 void MenuController::Render()
@@ -257,12 +252,6 @@ void MenuController::onSelectItem()
       return;
    }
 
-   if ( m_IndexIPTunnel == m_SelectedIndex)
-   {
-      add_menu_to_stack(new MenuControllerTunnel());
-      return;
-   }
-
    if ( m_IndexRecording == m_SelectedIndex )
    {
       add_menu_to_stack(new MenuControllerRecording());
@@ -287,13 +276,12 @@ void MenuController::onSelectItem()
       return;
    }
 
-   /*
    if ( m_IndexPreferences == m_SelectedIndex )
    {
       add_menu_to_stack(new MenuPreferences()); 
       return;    
    }
-   */
+   
    if ( m_IndexPreferencesUI == m_SelectedIndex )
    {
       add_menu_to_stack(new MenuPreferencesUI()); 

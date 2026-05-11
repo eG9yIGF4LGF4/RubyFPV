@@ -48,7 +48,7 @@
 #include <time.h>
 #include <sys/resource.h>
 #include "radiolink.h"
-#include "udplink.h"
+#include "../r_utils/udplink.h"
 #include "radiopackets2.h"
 #include "radio_rx.h"
 
@@ -56,8 +56,6 @@
 //#define DEBUG_PACKET_SENT
 
 int s_bRadioDebugFlag = 0;
-int s_bRadioOverUdpFlag = 0;
-int s_bRadioControllerFlag = 0;
 int s_iUsePCAPForTx = DEFAULT_USE_PPCAP_FOR_TX;
 int s_iBypassSocketBuffers = DEFAULT_BYPASS_SOCKET_BUFFERS;
 int s_iRadioInterfacesBroken = 0;
@@ -148,16 +146,6 @@ int _radio_encode_port(int port)
 {
    //return (port * 2) + 1;
    return ((port<<4) | 0x0F);
-}
-
-void radio_init_link_structures_extra(int enableOverUDP, int isController)
-{
-   s_bRadioOverUdpFlag = enableOverUDP;
-   s_bRadioControllerFlag = isController;
-
-   if(enableOverUDP == 1) {
-      radio_process_udp_init(isController);
-   }
 }
 
 void radio_init_link_structures()
@@ -922,12 +910,6 @@ u8* radio_process_wlan_data_in(int interfaceNumber, int* outPacketLength, u32 uT
 
    s_iRadioLastReadErrorCode = RADIO_READ_ERROR_NO_ERROR;
 
-   if(s_bRadioOverUdpFlag == 1) {
-      if(pRadioHWInfo->iCardModel == CARD_MODEL_ETHERNET && pRadioHWInfo->iRadioDriver == RADIO_HW_DRIVER_ETHERNET) {
-         return radio_process_udp_data_in(interfaceNumber, outPacketLength, uTimeNow);
-      }
-   }
-
    if ( NULL != outPacketLength )
       *outPacketLength = 0;
 
@@ -1528,13 +1510,6 @@ int radio_write_raw_ieee_packet(int interfaceIndex, u8* pData, int dataLength, i
       log_softerror_and_alarm("RadioError: Tried to send an empty radio message.");
       return 0;
    }
-
-   if(s_bRadioOverUdpFlag == 1) {
-      if(pRadioHWInfo->iCardModel == CARD_MODEL_ETHERNET && pRadioHWInfo->iRadioDriver == RADIO_HW_DRIVER_ETHERNET) {
-         return radio_process_udp_data_out(interfaceIndex, pData, dataLength);
-      }
-   }
-
 
    if ( s_bRadioDebugFlag )
    {

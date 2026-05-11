@@ -1389,6 +1389,12 @@ bool handle_last_command_result()
          saveControllerModel(g_pCurrentModel);         
          break;
 
+      case COMMAND_ID_VEHICLE_SET_IP_TUNNEL:
+         log_line("[Commands] Command enable IP Tunnel (0/1) succeeded, enabled: %d", s_CommandParam );
+         g_pCurrentModel->enableIPTunnel = (bool)s_CommandParam;
+         saveControllerModel(g_pCurrentModel);         
+         break;
+
       case COMMAND_ID_SET_RC_CAMERA_PARAMS:
          g_pCurrentModel->camera_rc_channels = s_CommandParam;
          saveControllerModel(g_pCurrentModel);         

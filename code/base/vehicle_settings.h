@@ -8,7 +8,7 @@
 typedef struct
 {
    int iDevRxLoopTimeout;
-   int iTunnel;
+   int nUseIPTunnel;
 } VehicleSettings;
 
 int save_VehicleSettings();

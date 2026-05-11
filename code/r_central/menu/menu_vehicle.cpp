@@ -52,7 +52,6 @@
 #include "menu_vehicle_radio.h"
 #include "menu_vehicle_cpu_oipc.h"
 #include "menu_vehicle_dev.h"
-#include "menu_vehicle_tunnel.h"
 #include "menu_item_text.h"
 #include "../link_watch.h"
 
@@ -132,9 +131,6 @@ void MenuVehicle::onShow()
    if ( NULL != g_pCurrentModel && g_pCurrentModel->is_spectator )
       m_pMenuItems[m_IndexDataLink]->setEnabled(false);
  
-   m_IndexTunnel = addMenuItem(new MenuItem(L("IP Tunnel"), L("Configure IP tunnel settings for vehicle/controller")));
-   m_pMenuItems[m_IndexTunnel]->showArrow();
-
    m_IndexRC = addMenuItem(new MenuItem(L("Remote Control"), L("Change your remote control type, channels, protocols and so on."))); 
    #ifndef FEATURE_ENABLE_RC
    m_pMenuItems[m_IndexRC]->setEnabled(false);
@@ -414,6 +410,7 @@ void MenuVehicle::onSelectItem()
       add_menu_to_stack(new MenuVehicleGeneral());
       return;
    }
+   
    if ( m_IndexCamera == m_SelectedIndex )
    {
       if ( (NULL == g_pCurrentModel) || (g_pCurrentModel->iCameraCount <=0) )
@@ -424,11 +421,7 @@ void MenuVehicle::onSelectItem()
          add_menu_to_stack(new MenuVehicleCamera());
       return;
    }
-   if ( m_IndexTunnel == m_SelectedIndex)
-   {
-      add_menu_to_stack(new MenuVehicleTunnel());
-      return;
-   }
+
    if ( m_IndexVideo == m_SelectedIndex )
    {
       if ( get_sw_version_build(g_pCurrentModel) < 289 )

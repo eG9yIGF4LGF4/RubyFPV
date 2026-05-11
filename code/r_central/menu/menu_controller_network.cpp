@@ -87,6 +87,12 @@ MenuControllerNetwork::MenuControllerNetwork(void)
    m_IndexIP = addMenuItem(m_pItemsRange[0]);
    addMenuItem(new MenuItemText("Note: Changing network settings requires a restart."));
 
+   m_pItemsSelect[2] = new MenuItemSelect("Enable IP Tunnel", "Use IP tunnel between vehicle and controller.");
+   m_pItemsSelect[2]->addSelection("No");
+   m_pItemsSelect[2]->addSelection("Yes");
+   m_pItemsSelect[2]->setIsEditable();
+   m_IndexIPTunnel = addMenuItem(m_pItemsSelect[2]);
+
    m_IndexSSH = addMenuItem( new MenuItem("Enable SSH", "Enables SSH login to this controller"));
 }
 
@@ -100,6 +106,7 @@ void MenuControllerNetwork::valuesToUI()
       m_pItemsSelect[0]->setSelection(0);
 
    m_pItemsSelect[1]->setSelectedIndex(pCS->nUseFixedIP);
+   m_pItemsSelect[2]->setSelectedIndex(pCS->nUseIPTunnel);
 
    m_pItemsRange[0]->setCurrentValue(pCS->uFixedIP & 0xFF);
    if ( pCS->nUseFixedIP )
@@ -177,6 +184,15 @@ void MenuControllerNetwork::onSelectItem()
       m_pItemsRange[0]->invalidate();
       pCS->uFixedIP &= ~0xFF;
       pCS->uFixedIP |= ((int)m_pItemsRange[0]->getCurrentValue()) & 0xFF;
+      save_ControllerSettings();
+      valuesToUI();
+      send_control_message_to_router(PACKET_TYPE_LOCAL_CONTROL_CONTROLLER_CHANGED, PACKET_COMPONENT_LOCAL_CONTROL);       
+      return;
+   }
+
+   if ( m_IndexIPTunnel == m_SelectedIndex )
+   {
+      pCS->nUseIPTunnel = m_pItemsSelect[2]->getSelectedIndex();
       save_ControllerSettings();
       valuesToUI();
       send_control_message_to_router(PACKET_TYPE_LOCAL_CONTROL_CONTROLLER_CHANGED, PACKET_COMPONENT_LOCAL_CONTROL);       

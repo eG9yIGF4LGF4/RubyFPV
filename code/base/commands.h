@@ -291,5 +291,7 @@ typedef struct
 
 #define COMMAND_ID_CLEAR_LOGS 213
 
+#define COMMAND_ID_VEHICLE_SET_IP_TUNNEL 214
+
 //------------------------------------------------------
 const char* commands_get_description(u8 command_type);

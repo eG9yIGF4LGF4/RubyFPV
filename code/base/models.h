@@ -594,6 +594,7 @@ class Model
       type_radio_runtime_capabilities_parameters radioRuntimeCapabilities;
       type_logging_parameters loggingParams;
       bool enableDHCP;
+      bool enableIPTunnel;
 
       u32 camera_rc_channels;
            // each byte: pitch, roll, yaw camera RC channel (5 bits, 1 based index, 0 - unused), bit 6: 1 - absolute move, 0 - relative move;

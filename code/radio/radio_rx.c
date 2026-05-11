@@ -38,8 +38,13 @@
 #include "../common/string_utils.h"
 #include "radio_rx.h"
 #include "radiolink.h"
+#include "udplink.h"
 #include "radio_duplicate_det.h"
 #include <poll.h>
+#include "../base/ctrl_settings.h"
+#include <sys/stat.h>
+
+#define CLOCK_REALTIME 0
 
 int s_iRadioRxInitialized = 0;
 int s_iRadioRxSingalStop = 0;
@@ -55,6 +60,8 @@ pthread_t s_pThreadRadioRx;
 
 shared_mem_radio_stats* s_pSMRadioStats = NULL;
 int s_iSearchMode = 0;
+u32 s_iController = 0;
+u32 s_iEnableIPTunnel = 0;
 u32 s_uRadioRxTimeNow = 0;
 u32 s_uRadioRxMaxTimeRead = 0;
 u32 s_uRadioRxLastTimeQueue = 0;
@@ -585,7 +592,13 @@ int _radio_rx_parse_received_wifi_radio_data(int iInterfaceIndex, int iMaxReads)
    for( int iCountReads=0; iCountReads<iMaxReads; iCountReads++ )
    {
       iBufferLength = 0;
-      pPacketBuffer = radio_process_wlan_data_in(iInterfaceIndex, &iBufferLength, s_uRadioRxTimeNow);
+
+      if ( s_RadioRxState.bEnableIPTunnel ) 
+         pPacketBuffer = radio_process_udp_data_in(iInterfaceIndex, &iBufferLength, s_uRadioRxTimeNow);
+
+      if ( iBufferLength == 0 )
+         pPacketBuffer = radio_process_wlan_data_in(iInterfaceIndex, &iBufferLength, s_uRadioRxTimeNow);
+
       if ( NULL == pPacketBuffer )
          break;
 
@@ -1448,4 +1461,14 @@ u32 radio_rx_get_and_reset_max_loop_time_queue()
    u32 u = s_uRadioRxLastTimeQueue;
    s_uRadioRxLastTimeQueue = 0;
    return u;
+}
+
+void radio_rx_ip_tunnel_enable()
+{
+   s_RadioRxState.bEnableIPTunnel = 1;
+}
+
+void radio_rx_ip_tunnel_disable()
+{
+   s_RadioRxState.bEnableIPTunnel = 0;
 }

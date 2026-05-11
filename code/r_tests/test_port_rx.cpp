@@ -295,7 +295,7 @@ int main(int argc, char *argv[])
    }
    hardware_sleep_ms(100);
 
-   radio_init_link_structures(0);
+   radio_init_link_structures();
    radio_enable_crc_gen(1);
 
    if ( -1 == iInterfaceIndex )

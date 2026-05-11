@@ -21,4 +21,5 @@ class MenuControllerNetwork: public Menu
       int m_IndexDHCP;
       int m_IndexFixedIP;
       int m_IndexIP;
+      int m_IndexIPTunnel;
 };

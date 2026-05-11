@@ -149,6 +149,12 @@ void MenuVehicleGeneral::populate()
       m_SelectedIndex = iTmp;
       onFocusedItemChanged();
    }
+
+   m_pItemsSelect[1] = new MenuItemSelect("Enable IP Tunnel", "Use IP tunnel between vehicle and controller.");
+   m_pItemsSelect[1]->addSelection("No");
+   m_pItemsSelect[1]->addSelection("Yes");
+   m_pItemsSelect[1]->setIsEditable();
+   m_IndexIPTunnel = addMenuItem(m_pItemsSelect[1]);
 }
 
 void MenuVehicleGeneral::valuesToUI()
@@ -156,6 +162,7 @@ void MenuVehicleGeneral::valuesToUI()
    populate();
 
    m_pItemsSelect[0]->setSelection(g_pCurrentModel->vehicle_type & MODEL_TYPE_MASK);
+   m_pItemsSelect[1]->setSelectedIndex(g_pCurrentModel->enableIPTunnel);
 }
 
 void MenuVehicleGeneral::Render()
@@ -245,6 +252,15 @@ void MenuVehicleGeneral::onSelectItem()
       }
       else if ( ! handle_commands_send_to_vehicle(COMMAND_ID_SET_VEHICLE_TYPE, uVehicleType, NULL, 0) )
          m_pItemsSelect[0]->setSelection(g_pCurrentModel->vehicle_type & MODEL_TYPE_MASK);
+   }
+
+   if ( m_IndexIPTunnel == m_SelectedIndex )
+   {
+      u8 uCurrentSetting = (u8)(m_pItemsSelect[1]->getSelectedIndex());
+
+      if ( uCurrentSetting != g_pCurrentModel->enableIPTunnel ) { 
+         handle_commands_send_to_vehicle(COMMAND_ID_VEHICLE_SET_IP_TUNNEL, uCurrentSetting, NULL, 0);
+      }
    }
 
    if ( (-1 != m_IndexBoardType) && (m_IndexBoardType == m_SelectedIndex) )

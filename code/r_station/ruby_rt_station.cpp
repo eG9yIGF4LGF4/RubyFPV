@@ -867,6 +867,12 @@ void reasign_radio_links(bool bSilent)
    links_set_cards_frequencies_and_params(-1);
    radio_links_open_rxtx_radio_interfaces();
 
+   if( g_pControllerSettings->nUseIPTunnel ) {
+      radio_rx_ip_tunnel_enable();
+   } else {
+      radio_rx_ip_tunnel_disable();
+   }
+
    radio_rx_start_rx_thread(&g_SM_RadioStats, (int)g_bSearching, g_uAcceptedFirmwareType);
 
    if ( ! bSilent )
@@ -1643,7 +1649,6 @@ int main(int argc, char *argv[])
    int thisIsController = 1;
 
    radio_init_link_structures();
-   radio_init_link_structures_extra(enableRadioOverUDP, thisIsController);
    radio_enable_crc_gen(1);
    hardware_enumerate_radio_interfaces(); 
 
@@ -1816,6 +1821,13 @@ int main(int argc, char *argv[])
    load_CorePlugins(0);
 
    radio_duplicate_detection_init();
+
+   if( g_pControllerSettings->nUseIPTunnel ) {
+      radio_rx_ip_tunnel_enable();
+   } else {
+      radio_rx_ip_tunnel_disable();
+   }
+
    radio_rx_start_rx_thread(&g_SM_RadioStats, (int)g_bSearching, g_uAcceptedFirmwareType);
    
    log_line("Broadcasting that router is ready.");

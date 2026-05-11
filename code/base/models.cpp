@@ -503,9 +503,10 @@ bool Model::loadVersion10(FILE* fd)
          radioInterfacesParams.interface_szPort[i][iStrLen-1] = 0;
    }
 
-   if ( 9 != fscanf(fd, "%d %d %d %u %d %d %d %d %d", &tmp1, &radioInterfacesParams.iAutoVehicleTxPower, &radioInterfacesParams.iAutoControllerTxPower, &radioInterfacesParams.uFlagsRadioInterfaces, &radioInterfacesParams.iDummyR4, &radioInterfacesParams.iDummyR5, &radioInterfacesParams.iDummyR6,  &radioInterfacesParams.iDummyR7, &radioInterfacesParams.iDummyR8) )
+   if ( 10 != fscanf(fd, "%d %d %d %d %u %d %d %d %d %d", &tmp1, &tmp2, &radioInterfacesParams.iAutoVehicleTxPower, &radioInterfacesParams.iAutoControllerTxPower, &radioInterfacesParams.uFlagsRadioInterfaces, &radioInterfacesParams.iDummyR4, &radioInterfacesParams.iDummyR5, &radioInterfacesParams.iDummyR6,  &radioInterfacesParams.iDummyR7, &radioInterfacesParams.iDummyR8) )
       { log_softerror_and_alarm("Load model8: Error on line 8"); return false; }
    enableDHCP = (bool)tmp1;
+   enableIPTunnel = (bool)tmp2;
 
    if ( 1 != fscanf(fd, "%d", &radioInterfacesParams.iDummyR9) )
    {
@@ -1300,7 +1301,7 @@ bool Model::saveVersion10(FILE* fd, bool isOnController)
       sprintf(szSetting, "  %u %d %u %d %d %d %s- %s-\n", radioInterfacesParams.interface_capabilities_flags[i], radioInterfacesParams.interface_supported_bands[i], radioInterfacesParams.interface_radiotype_and_driver[i], radioInterfacesParams.interface_current_radio_flags[i], radioInterfacesParams.interface_raw_power[i], radioInterfacesParams.interface_dummy2[i], radioInterfacesParams.interface_szMAC[i], radioInterfacesParams.interface_szPort[i]);
       strcat(szModel, szSetting);
    }
-   sprintf(szSetting, "%d %d %d %u %d %d %d %d %d\n", enableDHCP, radioInterfacesParams.iAutoVehicleTxPower, radioInterfacesParams.iAutoControllerTxPower, radioInterfacesParams.uFlagsRadioInterfaces, radioInterfacesParams.iDummyR4, radioInterfacesParams.iDummyR5, radioInterfacesParams.iDummyR6, radioInterfacesParams.iDummyR7, radioInterfacesParams.iDummyR8); 
+   sprintf(szSetting, "%d %d %d %u %d %d %d %d %d\n", enableDHCP, enableIPTunnel, radioInterfacesParams.iAutoVehicleTxPower, radioInterfacesParams.iAutoControllerTxPower, radioInterfacesParams.uFlagsRadioInterfaces, radioInterfacesParams.iDummyR4, radioInterfacesParams.iDummyR5, radioInterfacesParams.iDummyR6, radioInterfacesParams.iDummyR7, radioInterfacesParams.iDummyR8); 
    strcat(szModel, szSetting);
 
    sprintf(szSetting, "%d\n", radioInterfacesParams.iDummyR9);
@@ -3211,6 +3212,7 @@ void Model::resetToDefaults(bool generateId)
 
    enc_flags = MODEL_ENC_FLAGS_NONE;
    enableDHCP = false;
+   enableIPTunnel = false;
    alarms = 0;
 
    uModelFlags = MODEL_FLAG_USE_LOGER_SERVICE | MODEL_FLAG_PRIORITIZE_UPLINK;

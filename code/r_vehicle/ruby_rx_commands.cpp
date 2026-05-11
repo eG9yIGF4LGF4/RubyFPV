@@ -3009,6 +3009,18 @@ bool process_command(u8* pBuffer, int length)
       return true;
    }
 
+   if ( uCommandType == COMMAND_ID_VEHICLE_SET_IP_TUNNEL )
+   {
+      sendCommandReply(COMMAND_RESPONSE_FLAGS_OK, 0, 0);
+      
+      g_pCurrentModel->enableIPTunnel = pPHC->command_param;
+
+      saveCurrentModel();
+      signalReloadModel(MODEL_CHANGED_GENERIC, 0);
+      
+      return true;
+   }
+
    return false;
 }
 
