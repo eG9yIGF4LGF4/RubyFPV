@@ -191,6 +191,17 @@ void MenuChannelsSelect::valuesToUI()
          else
             pItem->setChecked(false);
          itemIndex++;
+      }
+      
+   if ( m_uFrequencyBands & RADIO_HW_SUPPORTED_BAND_60 )
+      for( int i=0; i<getChannels60Count(); i++ )
+      {
+         MenuItemCheckbox* pItem = (MenuItemCheckbox*)m_pMenuItems[itemIndex];
+         if ( s_uChannelsSelect60Band & (((u32)0x01)<<i) )
+            pItem->setChecked(true);
+         else
+            pItem->setChecked(false);
+         itemIndex++;
       } 
 }
 
@@ -295,6 +306,7 @@ void MenuChannelsSelect::onSelectItem()
       s_uChannelsSelect24Band = MAX_U32;
       s_uChannelsSelect25Band = MAX_U32;
       s_uChannelsSelect58Band = MAX_U32;
+      s_uChannelsSelect60Band = MAX_U32;
       valuesToUI();
    }
    if ( 1 == m_SelectedIndex )
@@ -305,6 +317,7 @@ void MenuChannelsSelect::onSelectItem()
       s_uChannelsSelect24Band = 0;
       s_uChannelsSelect25Band = 0;
       s_uChannelsSelect58Band = 0;
+      s_uChannelsSelect60Band = 0;
       valuesToUI();
    }
 }
