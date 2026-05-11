@@ -5,8 +5,9 @@
 #include "udplink.h"
 
 // TODO: For a wg0 interface with 192.168.43.1/24 subnet
-#define ADDR_LOCAL   "192.168.43.2"
-#define ADDR_REMOTE  "192.168.43.3"
+#define IP_TUNNEL_UDP_PORT      6662
+#define IP_TUNNEL_ADDR_STATION  "192.168.43.2"
+#define IP_TUNNEL_ADDR_VEHICLE  "192.168.43.3"
 
 static u8  sPacketBufferRead[MAX_PACKET_LENGTH_PCAP];
 
@@ -15,10 +16,10 @@ static int s_tx_sock       = -1;
 static int s_is_controller = 0;
 
 static struct sockaddr_in s_bind_addr;  /* local address  — RX binds here  */
-static struct sockaddr_in s_dest_addr;  /* remote address — TX sends here   */
+static struct sockaddr_in s_dest_addr;  /* remote address — TX sends here  */
 
 /* ------------------------------------------------------------------ */
-/*  Public API                                                          */
+/*  Public API                                                        */
 /* ------------------------------------------------------------------ */
 
 void radio_process_udp_init(int isController)
@@ -30,18 +31,18 @@ void radio_process_udp_init(int isController)
      * Controller  : local = 192.168.43.1, remote = 192.168.43.2
      * Vehicle     : local = 192.168.43.2, remote = 192.168.43.1
      */
-    const char *local_ip  = isController ? ADDR_LOCAL  : ADDR_REMOTE;
-    const char *remote_ip = isController ? ADDR_REMOTE : ADDR_LOCAL;
+    const char *local_ip  = isController ? IP_TUNNEL_ADDR_STATION  : IP_TUNNEL_ADDR_VEHICLE;
+    const char *remote_ip = isController ? IP_TUNNEL_ADDR_VEHICLE : IP_TUNNEL_ADDR_STATION;
 
     memset(&s_bind_addr, 0, sizeof(s_bind_addr));
     s_bind_addr.sin_family      = AF_INET;
     s_bind_addr.sin_addr.s_addr = inet_addr(local_ip);
-    s_bind_addr.sin_port        = htons(isController ? UDP_PORT_STATION : UDP_PORT_VEHICLE);
+    s_bind_addr.sin_port        = htons(IP_TUNNEL_UDP_PORT);
 
     memset(&s_dest_addr, 0, sizeof(s_dest_addr));
     s_dest_addr.sin_family      = AF_INET;
     s_dest_addr.sin_addr.s_addr = inet_addr(remote_ip);
-    s_dest_addr.sin_port        = htons(isController ? UDP_PORT_VEHICLE : UDP_PORT_STATION);
+    s_dest_addr.sin_port        = htons(IP_TUNNEL_UDP_PORT);
 }
 
 int radio_process_udp_open_rx(void)
