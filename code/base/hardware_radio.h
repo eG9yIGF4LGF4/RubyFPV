@@ -20,16 +20,17 @@
 #define RADIO_HW_DRIVER_ATHEROS 1       // ath9k_htc
 #define RADIO_HW_DRIVER_RALINK 2        // rt2800usb, only 2.4Ghz band
 #define RADIO_HW_DRIVER_MEDIATEK 3      // mt7601u
-#define RADIO_HW_DRIVER_REALTEK_RTL88XXAU 4       // rtl88xxau
-#define RADIO_HW_DRIVER_REALTEK_RTL8812AU 5       // rtl8812au
+#define RADIO_HW_DRIVER_REALTEK_88XXAU 4       // rtl88xxau
+#define RADIO_HW_DRIVER_REALTEK_8812AU 5       // rtl8812au
 #define RADIO_HW_DRIVER_REALTEK_8812AU 6          // 8812au
-#define RADIO_HW_DRIVER_REALTEK_RTL88X2BU 7       // rtl88x2bu
+#define RADIO_HW_DRIVER_REALTEK_88X2BU 7       // rtl88x2bu
 #define RADIO_HW_DRIVER_SERIAL_SIK 8
 #define RADIO_HW_DRIVER_SERIAL 9
 #define RADIO_HW_DRIVER_REALTEK_8812EU 10          // 88x2eu
 #define RADIO_HW_DRIVER_REALTEK_8733BU 15          // 88733bu
 #define RADIO_HW_DRIVER_REALTEK_8852BE 16          // rtw89_8852be_git
 #define RADIO_HW_DRIVER_BUILTIN        17
+#define RADIO_HW_DRIVER_REALTEK_8814AU 18       // rtl8814au
 #define RADIO_HW_DRIVER_ETHERNET       20
 
 
@@ -208,11 +209,15 @@ int hardware_radio_get_class_net_adapters_count();
 
 int hardware_load_driver_rtl8812au();
 int hardware_load_driver_rtl8812eu();
+// int hardware_load_driver_rtl8814au(); // TODO 
 int hardware_load_driver_rtl8733bu();
+// int hardware_load_driver_rtl8852be(); // TODO 
 int hardware_radio_load_radio_modules(int iEchoToConsole);
 int hardware_install_driver_rtl8812au(int iEchoToConsole);
 int hardware_install_driver_rtl8812eu(int iEchoToConsole);
+// int hardware_install_driver_rtl8814au(int iEchoToConsole); // TODO
 int hardware_install_driver_rtl8733bu(int iEchoToConsole);
+// int hardware_install_driver_rtl8852be(int iEchoToConsole); // TODO
 void hardware_install_drivers(int iEchoToConsole);
 int hardware_initialize_radio_interface(int iInterfaceIndex, u32 uDelayMS);
 
@@ -228,11 +233,15 @@ int hardware_get_radio_index_from_mac(const char* szMAC);
 int hardware_radio_has_low_capacity_links();
 int hardware_radio_has_rtl8812au_cards();
 int hardware_radio_has_rtl8812eu_cards();
+// int hardware_radio_has_rtl8814au_cards(); // TODO
 int hardware_radio_has_rtl8733bu_cards();
+// int hardware_radio_has_rtl8852be_cards(); // TODO
 int hardware_radio_has_atheros_cards();
 int hardware_radio_driver_is_rtl8812au_card(int iDriver);
 int hardware_radio_driver_is_rtl8812eu_card(int iDriver);
+int hardware_radio_driver_is_rtl8814au_card(int iDriver);
 int hardware_radio_driver_is_rtl8733bu_card(int iDriver);
+int hardware_radio_driver_is_rtl8852be_card(int iDriver);
 int hardware_radio_driver_is_atheros_card(int iDriver);
 
 const char* hardware_get_radio_name(int iRadioIndex);

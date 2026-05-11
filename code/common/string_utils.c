@@ -1053,9 +1053,9 @@ const char* str_get_radio_driver_description(int iDriverType)
       strcpy(sszNICDriverDescription, "rt2800usb");
    if ( iDriverType == RADIO_HW_DRIVER_MEDIATEK )
       strcpy(sszNICDriverDescription, "mt7601u");
-   if ( iDriverType == RADIO_HW_DRIVER_REALTEK_RTL88XXAU )
+   if ( iDriverType == RADIO_HW_DRIVER_REALTEK_88XXAU )
       strcpy(sszNICDriverDescription, "rtl88xxau");
-   if ( iDriverType == RADIO_HW_DRIVER_REALTEK_RTL8812AU )
+   if ( iDriverType == RADIO_HW_DRIVER_REALTEK_8812AU )
       strcpy(sszNICDriverDescription, "rtl8812au");
    if ( iDriverType == RADIO_HW_DRIVER_REALTEK_8812AU )
       strcpy(sszNICDriverDescription, "8812au");

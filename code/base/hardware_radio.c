@@ -286,6 +286,14 @@ int hardware_load_radio_info_into_buffers(int* piOutputTotalCount, int* piOutput
                i+1, pRadioInfoArray[i].szName, pRadioInfoArray[i].szDriver);
             pRadioInfoArray[i].isHighCapacityInterface = 0;
          }
+
+         for( int kk=0; kk<strlen(pRadioInfoArray[i].szProductId); kk++ )
+         {
+            if ( pRadioInfoArray[i].szProductId[kk] == '\n' || pRadioInfoArray[i].szProductId[kk] == '\r' || pRadioInfoArray[i].szProductId[kk] == '\t' ) {
+               pRadioInfoArray[i].szProductId[kk] = 0;
+               break;
+            }
+         }
       }
 
       log_line("Loaded radio HW info file.");
@@ -649,7 +657,7 @@ int hardware_radio_get_driver_id_card_model(int iCardModel)
    else if ( iCardModel == CARD_MODEL_ETHERNET )
       return RADIO_HW_DRIVER_ETHERNET;
    else if ( (iCardModel > 0) && (iCardModel <50) )
-      return RADIO_HW_DRIVER_REALTEK_RTL88XXAU;
+      return RADIO_HW_DRIVER_REALTEK_88XXAU;
 
    return 0;
 }
@@ -933,7 +941,9 @@ int _hardware_enumerate_wifi_radios()
       sRadioInfo[i].isSupported = 0;
       if ( (NULL != strstr(pszDriver,"rtl88xxau")) ||
            (NULL != strstr(pszDriver,"8812au")) ||
+           (NULL != strstr(pszDriver,"8814au")) ||
            (NULL != strstr(pszDriver,"rtl8812au")) ||
+           (NULL != strstr(pszDriver,"rtl8814au")) ||
            (NULL != strstr(pszDriver,"rtl88XXau")) ||
            (NULL != strstr(pszDriver,"8812eu")) ||
            (NULL != strstr(pszDriver,"88x2eu")) ||
@@ -948,7 +958,7 @@ int _hardware_enumerate_wifi_radios()
               (NULL != strstr(pszDriver,"rtl88XXau")) )
          {
             sRadioInfo[i].iRadioType = RADIO_TYPE_REALTEK;
-            sRadioInfo[i].iRadioDriver = RADIO_HW_DRIVER_REALTEK_RTL88XXAU;
+            sRadioInfo[i].iRadioDriver = RADIO_HW_DRIVER_REALTEK_88XXAU;
          }
          if ( NULL != strstr(pszDriver,"8812au") )
          {
@@ -958,7 +968,12 @@ int _hardware_enumerate_wifi_radios()
          if ( NULL != strstr(pszDriver,"rtl8812au") )
          {
             sRadioInfo[i].iRadioType = RADIO_TYPE_REALTEK;
-            sRadioInfo[i].iRadioDriver = RADIO_HW_DRIVER_REALTEK_RTL8812AU;
+            sRadioInfo[i].iRadioDriver = RADIO_HW_DRIVER_REALTEK_8812AU;
+         }
+         if ( NULL != strstr(pszDriver,"rtl8814au") )
+         {
+            sRadioInfo[i].iRadioType = RADIO_TYPE_REALTEK;
+            sRadioInfo[i].iRadioDriver = RADIO_HW_DRIVER_REALTEK_8814AU;
          }
          if ( (NULL != strstr(pszDriver,"8812eu")) || (NULL != strstr(pszDriver,"88x2eu")) )
          {
@@ -1015,7 +1030,7 @@ int _hardware_enumerate_wifi_radios()
          sRadioInfo[i].isTxCapable = 0;
          strcpy(sRadioInfo[i].szDescription, "Realtek");
          sRadioInfo[i].iRadioType = RADIO_TYPE_REALTEK;
-         sRadioInfo[i].iRadioDriver = RADIO_HW_DRIVER_REALTEK_RTL88X2BU;
+         sRadioInfo[i].iRadioDriver = RADIO_HW_DRIVER_REALTEK_88X2BU;
       }
       if ( NULL != strstr(pszDriver,"rt2800usb") )
       {
@@ -1057,48 +1072,17 @@ int _hardware_enumerate_wifi_radios()
          log_softerror_and_alarm("Found unsupported radio (%s), driver %s, skipping.", sRadioInfo[i].szName, szDriver);
       else
          log_line("[HardwareRadio] Found supported radio type: %s, driver: %s, driver string short: %s, driver string: [%s]", str_get_radio_type_description(sRadioInfo[i].iRadioType), str_get_radio_driver_description(sRadioInfo[i].iRadioDriver), sRadioInfo[i].szDriver, pszDriver);
-      //sRadioInfo[i].iCardModel = 0; // TODO - to uncomment ??
 
       for( int kk=0; kk<(int)(sizeof(sRadioInfo[i].szUSBPort)/sizeof(sRadioInfo[i].szUSBPort[0])); kk++ )
          sRadioInfo[i].szUSBPort[kk] = 0;
 
-      for( int kk=0; kk<(int)(sizeof(sRadioInfo[i].szProductId)/sizeof(sRadioInfo[i].szProductId[0])); kk++ )
-         sRadioInfo[i].szProductId[kk] = 0;
+      for( int kk=0; kk<strlen(sRadioInfo[i].szProductId); kk++ )
+         if ( sRadioInfo[i].szProductId[kk] == '\n' || sRadioInfo[i].szProductId[kk] == '\t' || sRadioInfo[i].szProductId[kk] == '\r' ) {
+            sRadioInfo[i].szProductId[kk] = 0;
+            break;
+         }
 
-      // // Find the MAC address
-      // sprintf(szComm, "iw dev %s info | grep addr", sRadioInfo[i].szName );
-      // if ( 1 != hw_execute_bash_command_raw(szComm, szBuff) )
-      // {
-      //    log_softerror_and_alarm("Failed to find MAC address for %s", sRadioInfo[i].szName);
-      // }
-      // else if ( 1 != sscanf(szBuff, "%*s %s", szComm) )
-      // {
-      //    log_softerror_and_alarm("Failed to find MAC address for %s", sRadioInfo[i].szName);
-      // }
-      // else
-      // {
-      //    log_line("Found MAC address %s for %s", szComm, sRadioInfo[i].szName);
-      //    szComm[MAX_MAC_LENGTH-1] = 0;
-      //    int iSt = 0;
-      //    int iEnd = 0;
-      //    while ( iEnd < strlen(szComm) )
-      //    {
-      //       if ( szComm[iEnd] == ':' )
-      //          iEnd++;
-      //       else
-      //       {
-      //          szComm[iSt] = toupper(szComm[iEnd]);
-      //          iSt++;
-      //          iEnd++;
-      //       }
-      //    }
-      //    szComm[iSt] = 0;
-      //    strncpy(sRadioInfo[i].szMAC, szComm, MAX_MAC_LENGTH-1);
-      //    sRadioInfo[i].szMAC[MAX_MAC_LENGTH-1] = 0;
-      // }
-      strcpy(sRadioInfo[i].szMAC, szMac);
-
-      // Find physical interface number, in form phy#0
+      memcpy(sRadioInfo[i].szMAC, szMac, 18-1);
 
       sprintf(szComm, "iw dev | grep -B 1 %s", sRadioInfo[i].szName );
       if ( 1 != hw_execute_bash_command_raw(szComm, szBuff) )
@@ -2013,8 +1997,45 @@ int hardware_initialize_radio_interface(int iInterfaceIndex, u32 uDelayMS)
       _configure_radio_interface_realtek(iInterfaceIndex, pRadioHWInfo, uDelayMS);
 
 
-   pRadioHWInfo->uCurrentFrequencyKhz = 0;
-   pRadioHWInfo->lastFrequencySetFailed = 1;
+   char szBuff[1024];
+
+   // // Find the current frequency
+   sprintf(szComm, "iw dev %s info | grep channel", pRadioHWInfo->szName );
+   if ( 1 != hw_execute_bash_command_raw(szComm, szBuff) ) {
+      log_line("Failed to find frequency address for %s", pRadioHWInfo->szName);
+   } else {
+      int iSt = -1, iEnd = -1;
+      for (int j = 0; j < strlen(szBuff); j++ )
+      {
+         if ( iSt == -1 ) {
+            if ( szBuff[j] == '(' ) {
+               iSt = j + 1;
+               continue;
+            }
+         }   
+
+         if ( iEnd == -1 ) {
+            if ( szBuff[j] == ')' ) {
+               iEnd = j + 1;
+               break;
+            }
+         }            
+      }
+
+      char szNb[8];
+      memset(szNb, 0, 8);
+      memcpy(szNb, szBuff + iSt, iEnd - iSt);
+
+      int nb = atoi(szNb);
+      pRadioHWInfo->uCurrentFrequencyKhz = nb*1000;
+      pRadioHWInfo->lastFrequencySetFailed = 0;
+   }
+      
+   sprintf(szComm, "iw dev %s set freq %d", pRadioHWInfo->szName, pRadioHWInfo->uCurrentFrequencyKhz / 1000 );
+   hw_execute_bash_command_raw(szComm, szBuff);
+
+   // pRadioHWInfo->uCurrentFrequencyKhz = 0;
+   // pRadioHWInfo->lastFrequencySetFailed = 1;
    pRadioHWInfo->uFailedFrequencyKhz = DEFAULT_FREQUENCY;
 
    sprintf(szComm, "iwconfig %s rts off 2>&1", pRadioHWInfo->szName);
@@ -2224,10 +2245,17 @@ int hardware_radio_has_atheros_cards()
 int hardware_radio_driver_is_rtl8812au_card(int iDriver)
 {
    if ( (iDriver == RADIO_HW_DRIVER_REALTEK_8812AU) ||
-        (iDriver == RADIO_HW_DRIVER_REALTEK_RTL88XXAU) ||
-        (iDriver == RADIO_HW_DRIVER_REALTEK_RTL8812AU) ||
-        (iDriver == RADIO_HW_DRIVER_REALTEK_RTL88X2BU) ||
+        (iDriver == RADIO_HW_DRIVER_REALTEK_88XXAU) ||
+        (iDriver == RADIO_HW_DRIVER_REALTEK_8812AU) ||
+        (iDriver == RADIO_HW_DRIVER_REALTEK_88X2BU) ||
         (iDriver == RADIO_HW_DRIVER_MEDIATEK) )
+      return 1;
+   return 0;
+}
+
+int hardware_radio_driver_is_rtl8814au_card(int iDriver)
+{
+   if ( (iDriver == RADIO_HW_DRIVER_REALTEK_8814AU) )
       return 1;
    return 0;
 }
@@ -2244,6 +2272,13 @@ int hardware_radio_driver_is_rtl8733bu_card(int iDriver)
    if ( iDriver == RADIO_HW_DRIVER_REALTEK_8733BU )
       return 1;
    return 0; 
+}
+
+int hardware_radio_driver_is_rtl8852be_card(int iDriver)
+{
+   if ( (iDriver == RADIO_HW_DRIVER_REALTEK_8852BE) )
+      return 1;
+   return 0;
 }
 
 int hardware_radio_driver_is_atheros_card(int iDriver)
