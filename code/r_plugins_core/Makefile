@@ -1,6 +1,6 @@
 LDFLAGS=-lrt -lpcap -lpthread
-CPPFLAGS=-Wall -O0 -D _GNU_SOURCE
-CFLAGS := $(CFLAGS) 
+CPPFLAGS=-Wall -O0 -D _GNU_SOURCE -fPIC
+CFLAGS := $(CFLAGS) -fPIC
 RELEASE_DIR = ../../
 
 all: plugin_core_example
@@ -18,5 +18,11 @@ plugin_core_example: core_plugins_utils.o plugin_core_example.o
 	$(info Copy plugin_core_example)
 	$(info ----------------------------------------------------)
 
+plugin_core_keyboard: core_plugins_utils.o plugin_core_keyboard.o
+	gcc plugin_core_keyboard.o core_plugins_utils.o -shared -Wl,-soname,plugin_core_keyboard.so.1 -o plugin_core_keyboard.so.1.0.1 -lc
+	cp -f plugin_core_keyboard.so.1.0.1 $(RELEASE_DIR)
+	$(info Copy plugin_core_keyboard)
+	$(info ----------------------------------------------------)
+
 clean:
-	rm -f plugin_core_example.so.* *.o
+	rm -f *.so.* *.o

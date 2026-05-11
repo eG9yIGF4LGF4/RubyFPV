@@ -3,8 +3,8 @@
 #include "../public/ruby_core_plugin.h"
 #include "../public/utils/core_plugins_utils.h"
 
-const char* g_szPluginNameExample = "Example Core Plugin";
-const char* g_szUIDExample = "A34776T-A2123Q-WE19J-XX24";
+const char* g_szPluginNameExample = "Keyboard Core Plugin";
+const char* g_szUIDExample = "A23668T-A2123Q-WE19J-XX24";
 
 u32 g_uRuntimeLocation = 0;
 u32 g_uAllocatedCapabilities = 0;
@@ -17,7 +17,7 @@ extern "C" {
 // The plugin should just return the desired capabilities.
 u32 core_plugin_on_requested_capabilities()
 {
-   core_plugin_util_log_line("My plugin request capabilities.");
+   core_plugin_util_log_line("Keyboard plugin request capabilities.");
 
    return CORE_PLUGIN_CAPABILITY_DATA_STREAM | CORE_PLUGIN_CAPABILITY_HARDWARE_ACCESS_UART;
 }
@@ -48,7 +48,7 @@ int core_plugin_init(u32 uRuntimeLocation, u32 uAllocatedCapabilities)
    g_uRuntimeLocation = uRuntimeLocation;
    g_uAllocatedCapabilities = uAllocatedCapabilities;
 
-   core_plugin_util_log_line("My plugin init");
+   core_plugin_util_log_line("Keyboard plugin init");
 
    return 0;
 }
@@ -56,7 +56,7 @@ int core_plugin_init(u32 uRuntimeLocation, u32 uAllocatedCapabilities)
 // This is the last method called at runtime, before a plugin is unloaded (due to a reboot or plugin uninstall).
 void core_plugin_uninit()
 {
-   core_plugin_util_log_line("My plugin uninit");
+   core_plugin_util_log_line("Keyboard plugin uninit");
 }
 
 

@@ -49,6 +49,7 @@
 #include "menu_preferences_ui.h"
 #include "menu_preferences.h"
 #include "menu_controller_radio.h"
+#include "menu_controller_tunnel.h"
 #include "menu_controller_update.h"
 #include "../../base/ctrl_settings.h"
 
@@ -115,6 +116,9 @@ void MenuController::addItems()
    
    m_IndexNetwork = addMenuItem(new MenuItem(L("Local Network Settings"), L("Change the local network settings on the controller (DHCP/Fixed IP)")));
    m_pMenuItems[m_IndexNetwork]->showArrow();
+
+   m_IndexIPTunnel = addMenuItem(new MenuItem(L("IP Tunnel"), L("Configure IP tunnel settings for vehicle/controller")));
+   m_pMenuItems[m_IndexIPTunnel]->showArrow();
 
    m_IndexEncryption = -1;
    m_IndexEncryption = addMenuItem(new MenuItem("Encryption", "Change the encryption global settings"));
@@ -250,6 +254,12 @@ void MenuController::onSelectItem()
    if ( m_IndexRadio == m_SelectedIndex )
    {
       add_menu_to_stack(new MenuControllerRadio());
+      return;
+   }
+
+   if ( m_IndexIPTunnel == m_SelectedIndex)
+   {
+      add_menu_to_stack(new MenuControllerTunnel());
       return;
    }
 

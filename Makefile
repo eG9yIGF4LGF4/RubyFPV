@@ -74,6 +74,7 @@ FOLDER_CENTRAL_MENU=code/r_central/menu
 FOLDER_CENTRAL_OSD=code/r_central/osd
 FOLDER_CENTRAL_OLED=code/r_central/oled
 FOLDER_PLUGINS_OSD=code/r_plugins_osd
+FOLDER_PLUGINS_CORE=code/r_plugins_core
 FOLDER_TESTS=code/r_tests
 
 $(FOLDER_BASE)/%.o: $(FOLDER_BASE)/%.c
@@ -166,6 +167,9 @@ $(FOLDER_PLUGINS_OSD)/%.o: $(FOLDER_PLUGINS_OSD)/%.c
 $(FOLDER_PLUGINS_OSD)/%.o: $(FOLDER_PLUGINS_OSD)/%.cpp
 	$(CXX) $(_CFLAGS) -c -o $@ $<
 
+$(FOLDER_PLUGINS_CORE)/%.o: $(FOLDER_PLUGINS_CORE)/%.cpp
+	$(CXX) $(_CFLAGS) -c -o $@ $<
+
 $(FOLDER_TESTS)/%.o: $(FOLDER_TESTS)/%.c
 	$(CC) $(_CFLAGS) $(CFLAGS_RENDERER) -c -o $@ $<
 
@@ -203,7 +207,7 @@ CENTRAL_MENU_ITEMS_ALL := $(FOLDER_CENTRAL_MENU)/menu_items.o $(FOLDER_CENTRAL_M
 CENTRAL_MENU_ALL1 := $(FOLDER_CENTRAL_MENU)/menu.o $(FOLDER_CENTRAL_MENU)/menu_objects.o $(FOLDER_CENTRAL_MENU)/menu_preferences_buttons.o $(FOLDER_CENTRAL_MENU)/menu_root.o $(FOLDER_CENTRAL_MENU)/menu_search.o $(FOLDER_CENTRAL_MENU)/menu_spectator.o $(FOLDER_CENTRAL_MENU)/menu_vehicles.o $(FOLDER_CENTRAL_MENU)/menu_vehicle.o $(FOLDER_CENTRAL_MENU)/menu_vehicle_general.o $(FOLDER_CENTRAL_MENU)/menu_vehicle_expert.o $(FOLDER_CENTRAL_MENU)/menu_vehicle_video.o $(FOLDER_CENTRAL_MENU)/menu_vehicle_video_bidir.o $(FOLDER_CENTRAL_MENU)/menu_vehicle_camera.o $(FOLDER_CENTRAL_MENU)/menu_vehicle_osd.o $(FOLDER_CENTRAL_MENU)/menu_confirmation.o $(FOLDER_CENTRAL_MENU)/menu_storage.o $(FOLDER_CENTRAL_MENU)/menu_vehicle_telemetry.o $(FOLDER_CENTRAL_MENU)/menu_vehicle_video_encodings.o $(FOLDER_CENTRAL_MENU)/menu_text.o $(FOLDER_CENTRAL_MENU)/menu_tx_raw_power.o $(FOLDER_CENTRAL_MENU)/menu_calibrate_hdmi.o
 CENTRAL_MENU_ALL2 := $(FOLDER_CENTRAL_MENU)/menu_vehicle_relay.o $(FOLDER_CENTRAL_MENU)/menu_controller.o $(FOLDER_CENTRAL_MENU)/menu_vehicle_alarms.o $(FOLDER_CENTRAL_MENU)/menu_vehicle_camera_gains.o $(FOLDER_CENTRAL_MENU)/menu_controller_peripherals.o $(FOLDER_CENTRAL_MENU)/menu_controller_expert.o $(FOLDER_CENTRAL_MENU)/menu_system.o $(FOLDER_CENTRAL_MENU)/menu_vehicle_osd_instruments.o $(FOLDER_CENTRAL_MENU)/menu_preferences_ui.o $(FOLDER_CENTRAL_MENU)/menu_vehicle_video_profile.o $(FOLDER_CENTRAL_MENU)/menu_confirmation_import.o $(FOLDER_CENTRAL_MENU)/menu_system_alarms.o $(FOLDER_CENTRAL_MENU)/menu_vehicle_selector.o $(FOLDER_CENTRAL_MENU)/menu_vehicle_osd_widgets.o $(FOLDER_CENTRAL_MENU)/menu_vehicle_osd_widget.o $(FOLDER_CENTRAL_MENU)/menu_vehicle_dev.o $(FOLDER_CENTRAL_MENU)/menu_controller_dev.o $(FOLDER_CENTRAL_MENU)/menu_controller_dev_stats.o
 CENTRAL_MENU_ALL3 := $(FOLDER_CENTRAL_MENU)/menu_vehicle_management.o $(FOLDER_CENTRAL_MENU)/menu_vehicle_import.o $(FOLDER_CENTRAL_MENU)/menu_switch_vehicle.o $(FOLDER_CENTRAL_MENU)/menu_controller_joystick.o $(FOLDER_CENTRAL_MENU)/menu_system_all_params.o $(FOLDER_CENTRAL_MENU)/menu_color_picker.o $(FOLDER_CENTRAL_MENU)/menu_controller_video.o $(FOLDER_CENTRAL_MENU)/menu_controller_telemetry.o $(FOLDER_CENTRAL_MENU)/menu_update_vehicle.o $(FOLDER_CENTRAL_MENU)/menu_device_i2c.o $(FOLDER_CENTRAL_MENU)/menu_vehicle_osd_stats.o $(FOLDER_CENTRAL_MENU)/menu_vehicle_audio.o $(FOLDER_CENTRAL_MENU)/menu_channels_select.o $(FOLDER_CENTRAL_MENU)/menu_system_dev_logs.o $(FOLDER_CENTRAL_MENU)/menu_item_vehicle.o $(FOLDER_CENTRAL_MENU)/menu_radio_config.o $(FOLDER_CENTRAL_MENU)/menu_preferences.o
-CENTRAL_MENU_ALL4 := $(FOLDER_CENTRAL_MENU)/menu_vehicle_data_link.o $(FOLDER_CENTRAL_MENU)/menu_controller_network.o $(FOLDER_CENTRAL_MENU)/menu_vehicle_osd_plugins.o $(FOLDER_CENTRAL_MENU)/menu_vehicle_instruments_general.o $(FOLDER_CENTRAL_MENU)/menu_vehicle_osd_elements.o $(FOLDER_CENTRAL_MENU)/menu_vehicle_osd_plugin.o $(FOLDER_CENTRAL_MENU)/menu_controller_plugins.o $(FOLDER_CENTRAL_MENU)/menu_controller_encryption.o $(FOLDER_CENTRAL_MENU)/menu_search_connect.o $(FOLDER_CENTRAL_MENU)/menu_system_hardware.o $(FOLDER_CENTRAL_MENU)/menu_confirmation_hdmi.o $(FOLDER_CENTRAL_MENU)/menu_controller_recording.o $(FOLDER_CENTRAL_MENU)/menu_info_booster.o $(FOLDER_CENTRAL_MENU)/menu_controller_radio_interface.o $(FOLDER_CENTRAL_MENU)/menu_negociate_radio.o $(FOLDER_CENTRAL_MENU)/menu_about.o
+CENTRAL_MENU_ALL4 := $(FOLDER_CENTRAL_MENU)/menu_vehicle_data_link.o $(FOLDER_CENTRAL_MENU)/menu_controller_network.o $(FOLDER_CENTRAL_MENU)/menu_controller_tunnel.o $(FOLDER_CENTRAL_MENU)/menu_vehicle_osd_plugins.o $(FOLDER_CENTRAL_MENU)/menu_vehicle_instruments_general.o $(FOLDER_CENTRAL_MENU)/menu_vehicle_osd_elements.o $(FOLDER_CENTRAL_MENU)/menu_vehicle_osd_plugin.o $(FOLDER_CENTRAL_MENU)/menu_controller_plugins.o $(FOLDER_CENTRAL_MENU)/menu_controller_encryption.o $(FOLDER_CENTRAL_MENU)/menu_search_connect.o $(FOLDER_CENTRAL_MENU)/menu_system_hardware.o $(FOLDER_CENTRAL_MENU)/menu_confirmation_hdmi.o $(FOLDER_CENTRAL_MENU)/menu_controller_recording.o $(FOLDER_CENTRAL_MENU)/menu_info_booster.o $(FOLDER_CENTRAL_MENU)/menu_controller_radio_interface.o $(FOLDER_CENTRAL_MENU)/menu_negociate_radio.o $(FOLDER_CENTRAL_MENU)/menu_about.o
 CENTRAL_MENU_ALL5 := $(FOLDER_CENTRAL_MENU)/menu_system_dev_stats.o $(FOLDER_CENTRAL_MENU)/menu_vehicle_radio_link.o $(FOLDER_CENTRAL_MENU)/menu_vehicle_radio_interface.o $(FOLDER_CENTRAL_MENU)/menu_vehicle_management_plugins.o $(FOLDER_CENTRAL_MENU)/menu_vehicle_peripherals.o $(FOLDER_CENTRAL_MENU)/menu_confirmation_delete_logs.o $(FOLDER_CENTRAL_MENU)/menu_vehicle_radio.o $(FOLDER_CENTRAL_MENU)/menu_vehicle_cpu_oipc.o $(FOLDER_CENTRAL_MENU)/menu_confirmation_vehicle_board.o
 CENTRAL_MENU_ALL6 := $(FOLDER_CENTRAL_MENU)/menu_controller_radio.o $(FOLDER_CENTRAL_MENU)/menu_confirmation_video_rate.o $(FOLDER_CENTRAL_MENU)/menu_vehicle_simplesetup.o $(FOLDER_CENTRAL_MENU)/menu_confirmation_sdcard_update.o $(FOLDER_CENTRAL_MENU)/menu_controller_update.o $(FOLDER_CENTRAL_MENU)/menu_controller_update_net.o
 CENTRAL_MENU_RC := $(FOLDER_CENTRAL_MENU)/menu_vehicle_rc.o $(FOLDER_CENTRAL_MENU)/menu_vehicle_rc_failsafe.o $(FOLDER_CENTRAL_MENU)/menu_vehicle_rc_channels.o $(FOLDER_CENTRAL_MENU)/menu_vehicle_rc_expo.o $(FOLDER_CENTRAL_MENU)/menu_vehicle_rc_camera.o $(FOLDER_CENTRAL_MENU)/menu_vehicle_rc_input.o $(FOLDER_CENTRAL_MENU)/menu_vehicle_functions.o
@@ -284,7 +288,7 @@ ruby_rt_station: $(FOLDER_STATION)/ruby_rt_station.o $(MODULE_BASE) $(MODULE_BAS
 	$(FOLDER_BASE)/parser_h264.o $(FOLDER_BASE)/tx_powers.o $(FOLDER_UTILS)/utils_controller.o $(FOLDER_UTILS)/utils_vehicle.o $(FOLDER_STATION)/generic_rx_ecbuffers.o
 	$(CXX) $(_CFLAGS) -o $@ $^ $(_LDFLAGS) -ldl
 
-ruby_plugins: ruby_plugin_osd_ahi ruby_plugin_gauge_speed ruby_plugin_gauge_altitude ruby_plugin_gauge_ahi ruby_plugin_gauge_heading
+ruby_plugins: ruby_plugin_osd_ahi ruby_plugin_gauge_speed ruby_plugin_gauge_altitude ruby_plugin_gauge_ahi ruby_plugin_gauge_heading #ruby_plugin_keyboard
 
 ruby_plugin_osd_ahi: $(FOLDER_PLUGINS_OSD)/ruby_plugin_osd_ahi.o osd_plugins_utils.o core_plugins_utils.o
 	gcc $(FOLDER_PLUGINS_OSD)/ruby_plugin_osd_ahi.o osd_plugins_utils.o core_plugins_utils.o -shared -Wl,-soname,ruby_plugin_osd_ahi2.so.1 -o ruby_plugin_osd_ahi2.so.1.0.1 -lc
@@ -300,6 +304,9 @@ ruby_plugin_gauge_ahi: $(FOLDER_PLUGINS_OSD)/ruby_plugin_gauge_ahi.o osd_plugins
 
 ruby_plugin_gauge_heading: $(FOLDER_PLUGINS_OSD)/ruby_plugin_gauge_heading.o osd_plugins_utils.o core_plugins_utils.o
 	gcc $(FOLDER_PLUGINS_OSD)/ruby_plugin_gauge_heading.o osd_plugins_utils.o core_plugins_utils.o -shared -Wl,-soname,ruby_plugin_gauge_heading2.so.1 -o ruby_plugin_gauge_heading2.so.1.0.1 -lc
+
+ruby_plugin_keyboard: $(FOLDER_PLUGINS_CORE)/plugin_core_keyboard.o core_plugins_utils.o
+	gcc $(FOLDER_PLUGINS_CORE)/plugin_core_keyboard.o core_plugins_utils.o -shared -Wl,-soname,ruby_plugin_keyboard.so.1 -o ruby_plugin_keyboard.so.1.0.1 -lc
 
 ruby_player_radxa:code/r_player/ruby_player_radxa.o code/r_player/mpp_core.o $(FOLDER_BASE)/hdmi.o $(FOLDER_BASE)/ctrl_settings.o $(FOLDER_BASE)/shared_mem.o $(CENTRAL_RENDER_CODE) $(MODULE_MINIMUM_BASE)
 	$(CXX) $(_CFLAGS) $(CFLAGS_RENDERER) -o $@ $^ $(_LDFLAGS) $(LDFLAGS_RENDERER) $(LDFLAGS_CENTRAL) $(LDFLAGS_CENTRAL2) -ldl -lc -lrockchip_mpp

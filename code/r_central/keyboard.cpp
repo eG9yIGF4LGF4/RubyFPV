@@ -264,6 +264,12 @@ bool _keyboard_try_detect()
 
 void _add_input_event(u32 uEvent)
 {
+   if ( uEvent == INPUT_EVENT_PRESS_SHELL)
+   {
+      log_line("[Input] Shell button pressed..");
+      return;
+   }
+
    if ( (uEvent == INPUT_EVENT_PRESS_QA1) ||
         (uEvent == INPUT_EVENT_PRESS_QA2) ||
         (uEvent == INPUT_EVENT_PRESS_QA3) )
@@ -359,6 +365,8 @@ int _read_keyboard_input_events()
                uEvent = INPUT_EVENT_PRESS_QA2;
             else if ( (events[k].code == 4) || (events[k].code == 81) || (events[k].code == 76) )
                uEvent = INPUT_EVENT_PRESS_QA3;
+            else if ( (events[k].code == 41) )
+               uEvent = INPUT_EVENT_PRESS_SHELL;
             else if ( events[k].code != 69 )
             {
                log_line("[Keyboard] Pressed unknown key %d", events[k].code);
@@ -403,6 +411,8 @@ static void * _thread_keyboard(void *argument)
          _add_input_event(INPUT_EVENT_PRESS_MINUS);
       if ( isKeyPlusLongPressed() )
          _add_input_event(INPUT_EVENT_PRESS_PLUS);
+      if ( isKeyShellPressed( ) )
+         _add_input_event(INPUT_EVENT_PRESS_SHELL);
 
       if ( isKeyMinusLongLongPressed() || isKeyPlusLongLongPressed() || isKeyMenuLongLongPressed() )
          s_bHasLongPressFlag = true;

@@ -112,6 +112,7 @@ void reset_ControllerSettings()
    s_CtrlSettings.iVideoMPPBuffersSize = DEFAULT_MPP_BUFFERS_SIZE;
    s_CtrlSettings.iHDMIVSync = 1;
    s_CtrlSettings.iEasterEgg1 = 0;
+   s_CtrlSettings.iTunnel = 0;
    if ( s_CtrlSettingsLoaded )
       log_line("Reseted controller settings.");
 }
