@@ -48,6 +48,7 @@ u32 channels23[] = { 2312000, 2317000, 2322000, 2327000, 2332000, 2337000, 23420
 u32 channels24[] = { 2412000, 2417000, 2422000, 2427000, 2432000, 2437000, 2442000, 2447000, 2452000, 2457000, 2462000, 2467000, 2472000, 2484000 };
 u32 channels25[] = { 2487000, 2489000, 2492000, 2494000, 2497000, 2499000, 2512000, 2532000, 2572000, 2592000, 2612000, 2632000, 2652000, 2672000, 2692000, 2712000 };
 u32 channels58[] = { 5180000, 5200000, 5220000, 5240000, 5260000, 5280000, 5300000, 5320000, 5500000, 5520000, 5540000, 5560000, 5580000, 5600000, 5620000, 5640000, 5660000, 5680000, 5700000, 5745000, 5765000, 5785000, 5805000, 5825000, 5845000, 5865000, 5885000 };
+u32 channels60[] = { 5955000, 5975000, 5995000, 6015000, 6035000, 6055000, 6075000, 6095000, 6115000, 6135000, 6155000, 6175000, 6195000, 6215000, 6235000, 6255000, 6275000, 6295000, 6315000, 6335000, 6355000, 6375000, 6395000, 6415000, 6435000, 6455000, 6475000, 6495000, 6515000, 6535000, 6555000, 6575000, 6595000, 6615000, 6635000, 6655000, 6675000, 6695000, 6715000, 6735000, 6755000, 6775000, 6795000, 6815000, 6835000, 6855000, 6875000, 6895000, 6915000, 6935000, 6955000, 6975000, 6995000, 7015000, 7035000, 7055000, 7075000, 7095000, 7115000 };
 
 // in 1 Mb increments, in bps
 int s_WiFidataRates[] = {6000000, 9000000, 12000000, 18000000, 24000000, 36000000, 48000000, 54000000};
@@ -71,6 +72,8 @@ u32* getChannels25() { return channels25; }
 int getChannels25Count() { return sizeof(channels25)/sizeof(channels25[0]); }
 u32* getChannels58() { return channels58; }
 int getChannels58Count() { return sizeof(channels58)/sizeof(channels58[0]); }
+u32* getChannels60() { return channels60; }
+int getChannels60Count() { return sizeof(channels60)/sizeof(channels60[0]); }
 
 int _getChannelsAndCount(u32 nBand, u32** ppuChannels)
 {
@@ -106,6 +109,10 @@ int _getChannelsAndCount(u32 nBand, u32** ppuChannels)
    case RADIO_HW_SUPPORTED_BAND_58:
       *ppuChannels = getChannels58();
       return getChannels58Count();
+
+   case RADIO_HW_SUPPORTED_BAND_60:
+      *ppuChannels = getChannels60();
+      return getChannels60Count();
 
    default:
       break;
@@ -148,8 +155,10 @@ int getBand(u32 freqKhz)
       return RADIO_HW_SUPPORTED_BAND_24;
    if ( freqKhz < 5000000 )
       return RADIO_HW_SUPPORTED_BAND_25;
-   if ( freqKhz > 5000000 )
+   if ( freqKhz < 5925000 )
       return RADIO_HW_SUPPORTED_BAND_58;
+   if ( freqKhz > 5925000 )
+      return RADIO_HW_SUPPORTED_BAND_60;
 
    return 0;
 }
@@ -207,9 +216,15 @@ int isFrequencyInBands(u32 freqKhz, u8 bands)
          return 1;
       return 0;
    }
-   if ( freqKhz > 5000000 )
+   if ( freqKhz < 5925000 )
    {
       if ( bands & RADIO_HW_SUPPORTED_BAND_58 )
+         return 1;
+      return 0;
+   }
+   if ( freqKhz > 5925000 )
+   {
+      if ( bands & RADIO_HW_SUPPORTED_BAND_60 )
          return 1;
       return 0;
    }
@@ -229,7 +244,8 @@ int getSupportedChannels(u32 supportedBands, int includeSeparator, u32* pOutChan
       RADIO_HW_SUPPORTED_BAND_23,
       RADIO_HW_SUPPORTED_BAND_24,
       RADIO_HW_SUPPORTED_BAND_25,
-      RADIO_HW_SUPPORTED_BAND_58
+      RADIO_HW_SUPPORTED_BAND_58,
+      RADIO_HW_SUPPORTED_BAND_60
    };
 
    int iCountSupported = 0;

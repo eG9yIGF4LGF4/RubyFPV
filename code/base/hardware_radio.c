@@ -394,6 +394,12 @@ int _hardware_detect_card_model(const char* szProductId)
    if ( NULL != strstr( szProductId, "10EC:B852" ) )
       return CARD_MODEL_RTL8852BE;
 
+   if ( NULL != strstr( szProductId, "e8d:7961" ) )
+      return CARD_MODEL_MEDIATEK_MT7921;
+   if ( NULL != strstr( szProductId, "0e8d:7961" ) )
+      return CARD_MODEL_MEDIATEK_MT7921;
+
+
    return 0;
 }
 
@@ -656,6 +662,8 @@ int hardware_radio_get_driver_id_card_model(int iCardModel)
       return RADIO_HW_DRIVER_BUILTIN;
    else if ( iCardModel == CARD_MODEL_ETHERNET )
       return RADIO_HW_DRIVER_ETHERNET;
+   else if ( iCardModel == CARD_MODEL_MEDIATEK_MT7921 )
+      return RADIO_HW_DRIVER_MEDIATEK_MT7921;
    else if ( (iCardModel > 0) && (iCardModel <50) )
       return RADIO_HW_DRIVER_REALTEK_88XXAU;
 
@@ -968,7 +976,7 @@ int _hardware_enumerate_wifi_radios()
          if ( NULL != strstr(pszDriver,"rtl8812au") )
          {
             sRadioInfo[i].iRadioType = RADIO_TYPE_REALTEK;
-            sRadioInfo[i].iRadioDriver = RADIO_HW_DRIVER_REALTEK_8812AU;
+            sRadioInfo[i].iRadioDriver = RADIO_HW_DRIVER_REALTEK_RTL8812AU;
          }
          if ( NULL != strstr(pszDriver,"rtl8814au") )
          {
@@ -1046,8 +1054,17 @@ int _hardware_enumerate_wifi_radios()
          sRadioInfo[i].isSupported = 1;
          strcpy(sRadioInfo[i].szDescription, "Mediatek");
          sRadioInfo[i].iRadioType = RADIO_TYPE_MEDIATEK;
-         sRadioInfo[i].iRadioDriver = RADIO_HW_DRIVER_MEDIATEK;
+         sRadioInfo[i].iRadioDriver = RADIO_HW_DRIVER_MEDIATEK_MT7601;
       }
+      if ( NULL != strstr(pszDriver, "mt7921v") )
+      {
+         s_iHwRadiosSupportedCount++;
+         sRadioInfo[i].isSupported = 1;
+         strcpy(sRadioInfo[i].szDescription, "Mediatek");
+         sRadioInfo[i].iRadioType = RADIO_TYPE_MEDIATEK;
+         sRadioInfo[i].iRadioDriver = RADIO_HW_DRIVER_MEDIATEK_MT7921;
+      }
+
       if ( NULL != strstr(pszDriver, "ath9k_htc") )
       {
          s_iHwRadiosSupportedCount++;
@@ -1128,6 +1145,11 @@ int _hardware_enumerate_wifi_radios()
       hw_execute_bash_command_raw(szComm, szBuff);
       if ( 5 < strlen(szBuff) )
         sRadioInfo[i].supportedBands |= RADIO_HW_SUPPORTED_BAND_58;
+
+      sprintf(szComm, "iw phy%d info | grep 5975", sRadioInfo[i].phy_index);
+      hw_execute_bash_command_raw(szComm, szBuff);
+      if ( 5 < strlen(szBuff) )
+        sRadioInfo[i].supportedBands |= RADIO_HW_SUPPORTED_BAND_60;
 
       if ( sRadioInfo[i].iRadioDriver == RADIO_HW_DRIVER_REALTEK_8812EU )
          sRadioInfo[i].supportedBands &= ~RADIO_HW_SUPPORTED_BAND_24;
@@ -1965,6 +1987,57 @@ int _configure_radio_interface_realtek(int iInterfaceIndex, radio_hw_info_t* pRa
    return 1;
 }
 
+int _configure_radio_interface_mediatek(int iInterfaceIndex, radio_hw_info_t* pRadioHWInfo, u32 uDelayMS)
+{
+   if ( (NULL == pRadioHWInfo) || (iInterfaceIndex < 0) || (iInterfaceIndex >= hardware_get_radio_interfaces_count()) )
+      return 0;
+
+   char szComm[128];
+   char szOutput[2048];
+
+   #ifdef HW_PLATFORM_OPENIPC_CAMERA
+   
+   sprintf(szComm, "ip link set dev %s up", pRadioHWInfo->szName );
+   hw_execute_bash_command(szComm, NULL);
+   hardware_sleep_ms(uDelayMS);
+
+   sprintf(szComm, "iwconfig %s mode monitor", pRadioHWInfo->szName );
+   hw_execute_bash_command(szComm, NULL);
+   hardware_sleep_ms(uDelayMS);
+
+   sprintf(szComm, "iw dev %s set monitor fcsfail", pRadioHWInfo->szName);
+   hw_execute_bash_command(szComm, szOutput);
+   hardware_sleep_ms(uDelayMS);
+   
+   return 1;
+
+   #endif
+
+   sprintf(szComm, "ip link set dev %s down", pRadioHWInfo->szName );
+   hw_execute_bash_command(szComm, szOutput);
+   if ( 0 != szOutput[0] )
+      log_softerror_and_alarm("[HardwareRadio] Unexpected result: [%s]", szOutput);
+   hardware_sleep_ms(uDelayMS);
+
+   sprintf(szComm, "iw dev %s set monitor none 2>&1", pRadioHWInfo->szName);
+   hw_execute_bash_command(szComm, szOutput);
+   if ( 0 != szOutput[0] )
+      log_softerror_and_alarm("Unexpected result: [%s]", szOutput);
+   hardware_sleep_ms(uDelayMS);
+
+   sprintf(szComm, "iw dev %s set monitor fcsfail", pRadioHWInfo->szName);
+   hw_execute_bash_command(szComm, szOutput);
+   hardware_sleep_ms(uDelayMS);
+
+   sprintf(szComm, "ip link set dev %s up", pRadioHWInfo->szName );
+   hw_execute_bash_command(szComm, szOutput);
+   if ( 0 != szOutput[0] )
+      log_softerror_and_alarm("Unexpected result: [%s]", szOutput);
+   hardware_sleep_ms(uDelayMS);
+
+   return 1;
+}
+
 int hardware_initialize_radio_interface(int iInterfaceIndex, u32 uDelayMS)
 {
    if ( (iInterfaceIndex < 0) || (iInterfaceIndex >= hardware_get_radio_interfaces_count()) )
@@ -2248,7 +2321,7 @@ int hardware_radio_driver_is_rtl8812au_card(int iDriver)
         (iDriver == RADIO_HW_DRIVER_REALTEK_88XXAU) ||
         (iDriver == RADIO_HW_DRIVER_REALTEK_8812AU) ||
         (iDriver == RADIO_HW_DRIVER_REALTEK_88X2BU) ||
-        (iDriver == RADIO_HW_DRIVER_MEDIATEK) )
+        (iDriver == RADIO_HW_DRIVER_MEDIATEK_MT7601) )
       return 1;
    return 0;
 }
@@ -2277,6 +2350,13 @@ int hardware_radio_driver_is_rtl8733bu_card(int iDriver)
 int hardware_radio_driver_is_rtl8852be_card(int iDriver)
 {
    if ( (iDriver == RADIO_HW_DRIVER_REALTEK_8852BE) )
+      return 1;
+   return 0;
+}
+
+int hardware_radio_driver_is_mt7921_card(int iDriver)
+{
+   if ( (iDriver == RADIO_HW_DRIVER_MEDIATEK_MT7921) )
       return 1;
    return 0;
 }

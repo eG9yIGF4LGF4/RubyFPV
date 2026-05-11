@@ -350,6 +350,19 @@ int MenuSearch::_populate_search_frequencies()
          m_pItemsSelectFreq->addSeparator();
       }
    }
+   if ( m_SupportedBands & RADIO_HW_SUPPORTED_BAND_60 )
+   {
+      for( int i=0; i<getChannels60Count(); i++ )
+      {
+         m_Channels[m_NumChannels] = getChannels60()[i];
+         strcpy(szBuff, str_format_frequency(getChannels60()[i]));
+         if ( currentFreqKhz == getChannels60()[i] )
+            selectedIndex = m_NumChannels;
+         m_pItemsSelectFreq->addSelection(szBuff);
+         m_NumChannels++;
+      }
+      m_pItemsSelectFreq->addSeparator();
+   }
 
    if ( 0 == m_NumChannels )
       m_pItemsSelectFreq->addSelection(L("No supported frequencies"));
@@ -421,6 +434,12 @@ void MenuSearch::_add_menu_items()
       m_SupportedBandsList[m_iCountSupportedBands] = RADIO_HW_SUPPORTED_BAND_58;
       m_iCountSupportedBands++;
       m_pItemSelectBand->addSelection("5.8 Ghz");
+   }
+   if ( m_SupportedBands & RADIO_HW_SUPPORTED_BAND_60 )
+   {
+      m_SupportedBandsList[m_iCountSupportedBands] = RADIO_HW_SUPPORTED_BAND_60;
+      m_iCountSupportedBands++;
+      m_pItemSelectBand->addSelection("6.0 Ghz");
    }
 
    for( int i=0; i<m_iCountSupportedBands; i++ )
@@ -520,6 +539,17 @@ void MenuSearch::onShow()
          for( int i=0; i<m_iCountSupportedBands; i++ )
          {
             if ( m_SupportedBandsList[i] == RADIO_HW_SUPPORTED_BAND_58 )
+            {
+               m_SearchBandIndex = i;
+               break;
+            }
+         }
+      }
+      else if ( m_SupportedBands & RADIO_HW_SUPPORTED_BAND_60 )
+      {
+         for( int i=0; i<m_iCountSupportedBands; i++ )
+         {
+            if ( m_SupportedBandsList[i] == RADIO_HW_SUPPORTED_BAND_60 )
             {
                m_SearchBandIndex = i;
                break;

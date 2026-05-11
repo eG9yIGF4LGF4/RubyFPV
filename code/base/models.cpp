@@ -1989,7 +1989,7 @@ void Model::resetRadioLinkDataRatesAndFlags(int iRadioLink)
 }
 
 
-void Model::addNewRadioLinkForRadioInterface(int iRadioInterfaceIndex, bool* pbDefault24Used, bool* pbDefault24_2Used, bool* pbDefault58Used, bool* pbDefault58_2Used)
+void Model::addNewRadioLinkForRadioInterface(int iRadioInterfaceIndex, bool* pbDefault24Used, bool* pbDefault24_2Used, bool* pbDefault58Used, bool* pbDefault58_2Used, bool* pbDefault60Used, bool* pbDefault60_2Used)
 {
    if ( (iRadioInterfaceIndex < 0) || (iRadioInterfaceIndex >= hardware_get_radio_interfaces_count()) )
       return;
@@ -2028,6 +2028,23 @@ void Model::addNewRadioLinkForRadioInterface(int iRadioInterfaceIndex, bool* pbD
          }
          else
             radioLinksParams.link_frequency_khz[radioLinksParams.links_count] = DEFAULT_FREQUENCY58_3;
+      } else
+      if ( radioInterfacesParams.interface_supported_bands[iRadioInterfaceIndex] & RADIO_HW_SUPPORTED_BAND_60 )
+      {
+         if ( (NULL == pbDefault60Used) || (! (*pbDefault60Used)) )
+         {
+            radioLinksParams.link_frequency_khz[radioLinksParams.links_count] = DEFAULT_FREQUENCY60;
+            if ( NULL != pbDefault60Used)
+               *pbDefault60Used = true;
+         }
+         else if ( (NULL == pbDefault60_2Used) || (! (*pbDefault60_2Used)) )
+         {
+            radioLinksParams.link_frequency_khz[radioLinksParams.links_count] = DEFAULT_FREQUENCY60_2;
+            if ( NULL != pbDefault60_2Used )
+               *pbDefault60_2Used = true;
+         }
+         else
+            radioLinksParams.link_frequency_khz[radioLinksParams.links_count] = DEFAULT_FREQUENCY60_3;
       }
       else
       {
@@ -2206,8 +2223,10 @@ void Model::populateDefaultRadioLinksInfoFromRadioInterfaces()
 
    bool bDefault24Used = false;
    bool bDefault58Used = false;
+   bool bDefault60Used = false;
    bool bDefault24_2Used = false;
    bool bDefault58_2Used = false;
+   bool bDefault60_2Used = false;
 
    radioLinksParams.links_count = 0;
 
@@ -2221,7 +2240,7 @@ void Model::populateDefaultRadioLinksInfoFromRadioInterfaces()
          continue;
       if ( ! pRadioHWInfo->isSupported )
          continue;
-      addNewRadioLinkForRadioInterface(i, &bDefault24Used, &bDefault24_2Used, &bDefault58Used, &bDefault58_2Used);
+      addNewRadioLinkForRadioInterface(i, &bDefault24Used, &bDefault24_2Used, &bDefault58Used, &bDefault58_2Used, &bDefault60Used, &bDefault60_2Used);
       radioLinksParams.links_count++;
    }
 
@@ -2269,8 +2288,10 @@ bool Model::check_update_radio_links()
 
    bool bDefault24Used = false;
    bool bDefault58Used = false;
+   bool bDefault60Used = false;
    bool bDefault24_2Used = false;
    bool bDefault58_2Used = false;
+   bool bDefault60_2Used = false;
 
    // Remove unused radio links
 
@@ -2344,6 +2365,11 @@ bool Model::check_update_radio_links()
          bDefault58Used = true;
       if ( uFreq == DEFAULT_FREQUENCY58_2 )
          bDefault58_2Used = true;
+      if ( uFreq == DEFAULT_FREQUENCY60 )
+         bDefault60Used = true;
+      if ( uFreq == DEFAULT_FREQUENCY60_2 )
+         bDefault60_2Used = true;
+
    }
 
    for( int iInterface=0; iInterface<radioInterfacesParams.interfaces_count; iInterface++ )
@@ -2366,7 +2392,7 @@ bool Model::check_update_radio_links()
 
       // Add a new radio link
 
-      addNewRadioLinkForRadioInterface(iInterface, &bDefault24Used, &bDefault24_2Used, &bDefault58Used, &bDefault58_2Used);
+      addNewRadioLinkForRadioInterface(iInterface, &bDefault24Used, &bDefault24_2Used, &bDefault58Used, &bDefault58_2Used, &bDefault60Used, &bDefault60_2Used);
 
       if ( 0 == radioLinksParams.links_count )
       {
@@ -5284,6 +5310,8 @@ void Model::populateFromVehicleTelemetryData_v3(t_packet_header_ruby_telemetry_e
        (getBand(radioLinksParams.link_frequency_khz[0]) == RADIO_HW_SUPPORTED_BAND_24) ||
        (getBand(radioLinksParams.link_frequency_khz[0]) == RADIO_HW_SUPPORTED_BAND_25) )
       radioInterfacesParams.interface_radiotype_and_driver[0] = RADIO_TYPE_ATHEROS | (RADIO_HW_DRIVER_ATHEROS<<8);
+   else  if ( (getBand(radioLinksParams.link_frequency_khz[0]) == RADIO_HW_SUPPORTED_BAND_60) )
+      radioInterfacesParams.interface_radiotype_and_driver[0] = RADIO_TYPE_MEDIATEK | (RADIO_HW_DRIVER_MEDIATEK_MT7921<<8);
    else
       radioInterfacesParams.interface_radiotype_and_driver[0] = RADIO_TYPE_SIK | (RADIO_HW_DRIVER_SERIAL_SIK<<8);
 

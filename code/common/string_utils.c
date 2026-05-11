@@ -746,6 +746,8 @@ const char* str_get_hardware_board_name(u32 board_type)
    static const char* s_szBoardTypeOpenIPCSigmasterThinker = "OpenIPC Thinker (builtin radio)";
    static const char* s_szBoardTypeOpenIPCSigmasterThinkerE = "OpenIPC Thinker (ext radio)";
 
+   static const char* s_szBoardTypeLinuxGeneric = "Linux Generic";
+
    if ( (board_type & BOARD_TYPE_MASK) == BOARD_TYPE_PIZERO )
       return s_szBoardTypePi0;
    if ( (board_type & BOARD_TYPE_MASK) == BOARD_TYPE_PIZEROW )
@@ -766,6 +768,9 @@ const char* str_get_hardware_board_name(u32 board_type)
       return s_szBoardTypePi3BP;
    if ( (board_type & BOARD_TYPE_MASK) == BOARD_TYPE_PI4B )
       return s_szBoardTypePi4B;
+
+   if ( (board_type & BOARD_TYPE_MASK) == BOARD_TYPE_LINUX_GENERIC )
+      return s_szBoardTypeLinuxGeneric;
 
    if ( (board_type & BOARD_TYPE_MASK) == BOARD_TYPE_RADXA_ZERO3 )
       return s_szBoardTypeRadxaZero3;
@@ -832,6 +837,8 @@ const char* str_get_hardware_board_name_short(u32 board_type)
    static const char* s_szBoardSTypeOpenIPCSigmasterThinker = "Thinker";
    static const char* s_szBoardSTypeOpenIPCSigmasterThinkerE = "Thinker(E)";
 
+   static const char* s_szBoardSTypeLinuxGeneric = "linux";
+
    if ( (board_type & BOARD_TYPE_MASK) == BOARD_TYPE_PIZERO )
       return s_szBoardSTypePi0;
    if ( (board_type & BOARD_TYPE_MASK) == BOARD_TYPE_PIZEROW )
@@ -852,6 +859,9 @@ const char* str_get_hardware_board_name_short(u32 board_type)
       return s_szBoardSTypePi3BP;
    if ( (board_type & BOARD_TYPE_MASK) == BOARD_TYPE_PI4B )
       return s_szBoardSTypePi4B;
+
+   if ( (board_type & BOARD_TYPE_MASK) == BOARD_TYPE_LINUX_GENERIC )
+      return s_szBoardSTypeLinuxGeneric;
 
    if ( (board_type & BOARD_TYPE_MASK) == BOARD_TYPE_RADXA_ZERO3 )
       return s_szBoardSTypeRadxaZero3;
@@ -1007,7 +1017,14 @@ void str_get_supported_bands_string(u32 bands, char* szOut)
       hasGhz = 1;
       iCount++;
    }
-
+   if ( bands & RADIO_HW_SUPPORTED_BAND_60 )
+   {
+      if ( 0 != szOut[0] )
+         strcat(szOut, ", ");
+      strcat(szOut, "6.0");
+      hasGhz = 1;
+      iCount++;
+   }
    if ( (0 == szOut[0]) || (0 == iCount) )
    {
       strcpy(szOut, "N/A");
@@ -1051,11 +1068,13 @@ const char* str_get_radio_driver_description(int iDriverType)
       strcpy(sszNICDriverDescription, "ath9k_htc");
    if ( iDriverType == RADIO_HW_DRIVER_RALINK )
       strcpy(sszNICDriverDescription, "rt2800usb");
-   if ( iDriverType == RADIO_HW_DRIVER_MEDIATEK )
+   if ( iDriverType == RADIO_HW_DRIVER_MEDIATEK_MT7601 )
       strcpy(sszNICDriverDescription, "mt7601u");
+   if ( iDriverType == RADIO_HW_DRIVER_MEDIATEK_MT7921 )
+      strcpy(sszNICDriverDescription, "mt7921v");
    if ( iDriverType == RADIO_HW_DRIVER_REALTEK_88XXAU )
       strcpy(sszNICDriverDescription, "rtl88xxau");
-   if ( iDriverType == RADIO_HW_DRIVER_REALTEK_8812AU )
+   if ( iDriverType == RADIO_HW_DRIVER_REALTEK_RTL8812AU )
       strcpy(sszNICDriverDescription, "rtl8812au");
    if ( iDriverType == RADIO_HW_DRIVER_REALTEK_8812AU )
       strcpy(sszNICDriverDescription, "8812au");
@@ -1084,6 +1103,7 @@ const char* str_get_radio_card_model_string(int cardModel)
    if ( cardModel == CARD_MODEL_ALFA_AWUS036NH )    strcpy(s_szCardModelDescription, "Alfa AWUS036NH");
    if ( cardModel == CARD_MODEL_ALFA_AWUS036ACH )   strcpy(s_szCardModelDescription, "Alfa AWUS036ACH");
    if ( cardModel == CARD_MODEL_ALFA_AWUS036ACS )   strcpy(s_szCardModelDescription, "Alfa AWUS036ACS");
+   if ( cardModel == CARD_MODEL_MEDIATEK_MT7921 )   strcpy(s_szCardModelDescription, "Mediatek MT7921");
    if ( cardModel == CARD_MODEL_ASUS_AC56 )         strcpy(s_szCardModelDescription, "ASUS AC56");
    if ( cardModel == CARD_MODEL_BLUE_STICK )        strcpy(s_szCardModelDescription, "Blue Stick");
    if ( cardModel == CARD_MODEL_RTL8812AU_DUAL_ANTENNA ) strcpy(s_szCardModelDescription, "RTL8812AU DualAnt");
@@ -1124,6 +1144,7 @@ const char* str_get_radio_card_model_string_short(int cardModel)
    if ( cardModel == CARD_MODEL_ALFA_AWUS036NH )    strcpy(s_szCardModelDescription, "AWUS036NH");
    if ( cardModel == CARD_MODEL_ALFA_AWUS036ACH )   strcpy(s_szCardModelDescription, "AWUS036ACH");
    if ( cardModel == CARD_MODEL_ALFA_AWUS036ACS )   strcpy(s_szCardModelDescription, "AWUS036ACS");
+   if ( cardModel == CARD_MODEL_MEDIATEK_MT7921 )  strcpy(s_szCardModelDescription, "MT7921");
    if ( cardModel == CARD_MODEL_ASUS_AC56 )         strcpy(s_szCardModelDescription, "AC56");
    if ( cardModel == CARD_MODEL_BLUE_STICK )        strcpy(s_szCardModelDescription, "BlueStick");
    if ( cardModel == CARD_MODEL_RTL8812AU_DUAL_ANTENNA ) strcpy(s_szCardModelDescription, "DualAnt");

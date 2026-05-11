@@ -1144,6 +1144,8 @@ bool handle_last_command_result()
                strcat(szBuff, "2.5 ");
             if ( g_pCurrentModel->radioInterfacesParams.interface_supported_bands[i] & RADIO_HW_SUPPORTED_BAND_58 )
                strcat(szBuff, "5.8 ");
+            if ( g_pCurrentModel->radioInterfacesParams.interface_supported_bands[i] & RADIO_HW_SUPPORTED_BAND_60 )
+               strcat(szBuff, "6.0 ");
             s_pMenuVehicleHWInfo->addTopLine(szBuff);
             sprintf(szBuff, ". . . flags: ");
             if ( g_pCurrentModel->radioInterfacesParams.interface_capabilities_flags[i] & RADIO_HW_CAPABILITY_FLAG_CAN_RX )

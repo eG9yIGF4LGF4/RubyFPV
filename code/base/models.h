@@ -632,7 +632,7 @@ class Model
       void populateHWInfo();
       bool populateVehicleSerialPorts();
       void resetRadioLinkDataRatesAndFlags(int iRadioLink);
-      void addNewRadioLinkForRadioInterface(int iRadioInterfaceIndex, bool* pbDefault24Used, bool* pbDefault24_2Used, bool* pbDefault58Used, bool* pbDefault58_2Used);
+      void addNewRadioLinkForRadioInterface(int iRadioInterfaceIndex, bool* pbDefault24Used, bool* pbDefault24_2Used, bool* pbDefault58Used, bool* pbDefault58_2Used, bool* pbDefault60Used, bool* pbDefault60_2Used);
       void populateRadioInterfacesInfoFromHardware();
       void populateDefaultRadioLinksInfoFromRadioInterfaces();
       bool check_update_radio_links();

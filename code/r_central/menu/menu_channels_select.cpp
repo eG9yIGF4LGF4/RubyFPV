@@ -51,6 +51,7 @@ u32 s_uChannelsSelect23Band = 0;
 u32 s_uChannelsSelect24Band = 0;
 u32 s_uChannelsSelect25Band = 0;
 u32 s_uChannelsSelect58Band = 0;
+u32 s_uChannelsSelect60Band = 0;
 
 MenuChannelsSelect::MenuChannelsSelect(u32 uFrequencyBands, int iId)
 :Menu(MENU_ID_CHANNELS_SELECT+iId*1000, L("Select Frequencies"), NULL)
@@ -122,6 +123,22 @@ MenuChannelsSelect::MenuChannelsSelect(u32 uFrequencyBands, int iId)
             pItem->setChecked(false);
          addMenuItem( pItem );
       }
+
+   if ( m_uFrequencyBands & RADIO_HW_SUPPORTED_BAND_60 )
+      for( int i=0; i<getChannels60Count(); i++ )
+      {
+         u32 freq = getChannels60()[i];
+         strcpy(szBuff, str_format_frequency(freq));
+         MenuItemCheckbox* pItem = new MenuItemCheckbox(szBuff);
+         pItem->setNotEditable();
+         if ( s_uChannelsSelect60Band & (((u32)0x01)<<i) )
+            pItem->setChecked(true);
+         else
+            pItem->setChecked(false);
+         addMenuItem( pItem );
+      }
+
+
 }
 
 MenuChannelsSelect::~MenuChannelsSelect()
@@ -247,7 +264,17 @@ int MenuChannelsSelect::onBack()
          if ( pItem->isChecked() )
             s_uChannelsSelect58Band |= (((u32)0x01)<<i);
          itemIndex++;
-      } 
+      }
+      
+   s_uChannelsSelect60Band = 0;
+   if ( m_uFrequencyBands & RADIO_HW_SUPPORTED_BAND_60 )
+      for( int i=0; i<getChannels60Count(); i++ )
+      {
+         MenuItemCheckbox* pItem = (MenuItemCheckbox*)m_pMenuItems[itemIndex];
+         if ( pItem->isChecked() )
+            s_uChannelsSelect60Band |= (((u32)0x01)<<i);
+         itemIndex++;
+      }
    
    menu_stack_pop(1);
    return 1;

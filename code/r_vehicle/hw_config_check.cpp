@@ -38,6 +38,7 @@
 
 static bool s_bHWCheckDefault24Used = false;
 static bool s_bHWCheckDefault58Used = false;
+static bool s_bHWCheckDefault60Used = false;
    
 
 void log_full_current_radio_configuration(Model* pModel)
@@ -366,7 +367,8 @@ void _add_new_radio_link_for_hw_radio_interface(int iInterfaceIndex, Model* pMod
       pModel->radioLinksParams.link_frequency_khz[iRadioLink] = DEFAULT_FREQUENCY;
       if ( pModel->radioInterfacesParams.interface_supported_bands[iInterfaceIndex] & RADIO_HW_SUPPORTED_BAND_58 )
          pModel->radioLinksParams.link_frequency_khz[iRadioLink] = DEFAULT_FREQUENCY58;
-         
+      if ( s_bHWCheckDefault60Used && pModel->radioLinksParams.link_frequency_khz[iRadioLink] == DEFAULT_FREQUENCY60 )
+         pModel->radioLinksParams.link_frequency_khz[iRadioLink] = DEFAULT_FREQUENCY60_2;         
       if ( s_bHWCheckDefault58Used && pModel->radioLinksParams.link_frequency_khz[iRadioLink] == DEFAULT_FREQUENCY58 )
          pModel->radioLinksParams.link_frequency_khz[iRadioLink] = DEFAULT_FREQUENCY58_2;
       if ( s_bHWCheckDefault24Used && pModel->radioLinksParams.link_frequency_khz[iRadioLink] == DEFAULT_FREQUENCY )
@@ -524,6 +526,9 @@ bool check_update_hardware_nics_vehicle(Model* pModel)
                s_bHWCheckDefault24Used = true;
             if ( pModel->radioInterfacesParams.interface_current_frequency_khz[k] == DEFAULT_FREQUENCY58 )
                s_bHWCheckDefault58Used = true;
+            if ( pModel->radioInterfacesParams.interface_current_frequency_khz[k] == DEFAULT_FREQUENCY60 )
+               s_bHWCheckDefault60Used = true;
+
 
             if ( k == i )
                log_line("[HW Radio Check] Found HW radio interface %s on hardware position %d same as on model radio interface position %d. Same position, no change in model radio interface order for this radio interface.", pRadioInfo->szMAC, i+1, k+1);

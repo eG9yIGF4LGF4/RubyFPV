@@ -6,58 +6,60 @@
 
 #define MAX_RADIO_HW_PARAMS 16
 
-#define RADIO_TYPE_OTHER 0
-#define RADIO_TYPE_RALINK 1
-#define RADIO_TYPE_ATHEROS 2
-#define RADIO_TYPE_REALTEK 3
-#define RADIO_TYPE_MEDIATEK 4
-#define RADIO_TYPE_SIK 5
-#define RADIO_TYPE_SERIAL 6
-#define RADIO_TYPE_BUILTIN 7
-#define RADIO_TYPE_BROADCOM 8
-#define RADIO_TYPE_QUALCOMM 9
+#define RADIO_TYPE_OTHER                  0
+#define RADIO_TYPE_RALINK                 1
+#define RADIO_TYPE_ATHEROS                2
+#define RADIO_TYPE_REALTEK                3
+#define RADIO_TYPE_MEDIATEK               4
+#define RADIO_TYPE_SIK                    5
+#define RADIO_TYPE_SERIAL                 6
+#define RADIO_TYPE_BUILTIN                7
+#define RADIO_TYPE_BROADCOM               8
+#define RADIO_TYPE_QUALCOMM               9
 
-#define RADIO_HW_DRIVER_ATHEROS 1       // ath9k_htc
-#define RADIO_HW_DRIVER_RALINK 2        // rt2800usb, only 2.4Ghz band
-#define RADIO_HW_DRIVER_MEDIATEK 3      // mt7601u
-#define RADIO_HW_DRIVER_REALTEK_88XXAU 4       // rtl88xxau
-#define RADIO_HW_DRIVER_REALTEK_8812AU 5       // rtl8812au
-#define RADIO_HW_DRIVER_REALTEK_8812AU 6          // 8812au
-#define RADIO_HW_DRIVER_REALTEK_88X2BU 7       // rtl88x2bu
-#define RADIO_HW_DRIVER_SERIAL_SIK 8
-#define RADIO_HW_DRIVER_SERIAL 9
-#define RADIO_HW_DRIVER_REALTEK_8812EU 10          // 88x2eu
-#define RADIO_HW_DRIVER_REALTEK_8733BU 15          // 88733bu
-#define RADIO_HW_DRIVER_REALTEK_8852BE 16          // rtw89_8852be_git
-#define RADIO_HW_DRIVER_BUILTIN        17
-#define RADIO_HW_DRIVER_REALTEK_8814AU 18       // rtl8814au
-#define RADIO_HW_DRIVER_ETHERNET       20
+#define RADIO_HW_DRIVER_ATHEROS           1        // ath9k_htc
+#define RADIO_HW_DRIVER_RALINK            2        // rt2800usb, only 2.4Ghz band
+#define RADIO_HW_DRIVER_MEDIATEK_MT7601   3        // mt7601u
+#define RADIO_HW_DRIVER_REALTEK_88XXAU    4        // rtl88xxau
+#define RADIO_HW_DRIVER_REALTEK_RTL8812AU 5        // rtl8812au
+#define RADIO_HW_DRIVER_REALTEK_8812AU    6        // 8812au
+#define RADIO_HW_DRIVER_REALTEK_88X2BU    7        // rtl88x2bu
+#define RADIO_HW_DRIVER_SERIAL_SIK        8
+#define RADIO_HW_DRIVER_SERIAL            9
+#define RADIO_HW_DRIVER_REALTEK_8812EU    10       // 88x2eu
+#define RADIO_HW_DRIVER_REALTEK_8733BU    15       // 88733bu
+#define RADIO_HW_DRIVER_REALTEK_8852BE    16       // rtw89_8852be_git
+#define RADIO_HW_DRIVER_BUILTIN           17
+#define RADIO_HW_DRIVER_REALTEK_8814AU    18       // rtl8814au
+#define RADIO_HW_DRIVER_MEDIATEK_MT7921   19       // mt7921v
+#define RADIO_HW_DRIVER_ETHERNET          20
 
 
 // 0 is generic card model
-#define CARD_MODEL_TPLINK722N       1
-#define CARD_MODEL_ALFA_AWUS036NHA  2
-#define CARD_MODEL_ALFA_AWUS036NH   3
-#define CARD_MODEL_ALFA_AWUS036ACH  4
-#define CARD_MODEL_ASUS_AC56        5
-#define CARD_MODEL_BLUE_STICK       6
+#define CARD_MODEL_TPLINK722N             1
+#define CARD_MODEL_ALFA_AWUS036NHA        2
+#define CARD_MODEL_ALFA_AWUS036NH         3
+#define CARD_MODEL_ALFA_AWUS036ACH        4
+#define CARD_MODEL_ASUS_AC56              5
+#define CARD_MODEL_BLUE_STICK             6
 #define CARD_MODEL_RTL8812AU_DUAL_ANTENNA 7
-#define CARD_MODEL_NETGEAR_A6100    8
-#define CARD_MODEL_TENDA_U12        9
-#define CARD_MODEL_RTL8812AU_AF1   10
-#define CARD_MODEL_ZIPRAY 11
-#define CARD_MODEL_ARCHER_T2UPLUS 12
-#define CARD_MODEL_RTL8814AU      13
-#define CARD_MODEL_ALFA_AWUS036ACS  14
-#define CARD_MODEL_BLUE_8812EU    15
-#define CARD_MODEL_ATHEROS_GENERIC 16
-#define CARD_MODEL_RTL8812AU_GENERIC 17
-#define CARD_MODEL_RTL8812AU_OIPC_USIGHT 18
+#define CARD_MODEL_NETGEAR_A6100          8
+#define CARD_MODEL_TENDA_U12              9
+#define CARD_MODEL_RTL8812AU_AF1          10
+#define CARD_MODEL_ZIPRAY                 11
+#define CARD_MODEL_ARCHER_T2UPLUS         12
+#define CARD_MODEL_RTL8814AU              13   
+#define CARD_MODEL_ALFA_AWUS036ACS        14
+#define CARD_MODEL_BLUE_8812EU            15
+#define CARD_MODEL_ATHEROS_GENERIC        16
+#define CARD_MODEL_RTL8812AU_GENERIC      17
+#define CARD_MODEL_RTL8812AU_OIPC_USIGHT  18
 #define CARD_MODEL_RTL8812AU_OIPC_USIGHT2 19
-#define CARD_MODEL_RTL8733BU        20
-#define CARD_MODEL_RTL8852BE        21
-#define CARD_MODEL_BUILTIN          22
-#define CARD_MODEL_ETHERNET         23
+#define CARD_MODEL_RTL8733BU              20
+#define CARD_MODEL_RTL8852BE              21
+#define CARD_MODEL_BUILTIN                22
+#define CARD_MODEL_ETHERNET               23
+#define CARD_MODEL_MEDIATEK_MT7921        24
 
 #define CARD_MODEL_SIK_RADIO 100
 #define CARD_MODEL_SERIAL_RADIO 101
@@ -67,6 +69,7 @@
 #define RADIO_HW_SUPPORTED_BAND_24 2
 #define RADIO_HW_SUPPORTED_BAND_25 4
 #define RADIO_HW_SUPPORTED_BAND_58 8
+#define RADIO_HW_SUPPORTED_BAND_60 9
 #define RADIO_HW_SUPPORTED_BAND_433 16
 #define RADIO_HW_SUPPORTED_BAND_868 32
 #define RADIO_HW_SUPPORTED_BAND_915 64
@@ -147,7 +150,7 @@ typedef struct
    int iCardModel;
    int isSupported;
    int isEnabled;
-   u8 supportedBands;  // bits 0-3: 2.3, 2.4, 2.5, 5.8 bands
+   u8 supportedBands;  // bits 0-3: 2.3, 2.4, 2.5, 5.8, 6.0 bands
    int isHighCapacityInterface;
    int isSerialRadio;
    int isConfigurable;

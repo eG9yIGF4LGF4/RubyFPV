@@ -305,6 +305,8 @@ float MenuSystemAllParams::renderRadioInfo(float xPos, float yPos, float width, 
          strcat(szBuff, "2.5, ");
       if ( pNICInfo->supportedBands & 8 )
          strcat(szBuff, "5.8, ");
+      if ( pNICInfo->supportedBands & 16 )
+         strcat(szBuff, "6.0, ");
       
       g_pRenderEngine->drawText(xPos, yPos, g_idFontMenuSmall, szBuff);
       yPos += 1.4*height_text;
@@ -364,6 +366,8 @@ float MenuSystemAllParams::renderRadioInfo(float xPos, float yPos, float width, 
                strcat(szBuff, "2.5 ");
             if ( g_pCurrentModel->radioInterfacesParams.interface_supported_bands[i] & RADIO_HW_SUPPORTED_BAND_58 )
                strcat(szBuff, "5.8 ");
+            if ( g_pCurrentModel->radioInterfacesParams.interface_supported_bands[i] & RADIO_HW_SUPPORTED_BAND_60 )
+               strcat(szBuff, "6.0 ");
             g_pRenderEngine->drawText(xPos, yPos, g_idFontMenuSmall, szBuff);
             yPos += 1.4*height_text;
 

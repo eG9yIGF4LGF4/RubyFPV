@@ -24,6 +24,9 @@
 #define DEFAULT_FREQUENCY58   5825000
 #define DEFAULT_FREQUENCY58_2 5885000
 #define DEFAULT_FREQUENCY58_3 5745000
+#define DEFAULT_FREQUENCY60   5975000
+#define DEFAULT_FREQUENCY60_2 6655000
+#define DEFAULT_FREQUENCY60_3 6995000
 
 #define DEFAULT_RADIO_FRAMES_FLAGS (RADIO_FLAGS_USE_LEGACY_DATARATES | RADIO_FLAGS_FRAME_TYPE_DATA)
 
@@ -72,6 +75,9 @@ u32* getChannels25();
 int getChannels25Count();
 u32* getChannels58();
 int getChannels58Count();
+u32* getChannels60();
+int getChannels60Count();
+
 
 int getBand(u32 freqKhz);
 int getChannelIndexForFrequency(u32 nBand, u32 freqKhz);
