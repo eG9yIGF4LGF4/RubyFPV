@@ -723,6 +723,21 @@ void MenuSearch::startSearch()
         }
      }
    }
+   if ( m_SupportedBandsList[m_SearchBandIndex] == RADIO_HW_SUPPORTED_BAND_60 )
+   {
+     m_pSearchChannels = getChannels60();
+     m_SearchChannelsCount = getChannels60Count();
+     for( int i=0; i<hardware_get_radio_interfaces_count(); i++ )
+     {
+        radio_hw_info_t* pRadioHWInfo = hardware_get_radio_info(i);
+        if ( pRadioHWInfo->isConfigurable )
+        if ( pRadioHWInfo->supportedBands & RADIO_HW_SUPPORTED_BAND_60 )
+        {
+           bFoundSupportedRadioInterface = true;
+           break;
+        }
+     }
+   }
 
    if ( ! bFoundSupportedRadioInterface )
    {

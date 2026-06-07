@@ -122,7 +122,7 @@
 #define MENU_ID_VEHICLE_IP_TUNNEL 134
 
 #define MAX_MENU_ITEMS 150
-#define MAX_MENU_CHANNELS 100
+#define MAX_MENU_CHANNELS 200
 
 extern float MENU_TEXTLINE_SPACING; // percent of item text height
 extern float MENU_ITEM_SPACING;  // percent of item text height

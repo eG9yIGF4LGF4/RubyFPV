@@ -370,7 +370,7 @@ test_port_tx:$(FOLDER_TESTS)/test_port_tx.o $(MODULE_BASE) $(MODULE_BASE2) $(MOD
 test_link:$(FOLDER_TESTS)/test_link.o $(MODULE_BASE) $(MODULE_BASE2) $(MODULE_COMMON) $(MODULE_RADIO) $(MODULE_MODELS)
 	$(CXX) $(_CFLAGS) -o $@ $^ $(_LDFLAGS) -ldl -lc
 
-clean:
+cleanvehicle:
 	rm -rf ruby_start ruby_i2c ruby_logger ruby_initdhcp ruby_sik_config ruby_alive ruby_video_proc ruby_update ruby_update_worker \
         ruby_tx_telemetry ruby_rt_vehicle \
           test_* ruby_controller ruby_rt_station ruby_tx_rc ruby_rx_telemetry ruby_player_radxa \
@@ -394,6 +394,8 @@ cleanstation:
           $(FOLDER_TESTS)/*.o $(FOLDER_PLUGINS_OSD)/*.o \
           code/r_i2c/*.o code/r_utils/*.o code/r_player/*.o
 
+
+clean: cleanvehicle cleanstation
 
 copybins:
 	cp -f ./ruby_* /home/radxa/ruby && \

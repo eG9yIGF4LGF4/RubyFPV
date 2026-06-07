@@ -822,7 +822,7 @@ int _hardware_enumerate_wifi_radios()
    _hardware_find_usb_radio_interfaces_info();
 
    log_line("[HardwareRadio] Finding wireless radio cards...");
-   FILE* fp = popen("ls /sys/class/net/ | nice grep -v eth0 | nice grep -v lo | nice grep -v veth | nice grep -v usb | nice grep -v intwifi | nice grep -v relay | nice grep -v wifihotspot", "r" );
+   FILE* fp = popen("ls /sys/class/net/ | nice grep -v eth0 | nice grep -v docker | nice grep -v br | nice grep -v lo | nice grep -v veth | nice grep -v usb | nice grep -v intwifi | nice grep -v relay | nice grep -v wifihotspot ", "r" );
    if ( NULL == fp )
    {
       log_error_and_alarm("Failed to enumerate 2.4/5.8 radios.");
@@ -1056,7 +1056,7 @@ int _hardware_enumerate_wifi_radios()
          sRadioInfo[i].iRadioType = RADIO_TYPE_MEDIATEK;
          sRadioInfo[i].iRadioDriver = RADIO_HW_DRIVER_MEDIATEK_MT7601;
       }
-      if ( NULL != strstr(pszDriver, "mt7921v") )
+      if ( NULL != strstr(pszDriver, "mt7921u") )
       {
          s_iHwRadiosSupportedCount++;
          sRadioInfo[i].isSupported = 1;
@@ -1146,7 +1146,7 @@ int _hardware_enumerate_wifi_radios()
       if ( 5 < strlen(szBuff) )
         sRadioInfo[i].supportedBands |= RADIO_HW_SUPPORTED_BAND_58;
 
-      sprintf(szComm, "iw phy%d info | grep 5975", sRadioInfo[i].phy_index);
+      sprintf(szComm, "iw phy%d info | grep 6115", sRadioInfo[i].phy_index);
       hw_execute_bash_command_raw(szComm, szBuff);
       if ( 5 < strlen(szBuff) )
         sRadioInfo[i].supportedBands |= RADIO_HW_SUPPORTED_BAND_60;
