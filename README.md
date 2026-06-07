@@ -6,7 +6,7 @@ Read more about Ruby, including how to setup, install and use your Ruby systems,
 
 # Features highlights:
 
-<B>Mutiple, rendundant radio links on 433/868/915 Mhz and 2.4/5.8 Ghz bands:</B>
+<B>Mutiple, rendundant radio links on 433/868/915 Mhz and 2.4/5.8/6.0  Ghz bands:</B>
 
 Multiple redundant radio links in different bands (433Mhz, 868/915Mhz, 2.3, 2.4, 2.5 and 5.8Ghz) can be used simultaneously between vehicles, ground control stations and relays for better resilience, link quality and range;
 

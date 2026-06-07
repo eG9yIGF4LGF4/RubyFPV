@@ -598,7 +598,7 @@ int _radio_open_interface_for_read_with_filter(int interfaceIndex, char* szFilte
 
    if ( ! hardware_radio_is_wifi_radio(pRadioHWInfo) )
    {
-      log_softerror_and_alarm("Tried to open a non 2.4/5.8 radio in high capacity 2.4/5.8 mode.");
+      log_softerror_and_alarm("Tried to open a non 2.4/5.8/6.0  radio in high capacity 2.4/5.8/6.0  mode.");
       return -1;
    }
 
@@ -722,7 +722,7 @@ int radio_open_interface_for_write(int interfaceIndex)
       if ( ! hardware_radio_is_wifi_radio(pRadioHWInfo) )
       // Bad karma
       {
-         log_softerror_and_alarm("Tried to open a non 2.4/5.8 radio in high capacity 2.4/5.8 mode.");
+         log_softerror_and_alarm("Tried to open a non 2.4/5.8/6.0  radio in high capacity 2.4/5.8/6.0  mode.");
          return -1;
       }
 

@@ -851,7 +851,7 @@ void _process_local_notification_model_changed(t_packet_header* pPH, int changeT
       }
       else
       {
-         log_line("Radio link %d is regular 2.4/5.8 link.", iLink+1);
+         log_line("Radio link %d is regular 2.4/5.8/6.0  link.", iLink+1);
       }
 
       bMustSignalOtherComponents = false;

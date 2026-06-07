@@ -31,8 +31,9 @@
 #define RADIO_HW_DRIVER_REALTEK_8852BE    16       // rtw89_8852be_git
 #define RADIO_HW_DRIVER_BUILTIN           17
 #define RADIO_HW_DRIVER_REALTEK_8814AU    18       // rtl8814au
-#define RADIO_HW_DRIVER_MEDIATEK_MT7921   19       // mt7921v
-#define RADIO_HW_DRIVER_ETHERNET          20
+#define RADIO_HW_DRIVER_MEDIATEK_MT7921   19       // mt7921u
+#define RADIO_HW_DRIVER_ATHEROS11_PCI     20       // ath11k_pci
+#define RADIO_HW_DRIVER_ETHERNET          21
 
 
 // 0 is generic card model
@@ -60,6 +61,9 @@
 #define CARD_MODEL_BUILTIN                22
 #define CARD_MODEL_ETHERNET               23
 #define CARD_MODEL_MEDIATEK_MT7921        24
+#define CARD_MODEL_QUALCOM_QCA6290        25
+#define CARD_MODEL_QUALCOM_QCNFA765       26
+
 
 #define CARD_MODEL_SIK_RADIO 100
 #define CARD_MODEL_SERIAL_RADIO 101

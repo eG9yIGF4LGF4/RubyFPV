@@ -221,7 +221,7 @@ int r_initradio(int argc, char *argv[])
 
    if ( 0 == hardware_get_radio_interfaces_count() )
    {
-      log_error_and_alarm("There are no radio interfaces (2.4/5.8 wlans) on this device.");
+      log_error_and_alarm("There are no radio interfaces (2.4/5.8/6.0  wlans) on this device.");
       return -1;
    }    
    

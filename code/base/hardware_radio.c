@@ -399,6 +399,10 @@ int _hardware_detect_card_model(const char* szProductId)
    if ( NULL != strstr( szProductId, "0e8d:7961" ) )
       return CARD_MODEL_MEDIATEK_MT7921;
 
+   if ( NULL != strstr( szProductId, "17CB:1101" ) )
+      return CARD_MODEL_QUALCOM_QCA6290;
+   if ( NULL != strstr( szProductId, "17CB:1103" ) )
+      return CARD_MODEL_QUALCOM_QCNFA765;
 
    return 0;
 }
@@ -664,6 +668,10 @@ int hardware_radio_get_driver_id_card_model(int iCardModel)
       return RADIO_HW_DRIVER_ETHERNET;
    else if ( iCardModel == CARD_MODEL_MEDIATEK_MT7921 )
       return RADIO_HW_DRIVER_MEDIATEK_MT7921;
+   else if ( iCardModel == CARD_MODEL_QUALCOM_QCA6290 )
+      return RADIO_HW_DRIVER_ATHEROS11_PCI;
+   else if ( iCardModel == CARD_MODEL_QUALCOM_QCNFA765 )
+      return RADIO_HW_DRIVER_ATHEROS11_PCI;
    else if ( (iCardModel > 0) && (iCardModel <50) )
       return RADIO_HW_DRIVER_REALTEK_88XXAU;
 
@@ -825,7 +833,7 @@ int _hardware_enumerate_wifi_radios()
    FILE* fp = popen("ls /sys/class/net/ | nice grep -v eth0 | nice grep -v docker | nice grep -v br | nice grep -v lo | nice grep -v veth | nice grep -v usb | nice grep -v intwifi | nice grep -v relay | nice grep -v wifihotspot ", "r" );
    if ( NULL == fp )
    {
-      log_error_and_alarm("Failed to enumerate 2.4/5.8 radios.");
+      log_error_and_alarm("Failed to enumerate 2.4/5.8/6.0 radios.");
       return 0;
    }
    
@@ -1020,6 +1028,20 @@ int _hardware_enumerate_wifi_radios()
                sRadioInfo[i].iCardModel = CARD_MODEL_RTL8852BE;
                memcpy(sRadioInfo[i].szProductId, "10EC:B852", 10);
             }
+            if( NULL != strstr(szPciDevId, "17CB:1101"))
+            {
+               sRadioInfo[i].iRadioType = RADIO_TYPE_QUALCOMM;
+               sRadioInfo[i].iRadioDriver = RADIO_HW_DRIVER_ATHEROS11_PCI;
+               sRadioInfo[i].iCardModel = CARD_MODEL_QUALCOM_QCA6290;
+               memcpy(sRadioInfo[i].szProductId, "17CB:1101", 10);
+            }
+            if( NULL != strstr(szPciDevId, "17CB:1103"))
+            {
+               sRadioInfo[i].iRadioType = RADIO_TYPE_QUALCOMM;
+               sRadioInfo[i].iRadioDriver = RADIO_HW_DRIVER_ATHEROS11_PCI;
+               sRadioInfo[i].iCardModel = CARD_MODEL_QUALCOM_QCNFA765;
+               memcpy(sRadioInfo[i].szProductId, "17CB:1103", 10);
+            }
          }
          if ( NULL != strstr(szPciDevClass,"20000") )
          {
@@ -1204,9 +1226,9 @@ int hardware_enumerate_radio_interfaces_step(int iStep)
       _hardware_enumerate_wifi_radios();
       
       if ( 0 == s_iHwRadiosCount )
-         log_error_and_alarm("[HardwareRadio] No 2.4/5.8 radio modules found!");
+         log_error_and_alarm("[HardwareRadio] No 2.4/5.8/6.0  radio modules found!");
       else
-         log_line("[HardwareRadio] Found %d 2.4/5.8 radio modules.", s_iHwRadiosCount);
+         log_line("[HardwareRadio] Found %d 2.4/5.8/6.0  radio modules.", s_iHwRadiosCount);
 
       s_HardwareRadiosEnumeratedOnce = 1;
    }

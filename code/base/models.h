@@ -392,7 +392,7 @@ typedef struct
 // Radio datarates:
 // zero: auto or use radio link datarate
 // negative: MCS data rates
-// positive < 100: legacy 2.4/5.8 datarates, in Mbps
+// positive < 100: legacy 2.4/5.8/6.0  datarates, in Mbps
 // positive > 100: bps bitrates (for low bandwidth radio cards). Ex: 200 = 100 bps; 9700 = 9600 bps, 1000000 = 999900 bps
 
 typedef struct
